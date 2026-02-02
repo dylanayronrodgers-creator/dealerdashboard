@@ -4,6 +4,9 @@ let agents = [];
 let packages = [];
 let leads = [];
 let orders = [];
+let dealers = [];
+let pendingAgents = [];
+let systemSettings = {};
 
 document.addEventListener('DOMContentLoaded', async function() {
     // Check authentication
@@ -22,6 +25,9 @@ document.addEventListener('DOMContentLoaded', async function() {
         loadPackages(),
         loadLeads(),
         loadOrders(),
+        loadDealers(),
+        loadPendingAgents(),
+        loadSystemSettings(),
         loadDashboardStats()
     ]);
     
@@ -68,7 +74,10 @@ function showSection(section) {
         'orders': { title: 'Orders', subtitle: 'Track all orders' },
         'agents': { title: 'Agents', subtitle: 'Manage your sales agents' },
         'packages': { title: 'Packages', subtitle: 'Openserve fibre packages' },
-        'reports': { title: 'Reports', subtitle: 'Analytics and performance metrics' }
+        'reports': { title: 'Reports', subtitle: 'Analytics and performance metrics' },
+        'dealers': { title: 'Dealers', subtitle: 'Manage dealer organizations' },
+        'pending-agents': { title: 'Pending Agents', subtitle: 'Review and approve new agents' },
+        'settings': { title: 'Settings', subtitle: 'System configuration' }
     };
     
     if (titles[section]) {
@@ -602,6 +611,84 @@ function setupFormHandlers() {
             alert('Error returning item: ' + error.message);
         }
     });
+    
+    // Add Dealer Form
+    document.getElementById('addDealerForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        
+        try {
+            const { error } = await window.supabaseClient.from('dealers').insert({
+                name: formData.get('name'),
+                code: formData.get('code') || null,
+                contact_email: formData.get('contact_email') || null,
+                contact_phone: formData.get('contact_phone') || null,
+                is_active: true
+            });
+            
+            if (error) throw error;
+            
+            closeModal('addDealerModal');
+            e.target.reset();
+            await loadDealers();
+            alert('Dealer added successfully!');
+        } catch (error) {
+            console.error('Error adding dealer:', error);
+            alert('Error adding dealer: ' + error.message);
+        }
+    });
+    
+    // Approve Agent Form
+    document.getElementById('approveAgentForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        const pendingAgentId = formData.get('pending_agent_id');
+        
+        try {
+            // Create user in Supabase Auth
+            const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+                email: formData.get('email'),
+                password: formData.get('password'),
+                options: {
+                    data: {
+                        full_name: formData.get('full_name'),
+                        role: 'agent'
+                    }
+                }
+            });
+            
+            if (authError) throw authError;
+            
+            // Create profile with dealer assignment
+            const { error: profileError } = await window.supabaseClient.from('profiles').insert({
+                id: authData.user.id,
+                email: formData.get('email'),
+                full_name: formData.get('full_name'),
+                phone: formData.get('phone') || null,
+                dealer_id: formData.get('dealer_id') || null,
+                role: 'agent',
+                is_approved: true
+            });
+            
+            if (profileError) throw profileError;
+            
+            // Update pending agent status
+            const { error: updateError } = await window.supabaseClient
+                .from('pending_agents')
+                .update({ status: 'approved' })
+                .eq('id', pendingAgentId);
+            
+            if (updateError) throw updateError;
+            
+            closeModal('approveAgentModal');
+            e.target.reset();
+            await Promise.all([loadAgents(), loadPendingAgents()]);
+            alert('Agent approved and created successfully!');
+        } catch (error) {
+            console.error('Error approving agent:', error);
+            alert('Error approving agent: ' + error.message);
+        }
+    });
 }
 
 // Return to Agent
@@ -744,5 +831,307 @@ function editPackage(packageId) {
     const pkg = packages.find(p => p.id === packageId);
     if (pkg) {
         alert('Edit functionality coming soon. Package: ' + pkg.name);
+    }
+}
+
+// ============================================
+// DEALERS FUNCTIONS
+// ============================================
+async function loadDealers() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('dealers')
+            .select('*')
+            .order('name');
+        
+        if (error) throw error;
+        dealers = data || [];
+        renderDealersGrid();
+        populateDealerSelects();
+    } catch (error) {
+        console.error('Error loading dealers:', error);
+        dealers = [];
+    }
+}
+
+function renderDealersGrid() {
+    const grid = document.getElementById('dealersGrid');
+    if (!grid) return;
+    
+    if (dealers.length === 0) {
+        grid.innerHTML = `
+            <div class="card p-6 text-center col-span-full">
+                <p class="text-gray-500">No dealers yet. Add your first dealer!</p>
+            </div>
+        `;
+        return;
+    }
+    
+    grid.innerHTML = dealers.map(dealer => `
+        <div class="card p-6">
+            <div class="flex items-start justify-between mb-4">
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                    </svg>
+                </div>
+                <span class="px-2 py-1 text-xs rounded-full ${dealer.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
+                    ${dealer.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </div>
+            <h4 class="font-semibold text-gray-800 mb-1">${dealer.name}</h4>
+            ${dealer.code ? `<p class="text-sm text-gray-500 mb-2">Code: ${dealer.code}</p>` : ''}
+            ${dealer.contact_email ? `<p class="text-sm text-gray-600">${dealer.contact_email}</p>` : ''}
+            ${dealer.contact_phone ? `<p class="text-sm text-gray-600">${dealer.contact_phone}</p>` : ''}
+            <div class="mt-4 pt-4 border-t flex gap-2">
+                <button onclick="toggleDealerStatus('${dealer.id}', ${!dealer.is_active})" class="text-sm ${dealer.is_active ? 'text-orange-600 hover:text-orange-800' : 'text-green-600 hover:text-green-800'}">
+                    ${dealer.is_active ? 'Deactivate' : 'Activate'}
+                </button>
+                <button onclick="deleteDealer('${dealer.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
+            </div>
+        </div>
+    `).join('');
+}
+
+function populateDealerSelects() {
+    const selects = ['approveAgentDealer', 'agentDealerSelect'];
+    selects.forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">No dealer</option>';
+            dealers.filter(d => d.is_active).forEach(dealer => {
+                select.innerHTML += `<option value="${dealer.id}">${dealer.name}</option>`;
+            });
+            if (currentValue) select.value = currentValue;
+        }
+    });
+}
+
+async function toggleDealerStatus(dealerId, newStatus) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('dealers')
+            .update({ is_active: newStatus })
+            .eq('id', dealerId);
+        
+        if (error) throw error;
+        await loadDealers();
+    } catch (error) {
+        console.error('Error updating dealer:', error);
+        alert('Error updating dealer: ' + error.message);
+    }
+}
+
+async function deleteDealer(dealerId) {
+    if (!confirm('Are you sure you want to delete this dealer?')) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('dealers')
+            .delete()
+            .eq('id', dealerId);
+        
+        if (error) throw error;
+        await loadDealers();
+        alert('Dealer deleted successfully!');
+    } catch (error) {
+        console.error('Error deleting dealer:', error);
+        alert('Error deleting dealer: ' + error.message);
+    }
+}
+
+// ============================================
+// PENDING AGENTS FUNCTIONS
+// ============================================
+async function loadPendingAgents() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('pending_agents')
+            .select('*, dealer:dealers(name)')
+            .eq('status', 'pending')
+            .order('created_at', { ascending: false });
+        
+        if (error) throw error;
+        pendingAgents = data || [];
+        renderPendingAgentsTable();
+        updatePendingAgentsBadge();
+    } catch (error) {
+        console.error('Error loading pending agents:', error);
+        pendingAgents = [];
+    }
+}
+
+function renderPendingAgentsTable() {
+    const table = document.getElementById('pendingAgentsTable');
+    if (!table) return;
+    
+    if (pendingAgents.length === 0) {
+        table.innerHTML = `
+            <tr class="border-t">
+                <td class="px-6 py-4" colspan="5">
+                    <p class="text-gray-500 text-center">No pending agents</p>
+                </td>
+            </tr>
+        `;
+        return;
+    }
+    
+    table.innerHTML = pendingAgents.map(agent => `
+        <tr class="border-t hover:bg-gray-50">
+            <td class="px-6 py-4 font-medium text-gray-800">${agent.full_name}</td>
+            <td class="px-6 py-4 text-gray-600">${agent.email}</td>
+            <td class="px-6 py-4 text-gray-600">${agent.dealer?.name || '-'}</td>
+            <td class="px-6 py-4 text-gray-500">${new Date(agent.created_at).toLocaleDateString()}</td>
+            <td class="px-6 py-4">
+                <div class="flex gap-2">
+                    <button onclick="openApproveAgentModal('${agent.id}')" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">Approve</button>
+                    <button onclick="rejectPendingAgent('${agent.id}')" class="text-red-600 hover:text-red-800 text-sm">Reject</button>
+                </div>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function updatePendingAgentsBadge() {
+    const badge = document.getElementById('pendingAgentsBadge');
+    if (badge) {
+        if (pendingAgents.length > 0) {
+            badge.textContent = pendingAgents.length;
+            badge.classList.remove('hidden');
+        } else {
+            badge.classList.add('hidden');
+        }
+    }
+}
+
+function openApproveAgentModal(pendingAgentId) {
+    const agent = pendingAgents.find(a => a.id === pendingAgentId);
+    if (!agent) return;
+    
+    document.getElementById('pendingAgentId').value = pendingAgentId;
+    document.getElementById('approveAgentName').value = agent.full_name;
+    document.getElementById('approveAgentEmail').value = agent.email;
+    
+    populateDealerSelects();
+    if (agent.dealer_id) {
+        document.getElementById('approveAgentDealer').value = agent.dealer_id;
+    }
+    
+    openModal('approveAgentModal');
+}
+
+async function rejectPendingAgent(pendingAgentId) {
+    if (!confirm('Are you sure you want to reject this agent?')) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('pending_agents')
+            .update({ status: 'rejected' })
+            .eq('id', pendingAgentId);
+        
+        if (error) throw error;
+        await loadPendingAgents();
+        alert('Agent rejected.');
+    } catch (error) {
+        console.error('Error rejecting agent:', error);
+        alert('Error rejecting agent: ' + error.message);
+    }
+}
+
+// ============================================
+// SYSTEM SETTINGS FUNCTIONS
+// ============================================
+async function loadSystemSettings() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('system_settings')
+            .select('*');
+        
+        if (error) throw error;
+        
+        systemSettings = {};
+        (data || []).forEach(setting => {
+            systemSettings[setting.key] = setting.value;
+        });
+        
+        applySystemSettings();
+    } catch (error) {
+        console.error('Error loading settings:', error);
+        systemSettings = {};
+    }
+}
+
+function applySystemSettings() {
+    // Openserve API toggle
+    const apiEnabled = systemSettings.openserve_api_enabled?.enabled || false;
+    const toggle = document.getElementById('openserveApiToggle');
+    const configDiv = document.getElementById('openserveApiConfig');
+    const statusDiv = document.getElementById('openserveApiStatus');
+    
+    if (toggle) toggle.checked = apiEnabled;
+    if (configDiv) configDiv.classList.toggle('hidden', !apiEnabled);
+    if (statusDiv) {
+        if (apiEnabled) {
+            statusDiv.className = 'mt-4 p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+            statusDiv.innerHTML = '<strong>Status:</strong> Active - Connected to Openserve API';
+        } else {
+            statusDiv.className = 'mt-4 p-3 bg-amber-50 rounded-xl text-sm text-amber-700';
+            statusDiv.innerHTML = '<strong>Status:</strong> Inactive - Enable to connect to live Openserve data';
+        }
+    }
+    
+    // Load API config values
+    const apiConfig = systemSettings.openserve_api_config || {};
+    const urlInput = document.getElementById('openserveApiUrl');
+    const keyInput = document.getElementById('openserveApiKey');
+    if (urlInput && apiConfig.api_url) urlInput.value = apiConfig.api_url;
+    if (keyInput && apiConfig.api_key) keyInput.value = apiConfig.api_key;
+}
+
+async function toggleOpenserveApi(enabled) {
+    const configDiv = document.getElementById('openserveApiConfig');
+    if (configDiv) configDiv.classList.toggle('hidden', !enabled);
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('system_settings')
+            .upsert({
+                key: 'openserve_api_enabled',
+                value: { enabled },
+                updated_at: new Date().toISOString(),
+                updated_by: currentUser.id
+            });
+        
+        if (error) throw error;
+        
+        systemSettings.openserve_api_enabled = { enabled };
+        applySystemSettings();
+    } catch (error) {
+        console.error('Error updating setting:', error);
+        alert('Error updating setting: ' + error.message);
+    }
+}
+
+async function saveOpenserveConfig() {
+    const apiUrl = document.getElementById('openserveApiUrl').value;
+    const apiKey = document.getElementById('openserveApiKey').value;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('system_settings')
+            .upsert({
+                key: 'openserve_api_config',
+                value: { api_url: apiUrl, api_key: apiKey },
+                updated_at: new Date().toISOString(),
+                updated_by: currentUser.id
+            });
+        
+        if (error) throw error;
+        
+        alert('Openserve API configuration saved!');
+    } catch (error) {
+        console.error('Error saving config:', error);
+        alert('Error saving configuration: ' + error.message);
     }
 }

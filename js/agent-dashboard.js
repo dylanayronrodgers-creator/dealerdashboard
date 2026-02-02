@@ -1,10 +1,13 @@
 // Agent Dashboard JavaScript
 let currentUser = null;
 let packages = [];
+let packageAliases = [];
+let dealers = [];
 let myLeads = [];
 let myOrders = [];
 let returnedItems = [];
 let importData = [];
+let importStats = { duplicates: 0, newAgents: [] };
 
 document.addEventListener('DOMContentLoaded', async function() {
     // Check authentication
@@ -20,6 +23,7 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Load initial data
     await Promise.all([
         loadPackages(),
+        loadDealers(),
         loadMyLeads(),
         loadMyOrders(),
         loadReturnedItems()
@@ -116,6 +120,23 @@ function populatePackageSelects() {
     });
 }
 
+// Load Dealers
+async function loadDealers() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('dealers')
+            .select('*')
+            .eq('is_active', true)
+            .order('name');
+        
+        if (error) throw error;
+        dealers = data || [];
+    } catch (error) {
+        console.error('Error loading dealers:', error);
+        dealers = [];
+    }
+}
+
 // Load My Leads
 async function loadMyLeads() {
     try {
@@ -161,10 +182,13 @@ function renderMyLeadsTable(filteredLeads = null) {
         return;
     }
     
-    table.innerHTML = displayLeads.map(lead => `
+    table.innerHTML = displayLeads.map(lead => {
+        const displayName = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown';
+        return `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">${lead.first_name} ${lead.last_name}</div>
+                <div class="font-medium text-gray-800">${displayName}</div>
+                ${lead.lead_id ? `<div class="text-xs text-gray-400">ID: ${lead.lead_id}</div>` : ''}
             </td>
             <td class="py-4">
                 <div class="text-sm text-gray-600">${lead.email}</div>
@@ -183,7 +207,7 @@ function renderMyLeadsTable(filteredLeads = null) {
                 </div>
             </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 function renderRecentLeads() {
@@ -201,10 +225,12 @@ function renderRecentLeads() {
         return;
     }
     
-    table.innerHTML = recentLeads.map(lead => `
+    table.innerHTML = recentLeads.map(lead => {
+        const displayName = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown';
+        return `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">${lead.first_name} ${lead.last_name}</div>
+                <div class="font-medium text-gray-800">${displayName}</div>
             </td>
             <td class="py-4 text-sm text-gray-600">${lead.package?.name || '-'}</td>
             <td class="py-4">
@@ -215,7 +241,7 @@ function renderRecentLeads() {
                 <button onclick="updateLeadStatus('${lead.id}')" class="text-blue-600 hover:text-blue-800 text-sm">Update</button>
             </td>
         </tr>
-    `).join('');
+    `}).join('');
 }
 
 // Load My Orders
@@ -661,20 +687,23 @@ function processCSVFile(file) {
             return;
         }
         
-        const headers = lines[0].split(',').map(h => h.trim().toLowerCase());
-        const requiredHeaders = ['first_name', 'last_name', 'email', 'phone', 'address'];
+        // Parse headers - normalize to lowercase and handle variations
+        const rawHeaders = parseCSVLine(lines[0]);
+        const headers = rawHeaders.map(h => normalizeHeader(h.trim()));
         
-        const missingHeaders = requiredHeaders.filter(h => !headers.includes(h));
-        if (missingHeaders.length > 0) {
-            alert('Missing required columns: ' + missingHeaders.join(', '));
+        // Check for minimum required fields (flexible - either full_name or first_name)
+        const hasName = headers.includes('full_name') || headers.includes('first_name') || headers.includes('address');
+        if (!hasName) {
+            alert('CSV must have at least a name or address column');
             return;
         }
         
         importData = [];
+        importStats = { duplicates: 0, newAgents: [] };
         
         for (let i = 1; i < lines.length; i++) {
             const values = parseCSVLine(lines[i]);
-            if (values.length >= headers.length) {
+            if (values.length > 0) {
                 const row = {};
                 headers.forEach((header, index) => {
                     row[header] = values[index]?.trim() || '';
@@ -687,6 +716,90 @@ function processCSVFile(file) {
     };
     
     reader.readAsText(file);
+}
+
+// Normalize CSV headers to standard field names
+function normalizeHeader(header) {
+    const h = header.toLowerCase().replace(/[^a-z0-9_]/g, '_').replace(/_+/g, '_');
+    const mappings = {
+        'lead_id': 'lead_id',
+        'leadid': 'lead_id',
+        'agent': 'agent_name',
+        'captured_by': 'captured_by_email',
+        'capturedby': 'captured_by_email',
+        'package_name': 'package_name',
+        'packagename': 'package_name',
+        'package': 'package_name',
+        'isp': 'isp',
+        'lead_type': 'lead_type',
+        'leadtype': 'lead_type',
+        'status': 'csv_status',
+        'address': 'address',
+        'first_name': 'first_name',
+        'firstname': 'first_name',
+        'last_name': 'last_name',
+        'lastname': 'last_name',
+        'full_name': 'full_name',
+        'fullname': 'full_name',
+        'name': 'full_name',
+        'email': 'email',
+        'phone': 'phone',
+        'notes': 'notes',
+        'order_number': 'order_number',
+        'ordernumber': 'order_number',
+        'order_status': 'order_status',
+        'orderstatus': 'order_status',
+        'order_date': 'order_date',
+        'orderdate': 'order_date',
+        'date_captured': 'date_captured',
+        'datecaptured': 'date_captured',
+        'last_updated': 'last_updated',
+        'lastupdated': 'last_updated',
+        'secondary_contact_name': 'secondary_contact_name',
+        'secondary_contact_number': 'secondary_contact_number',
+        'secondary_contact_email': 'secondary_contact_email',
+        'dealer': 'dealer_name'
+    };
+    return mappings[h] || h;
+}
+
+// Intelligent package matching
+function findPackageByName(packageName) {
+    if (!packageName) return null;
+    const name = packageName.toLowerCase().trim();
+    
+    // Direct match
+    let pkg = packages.find(p => p.name.toLowerCase() === name);
+    if (pkg) return pkg.id;
+    
+    // Partial match
+    pkg = packages.find(p => p.name.toLowerCase().includes(name) || name.includes(p.name.toLowerCase()));
+    if (pkg) return pkg.id;
+    
+    // Extract speed pattern (e.g., "20/10Mbps" or "50Mbps")
+    const speedMatch = name.match(/(\d+)(?:\/\d+)?\s*mbps/i);
+    if (speedMatch) {
+        const speed = parseInt(speedMatch[1]);
+        // Find package with matching speed
+        pkg = packages.find(p => p.speed === speed);
+        if (pkg) return pkg.id;
+        
+        // Find closest speed
+        pkg = packages.find(p => Math.abs(p.speed - speed) <= 10);
+        if (pkg) return pkg.id;
+    }
+    
+    // Check for "Uncapped" keyword and try to match
+    if (name.includes('uncapped')) {
+        const speedMatch = name.match(/(\d+)/);
+        if (speedMatch) {
+            const speed = parseInt(speedMatch[1]);
+            pkg = packages.find(p => p.speed === speed || p.name.toLowerCase().includes('webconnect'));
+            if (pkg) return pkg.id;
+        }
+    }
+    
+    return null;
 }
 
 function parseCSVLine(line) {
@@ -756,28 +869,88 @@ async function confirmImport() {
     
     let imported = 0;
     let failed = 0;
+    let duplicates = 0;
+    const newAgents = new Set();
     
     for (let i = 0; i < importData.length; i++) {
         const row = importData[i];
         
         try {
-            // Find package by name if provided
-            let packageId = null;
-            if (row.package_name) {
-                const pkg = packages.find(p => p.name.toLowerCase() === row.package_name.toLowerCase());
-                if (pkg) packageId = pkg.id;
+            // Check for duplicate by lead_id
+            if (row.lead_id) {
+                const { data: existing } = await window.supabaseClient
+                    .from('leads')
+                    .select('id')
+                    .eq('lead_id', row.lead_id)
+                    .single();
+                
+                if (existing) {
+                    duplicates++;
+                    continue;
+                }
             }
             
+            // Find package using intelligent matching
+            const packageId = findPackageByName(row.package_name);
+            
+            // Build full_name from first_name/last_name if not provided
+            let fullName = row.full_name;
+            if (!fullName && (row.first_name || row.last_name)) {
+                fullName = `${row.first_name || ''} ${row.last_name || ''}`.trim();
+            }
+            
+            // Track new agents from captured_by_email
+            if (row.captured_by_email && row.captured_by_email.includes('@')) {
+                newAgents.add(JSON.stringify({
+                    email: row.captured_by_email,
+                    name: row.agent_name || row.captured_by_email.split('@')[0]
+                }));
+            }
+            
+            // Find dealer if specified
+            let dealerId = null;
+            if (row.dealer_name) {
+                const dealer = dealers.find(d => 
+                    d.name.toLowerCase() === row.dealer_name.toLowerCase() ||
+                    d.code?.toLowerCase() === row.dealer_name.toLowerCase()
+                );
+                if (dealer) dealerId = dealer.id;
+            }
+            
+            // Parse dates
+            const parseDate = (dateStr) => {
+                if (!dateStr) return null;
+                try {
+                    return new Date(dateStr).toISOString();
+                } catch {
+                    return null;
+                }
+            };
+            
             const { error } = await window.supabaseClient.from('leads').insert({
-                first_name: row.first_name,
-                last_name: row.last_name,
-                email: row.email,
-                phone: row.phone,
-                address: row.address,
+                lead_id: row.lead_id || null,
+                full_name: fullName,
+                first_name: row.first_name || null,
+                last_name: row.last_name || null,
+                email: row.email || '',
+                phone: row.phone || '',
+                address: row.address || '',
                 package_id: packageId,
                 agent_id: currentUser.id,
+                dealer_id: dealerId,
                 notes: row.notes || '',
-                status: 'new'
+                status: 'new',
+                lead_type: row.lead_type || null,
+                isp: row.isp || null,
+                captured_by_email: row.captured_by_email || null,
+                order_number: row.order_number || null,
+                order_status: row.order_status || null,
+                order_date: parseDate(row.order_date),
+                date_captured: parseDate(row.date_captured),
+                last_updated: parseDate(row.last_updated),
+                secondary_contact_name: row.secondary_contact_name || null,
+                secondary_contact_number: row.secondary_contact_number || null,
+                secondary_contact_email: row.secondary_contact_email || null
             });
             
             if (error) throw error;
@@ -792,12 +965,32 @@ async function confirmImport() {
         progressText.textContent = `${percent}%`;
     }
     
+    // Create pending agents for admin approval
+    const agentsList = Array.from(newAgents).map(a => JSON.parse(a));
+    for (const agent of agentsList) {
+        try {
+            await window.supabaseClient.from('pending_agents').upsert({
+                email: agent.email,
+                full_name: agent.name,
+                status: 'pending'
+            }, { onConflict: 'email' });
+        } catch (e) {
+            console.log('Agent already exists or error:', e);
+        }
+    }
+    
     progress.classList.add('hidden');
     importData = [];
     document.getElementById('csvFileInput').value = '';
     
     await loadMyLeads();
-    alert(`Import complete!\n\nSuccessfully imported: ${imported}\nFailed: ${failed}`);
+    
+    let message = `Import complete!\n\nSuccessfully imported: ${imported}`;
+    if (duplicates > 0) message += `\nDuplicates skipped: ${duplicates}`;
+    if (failed > 0) message += `\nFailed: ${failed}`;
+    if (agentsList.length > 0) message += `\n\nNew agents detected: ${agentsList.length}\nThey will need admin approval.`;
+    
+    alert(message);
 }
 
 function cancelImport() {
@@ -807,7 +1000,7 @@ function cancelImport() {
 }
 
 function downloadTemplate() {
-    const template = 'first_name,last_name,email,phone,address,package_name,notes\nJohn,Doe,john@example.com,0821234567,123 Main St,Fibre 50Mbps,Interested in fast internet\nJane,Smith,jane@example.com,0829876543,456 Oak Ave,Fibre 100Mbps,Referred by friend';
+    const template = 'LEAD ID,AGENT,full_name,email,phone,address,package_name,notes,CAPTURED BY,dealer\nL12345,Tumi Maila,John Doe,john@example.com,0821234567,123 Main St Gauteng,20/10Mbps Uncapped Fibre,Interested in fibre,agent@example.com,Mailstech\nL12346,Betty Holdings,Jane Smith,jane@example.com,0829876543,456 Oak Ave Limpopo,50/25 Mbps Uncapped Fibre,Referred by friend,sales@dealer.com,Betty Holdings';
     
     const blob = new Blob([template], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);
