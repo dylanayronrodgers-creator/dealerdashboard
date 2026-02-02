@@ -32,6 +32,21 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
         }
+        /* Responsive */
+        @media (max-width: 768px) {
+            .hero-text { font-size: 2.5rem !important; }
+            nav { gap: 0.5rem; }
+            nav a { padding: 0.5rem; font-size: 0.875rem; }
+        }
+        @media (max-width: 640px) {
+            .hero-text { font-size: 2rem !important; }
+            header { padding: 1rem; }
+            .logo-container { gap: 0.5rem; }
+            .logo-container img { height: 2rem; }
+        }
+        @media (hover: none) {
+            .btn-primary:hover { transform: none; }
+        }
     </style>
 </head>
 <body class="gradient-bg min-h-screen">

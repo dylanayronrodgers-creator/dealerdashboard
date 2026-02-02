@@ -65,6 +65,28 @@
             50% { opacity: 0.5; }
         }
         
+        /* Tablet responsive */
+        @media (max-width: 1024px) {
+            .card { padding: 1rem; }
+        }
+        
+        /* Small screens */
+        @media (max-width: 640px) {
+            .card h3 { font-size: 1.5rem; }
+            .modal > div { margin: 0.5rem; max-height: 95vh; }
+            table { font-size: 0.75rem; }
+            th, td { padding: 0.5rem 0.25rem; }
+        }
+        
+        /* Scrollable tables */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+        /* Touch-friendly buttons */
+        @media (hover: none) {
+            .btn-primary:hover { transform: none; }
+            .nav-item { padding: 0.875rem 1rem; }
+        }
+        
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }

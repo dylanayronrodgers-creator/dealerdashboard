@@ -77,6 +77,35 @@
             .mobile-header { display: none !important; }
             .sidebar-overlay { display: none !important; }
         }
+        
+        /* Tablet responsive */
+        @media (max-width: 1024px) {
+            .card { padding: 1rem; }
+            .stats-grid { grid-template-columns: repeat(2, 1fr); }
+        }
+        
+        /* Small screens */
+        @media (max-width: 640px) {
+            .stats-grid { grid-template-columns: 1fr; }
+            .card h3 { font-size: 1.5rem; }
+            .modal > div { margin: 0.5rem; max-height: 95vh; }
+            table { font-size: 0.75rem; }
+            th, td { padding: 0.5rem 0.25rem; }
+        }
+        
+        /* Large screens */
+        @media (min-width: 1536px) {
+            .main-content { max-width: 1400px; margin-left: auto; margin-right: auto; padding-left: 16rem; }
+        }
+        
+        /* Scrollable tables */
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        
+        /* Touch-friendly buttons */
+        @media (hover: none) {
+            .btn-primary:hover { transform: none; }
+            .nav-item { padding: 0.875rem 1rem; }
+        }
     </style>
 </head>
 <body class="min-h-screen flex">
