@@ -78,6 +78,7 @@ function showSection(section) {
         'agents': { title: 'Agents', subtitle: 'Manage your sales agents' },
         'packages': { title: 'Packages', subtitle: 'Openserve fibre packages' },
         'reports': { title: 'Reports', subtitle: 'Analytics and performance metrics' },
+        'import': { title: 'Import Leads', subtitle: 'Upload CSV files to import leads' },
         'dealers': { title: 'Dealers', subtitle: 'Manage dealer organizations' },
         'pending-agents': { title: 'Pending Agents', subtitle: 'Review and approve new agents' },
         'settings': { title: 'Settings', subtitle: 'System configuration' }
@@ -1222,4 +1223,352 @@ async function testSupabaseConnection() {
         statusText.textContent = 'Connection failed: ' + error.message;
         statusText.parentElement.className = 'p-3 bg-red-50 rounded-xl text-sm text-red-700';
     }
+}
+
+// ============================================
+// CSV IMPORT FUNCTIONS
+// ============================================
+let importData = [];
+let packageAliases = [];
+let importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [] };
+
+function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file) {
+        processCSVFile(file);
+    }
+}
+
+function processCSVFile(file) {
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        const text = e.target.result;
+        const lines = text.split('\n').filter(line => line.trim());
+        
+        if (lines.length < 2) {
+            alert('CSV file must have at least a header and one data row');
+            return;
+        }
+        
+        const headers = parseCSVLine(lines[0]).map(h => normalizeHeader(h.trim()));
+        const data = [];
+        
+        for (let i = 1; i < lines.length; i++) {
+            const values = parseCSVLine(lines[i]);
+            if (values.length === headers.length) {
+                const row = {};
+                headers.forEach((header, index) => {
+                    row[header] = values[index]?.trim() || '';
+                });
+                data.push(row);
+            }
+        }
+        
+        importData = data;
+        showImportPreview(headers, data);
+    };
+    reader.readAsText(file);
+}
+
+function normalizeHeader(header) {
+    const headerMap = {
+        'lead id': 'lead_id',
+        'leadid': 'lead_id',
+        'agent': 'agent_name',
+        'full_name': 'full_name',
+        'fullname': 'full_name',
+        'name': 'full_name',
+        'first_name': 'first_name',
+        'firstname': 'first_name',
+        'last_name': 'last_name',
+        'lastname': 'last_name',
+        'email': 'email',
+        'phone': 'phone',
+        'telephone': 'phone',
+        'cell': 'phone',
+        'mobile': 'phone',
+        'address': 'address',
+        'package': 'package_name',
+        'package_name': 'package_name',
+        'packagename': 'package_name',
+        'notes': 'notes',
+        'captured by': 'captured_by_email',
+        'captured_by': 'captured_by_email',
+        'capturedby': 'captured_by_email',
+        'dealer': 'dealer_name',
+        'dealer_name': 'dealer_name',
+        'dealername': 'dealer_name',
+        'order number': 'order_number',
+        'order_number': 'order_number',
+        'order status': 'order_status',
+        'order_status': 'order_status',
+        'order date': 'order_date',
+        'order_date': 'order_date',
+        'date captured': 'date_captured',
+        'date_captured': 'date_captured',
+        'last updated': 'last_updated',
+        'last_updated': 'last_updated',
+        'status': 'status',
+        'lead type': 'lead_type',
+        'lead_type': 'lead_type',
+        'isp': 'isp',
+        'secondary contact name': 'secondary_contact_name',
+        'secondary_contact_name': 'secondary_contact_name',
+        'secondary contact number': 'secondary_contact_number',
+        'secondary_contact_number': 'secondary_contact_number',
+        'secondary contact email': 'secondary_contact_email',
+        'secondary_contact_email': 'secondary_contact_email'
+    };
+    
+    const normalized = header.toLowerCase().trim();
+    return headerMap[normalized] || normalized.replace(/\s+/g, '_');
+}
+
+function parseCSVLine(line) {
+    const result = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+        const char = line[i];
+        if (char === '"') {
+            inQuotes = !inQuotes;
+        } else if (char === ',' && !inQuotes) {
+            result.push(current);
+            current = '';
+        } else {
+            current += char;
+        }
+    }
+    result.push(current);
+    return result;
+}
+
+function showImportPreview(headers, data) {
+    const preview = document.getElementById('importPreview');
+    const table = document.getElementById('previewTable');
+    const countSpan = document.getElementById('importCount');
+    
+    let html = '<thead class="bg-gray-50"><tr>';
+    headers.forEach(h => {
+        html += `<th class="px-3 py-2 text-left text-gray-600">${h}</th>`;
+    });
+    html += '</tr></thead><tbody>';
+    
+    const previewRows = data.slice(0, 5);
+    previewRows.forEach(row => {
+        html += '<tr class="border-b">';
+        headers.forEach(h => {
+            html += `<td class="px-3 py-2 text-gray-800">${row[h] || ''}</td>`;
+        });
+        html += '</tr>';
+    });
+    html += '</tbody>';
+    
+    table.innerHTML = html;
+    countSpan.textContent = data.length;
+    preview.classList.remove('hidden');
+}
+
+async function confirmImport() {
+    if (importData.length === 0) {
+        alert('No data to import');
+        return;
+    }
+    
+    const progressDiv = document.getElementById('importProgress');
+    const progressBar = document.getElementById('progressBar');
+    const progressText = document.getElementById('progressText');
+    
+    progressDiv.classList.remove('hidden');
+    importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [] };
+    
+    for (let i = 0; i < importData.length; i++) {
+        const row = importData[i];
+        const progress = Math.round(((i + 1) / importData.length) * 100);
+        progressBar.style.width = progress + '%';
+        progressText.textContent = progress + '%';
+        
+        try {
+            // Check for duplicates by lead_id
+            if (row.lead_id) {
+                const { data: existing } = await window.supabaseClient
+                    .from('leads')
+                    .select('id')
+                    .eq('lead_id', row.lead_id)
+                    .limit(1);
+                
+                if (existing && existing.length > 0) {
+                    importStats.duplicates++;
+                    continue;
+                }
+            }
+            
+            // Find or create dealer
+            let dealerId = null;
+            if (row.dealer_name) {
+                const { data: dealerData } = await window.supabaseClient
+                    .from('dealers')
+                    .select('id')
+                    .ilike('name', row.dealer_name)
+                    .limit(1);
+                
+                if (dealerData && dealerData.length > 0) {
+                    dealerId = dealerData[0].id;
+                }
+            }
+            
+            // Find agent by email
+            let agentId = null;
+            if (row.captured_by_email) {
+                const { data: agentData } = await window.supabaseClient
+                    .from('profiles')
+                    .select('id')
+                    .eq('email', row.captured_by_email)
+                    .limit(1);
+                
+                if (agentData && agentData.length > 0) {
+                    agentId = agentData[0].id;
+                } else {
+                    // Add to pending agents
+                    const { data: pendingExists } = await window.supabaseClient
+                        .from('pending_agents')
+                        .select('id')
+                        .eq('email', row.captured_by_email)
+                        .limit(1);
+                    
+                    if (!pendingExists || pendingExists.length === 0) {
+                        await window.supabaseClient.from('pending_agents').insert({
+                            email: row.captured_by_email,
+                            full_name: row.agent_name || row.captured_by_email.split('@')[0],
+                            dealer_id: dealerId,
+                            status: 'pending'
+                        });
+                        importStats.newAgents.push(row.captured_by_email);
+                    }
+                }
+            }
+            
+            // Find package
+            let packageId = null;
+            if (row.package_name) {
+                packageId = await findPackageByName(row.package_name);
+            }
+            
+            // Build full name
+            let fullName = row.full_name || '';
+            if (!fullName && (row.first_name || row.last_name)) {
+                fullName = `${row.first_name || ''} ${row.last_name || ''}`.trim();
+            }
+            
+            // Parse dates safely
+            const parseDate = (dateStr) => {
+                if (!dateStr) return null;
+                const d = new Date(dateStr);
+                return isNaN(d.getTime()) ? null : d.toISOString();
+            };
+            
+            // Insert lead
+            const { error } = await window.supabaseClient.from('leads').insert({
+                lead_id: row.lead_id || null,
+                full_name: fullName || null,
+                first_name: row.first_name || null,
+                last_name: row.last_name || null,
+                email: row.email || null,
+                phone: row.phone || null,
+                address: row.address || null,
+                package_id: packageId,
+                agent_id: agentId,
+                dealer_id: dealerId,
+                notes: row.notes || null,
+                status: 'new',
+                captured_by_email: row.captured_by_email || null,
+                order_number: row.order_number || null,
+                order_status: row.order_status || null,
+                order_date: parseDate(row.order_date),
+                date_captured: parseDate(row.date_captured),
+                last_updated: parseDate(row.last_updated),
+                lead_type: row.lead_type || null,
+                isp: row.isp || null,
+                secondary_contact_name: row.secondary_contact_name || null,
+                secondary_contact_number: row.secondary_contact_number || null,
+                secondary_contact_email: row.secondary_contact_email || null
+            });
+            
+            if (error) throw error;
+            importStats.imported++;
+        } catch (error) {
+            console.error('Error importing row:', error);
+            importStats.errors++;
+        }
+    }
+    
+    // Show results
+    let message = `Import Complete!\n\n`;
+    message += `Imported: ${importStats.imported}\n`;
+    message += `Duplicates skipped: ${importStats.duplicates}\n`;
+    message += `Errors: ${importStats.errors}`;
+    if (importStats.newAgents.length > 0) {
+        message += `\n\nNew agents pending approval: ${importStats.newAgents.length}`;
+    }
+    
+    alert(message);
+    cancelImport();
+    await Promise.all([loadLeads(), loadPendingAgents()]);
+}
+
+async function findPackageByName(name) {
+    if (!name) return null;
+    
+    // Try exact match
+    const { data: exact } = await window.supabaseClient
+        .from('packages')
+        .select('id')
+        .ilike('name', name)
+        .limit(1);
+    
+    if (exact && exact.length > 0) return exact[0].id;
+    
+    // Try alias match
+    const { data: alias } = await window.supabaseClient
+        .from('package_aliases')
+        .select('package_id')
+        .ilike('alias', name)
+        .limit(1);
+    
+    if (alias && alias.length > 0) return alias[0].package_id;
+    
+    // Try speed matching (e.g., "20/10Mbps" -> find package with speed 20)
+    const speedMatch = name.match(/(\d+)\/?/);
+    if (speedMatch) {
+        const speed = parseInt(speedMatch[1]);
+        const { data: speedData } = await window.supabaseClient
+            .from('packages')
+            .select('id')
+            .eq('speed', speed)
+            .limit(1);
+        
+        if (speedData && speedData.length > 0) return speedData[0].id;
+    }
+    
+    return null;
+}
+
+function cancelImport() {
+    importData = [];
+    document.getElementById('importPreview').classList.add('hidden');
+    document.getElementById('importProgress').classList.add('hidden');
+    document.getElementById('csvFileInput').value = '';
+}
+
+function downloadTemplate() {
+    const template = 'LEAD ID,AGENT,full_name,email,phone,address,package_name,notes,CAPTURED BY,dealer\nL12345,Tumi Maila,John Doe,john@example.com,0821234567,123 Main St Gauteng,20/10Mbps Uncapped Fibre,Interested in fibre,agent@example.com,Mailstech\nL12346,Betty Holdings,Jane Smith,jane@example.com,0829876543,456 Oak Ave Limpopo,50/25 Mbps Uncapped Fibre,Referred by friend,sales@dealer.com,Betty Holdings';
+    
+    const blob = new Blob([template], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'leads_import_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
 }
