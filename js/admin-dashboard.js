@@ -532,11 +532,17 @@ function setupFormHandlers() {
         const formData = new FormData(e.target);
         
         try {
+            const firstName = formData.get('first_name');
+            const lastName = formData.get('last_name');
+            const fullName = `${firstName} ${lastName}`.trim();
+            
             const { error } = await window.supabaseClient.from('leads').insert({
-                first_name: formData.get('first_name'),
-                last_name: formData.get('last_name'),
+                first_name: firstName,
+                last_name: lastName,
+                full_name: fullName,
                 email: formData.get('email'),
                 phone: formData.get('phone'),
+                id_number: formData.get('id_number') || null,
                 address: formData.get('address'),
                 package_id: formData.get('package_id') || null,
                 agent_id: formData.get('agent_id') || null,

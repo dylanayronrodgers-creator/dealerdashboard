@@ -94,8 +94,9 @@ ALTER TABLE profiles ADD COLUMN IF NOT EXISTS is_approved BOOLEAN DEFAULT true;
 -- Add lead_id (external reference from CSV)
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS lead_id TEXT UNIQUE;
 
--- Add full_name column (replacing first_name/last_name requirement)
+-- Add full_name and id_number fields
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS full_name TEXT;
+ALTER TABLE leads ADD COLUMN IF NOT EXISTS id_number TEXT;
 
 -- Add dealer_id to leads
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS dealer_id UUID REFERENCES dealers(id) ON DELETE SET NULL;
