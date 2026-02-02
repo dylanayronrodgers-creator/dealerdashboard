@@ -89,6 +89,9 @@ SELECT
 -- ============================================
 -- 5. CREATE FUNCTION TO CONFIRM LEAD AND CALCULATE COMMISSION
 -- ============================================
+DROP FUNCTION IF EXISTS confirm_lead(uuid);
+DROP FUNCTION IF EXISTS reject_lead(uuid, text);
+
 CREATE OR REPLACE FUNCTION confirm_lead(p_lead_id UUID)
 RETURNS void AS $func$
 DECLARE
