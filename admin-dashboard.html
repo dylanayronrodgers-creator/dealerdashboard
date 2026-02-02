@@ -1,0 +1,541 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Axxess Dealer Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .sidebar-bg { background: linear-gradient(180deg, #051a0f 0%, #0a2e1a 100%); }
+        .main-bg { background: #f1f5f9; }
+        .card { background: white; border-radius: 1rem; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .btn-primary { background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%); }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(34, 197, 94, 0.3); }
+        .status-lead { background: #fef3c7; color: #92400e; }
+        .status-pending { background: #dbeafe; color: #1e40af; }
+        .status-processing { background: #e0e7ff; color: #3730a3; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .status-returned { background: #fce7f3; color: #9d174d; }
+        .nav-item { transition: all 0.2s ease; }
+        .nav-item:hover, .nav-item.active { background: rgba(255,255,255,0.1); }
+        .table-row:hover { background: #f8fafc; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <!-- Sidebar -->
+    <aside class="sidebar-bg w-64 min-h-screen flex flex-col fixed left-0 top-0 z-50">
+        <!-- Logo -->
+        <div class="p-6 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <div class="bg-slate-700 rounded-lg p-2">
+                    <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-8">
+                </div>
+                <div>
+                    <h1 class="text-white font-bold">Axxess</h1>
+                    <p class="text-white/50 text-xs">Admin Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#dashboard" class="nav-item active flex items-center gap-3 text-white px-4 py-3 rounded-xl" onclick="showSection('dashboard')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="#leads" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('leads')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Leads
+            </a>
+            <a href="#orders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('orders')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Orders
+            </a>
+            <a href="#agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('agents')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                </svg>
+                Agents
+            </a>
+            <a href="#packages" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('packages')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+                </svg>
+                Packages
+            </a>
+            <a href="#reports" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('reports')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Reports
+            </a>
+        </nav>
+
+        <!-- User Section -->
+        <div class="p-4 border-t border-white/10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <span id="userInitials">A</span>
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm" id="userName">Admin</p>
+                    <p class="text-white/50 text-xs">Administrator</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white py-2 px-4 rounded-lg hover:bg-white/10 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-bg flex-1 ml-64 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b px-8 py-4 flex items-center justify-between sticky top-0 z-40">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h2>
+                <p class="text-gray-500 text-sm" id="pageSubtitle">Overview of your dealer network</p>
+            </div>
+            <div class="flex items-center gap-4">
+                <div class="relative">
+                    <input type="text" placeholder="Search..." class="pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 w-64">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <button class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                    </svg>
+                    <span class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full"></span>
+                </button>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="p-8">
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                            </svg>
+                        </div>
+                        <span class="text-green-500 text-sm font-medium">+12%</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800" id="totalLeads">0</h3>
+                    <p class="text-gray-500 text-sm">Total Leads</p>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-gradient-to-br from-green-500 to-green-600 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <span class="text-green-500 text-sm font-medium">+8%</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800" id="totalOrders">0</h3>
+                    <p class="text-gray-500 text-sm">Active Orders</p>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                        </div>
+                        <span class="text-green-500 text-sm font-medium">+3</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800" id="totalAgents">0</h3>
+                    <p class="text-gray-500 text-sm">Active Agents</p>
+                </div>
+
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                            </svg>
+                        </div>
+                        <span class="text-green-500 text-sm font-medium">+15%</span>
+                    </div>
+                    <h3 class="text-3xl font-bold text-gray-800" id="conversionRate">0%</h3>
+                    <p class="text-gray-500 text-sm">Conversion Rate</p>
+                </div>
+            </div>
+
+            <!-- Charts Row -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Orders Overview</h3>
+                    <canvas id="ordersChart" height="200"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Lead Sources</h3>
+                    <canvas id="leadsChart" height="200"></canvas>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
+                    <a href="#orders" onclick="showSection('orders')" class="text-green-500 hover:text-green-600 text-sm font-medium">View All</a>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Client</th>
+                                <th class="pb-4 font-medium">Package</th>
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Status</th>
+                                <th class="pb-4 font-medium">Date</th>
+                                <th class="pb-4 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable">
+                            <tr class="table-row border-b">
+                                <td class="py-4" colspan="6">
+                                    <p class="text-gray-500 text-center">Loading...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leads Section -->
+        <section id="section-leads" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <select id="leadStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <option value="">All Status</option>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="converted">Converted</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                    <select id="leadAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <option value="">All Agents</option>
+                    </select>
+                </div>
+                <button onclick="openModal('addLeadModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Lead
+                </button>
+            </div>
+
+            <div class="card p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Client Name</th>
+                                <th class="pb-4 font-medium">Contact</th>
+                                <th class="pb-4 font-medium">Address</th>
+                                <th class="pb-4 font-medium">Package Interest</th>
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Status</th>
+                                <th class="pb-4 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="leadsTable">
+                            <tr class="table-row border-b">
+                                <td class="py-4" colspan="7">
+                                    <p class="text-gray-500 text-center">Loading leads...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="section-orders" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div class="flex items-center gap-4">
+                    <select id="orderStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <select id="orderAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <option value="">All Agents</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Order ID</th>
+                                <th class="pb-4 font-medium">Client</th>
+                                <th class="pb-4 font-medium">Package</th>
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Status</th>
+                                <th class="pb-4 font-medium">Created</th>
+                                <th class="pb-4 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable">
+                            <tr class="table-row border-b">
+                                <td class="py-4" colspan="7">
+                                    <p class="text-gray-500 text-center">Loading orders...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agents Section -->
+        <section id="section-agents" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800">Manage Agents</h3>
+                <button onclick="openModal('addAgentModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Agent
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="agentsGrid">
+                <div class="card p-6 text-center">
+                    <p class="text-gray-500">Loading agents...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Packages Section -->
+        <section id="section-packages" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-semibold text-gray-800">Openserve Packages</h3>
+                <button onclick="openModal('addPackageModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Package
+                </button>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="packagesGrid">
+                <div class="card p-6 text-center">
+                    <p class="text-gray-500">Loading packages...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="section-reports" class="p-8 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Agent Performance</h3>
+                    <canvas id="agentPerformanceChart" height="250"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Conversions</h3>
+                    <canvas id="monthlyConversionsChart" height="250"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Add Lead Modal -->
+    <div id="addLeadModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Add New Lead</h3>
+                <button onclick="closeModal('addLeadModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="addLeadForm" class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
+                        <input type="text" name="first_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
+                        <input type="text" name="last_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                        <input type="email" name="email" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
+                        <input type="tel" name="phone" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
+                    <input type="text" name="address" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Package Interest</label>
+                        <select name="package_id" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="leadPackageSelect">
+                            <option value="">Select Package</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Agent</label>
+                        <select name="agent_id" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="leadAgentSelect">
+                            <option value="">Select Agent</option>
+                        </select>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                    <textarea name="notes" rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('addLeadModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add Lead</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Agent Modal -->
+    <div id="addAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Add New Agent</h3>
+                <button onclick="closeModal('addAgentModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="addAgentForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" name="full_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" name="email" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
+                    <input type="password" name="password" required minlength="6" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" name="phone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('addAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Create Agent</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Package Modal -->
+    <div id="addPackageModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Add New Package</h3>
+                <button onclick="closeModal('addPackageModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="addPackageForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Package Name *</label>
+                    <input type="text" name="name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="e.g., Fibre 50Mbps">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Speed (Mbps) *</label>
+                    <input type="number" name="speed" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Price (R) *</label>
+                    <input type="number" name="price" required step="0.01" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="699.00">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                    <textarea name="description" rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('addPackageModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add Package</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Return to Agent Modal -->
+    <div id="returnToAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Return to Agent</h3>
+                <button onclick="closeModal('returnToAgentModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="returnToAgentForm" class="p-6 space-y-4">
+                <input type="hidden" name="item_id" id="returnItemId">
+                <input type="hidden" name="item_type" id="returnItemType">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Return *</label>
+                    <textarea name="return_reason" required rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="Please provide a reason..."></textarea>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('returnToAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Return</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/admin-dashboard.js"></script>
+</body>
+</html>

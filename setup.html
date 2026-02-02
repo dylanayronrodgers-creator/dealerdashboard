@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Setup - Axxess Dealer Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0a2e1a 0%, #051a0f 50%, #0d3320 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        }
+        .input-field {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+        }
+        .input-field:focus {
+            background: rgba(255, 255, 255, 0.1);
+            border-color: rgba(34, 197, 94, 0.5);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
+    <div class="w-full max-w-xl">
+        <!-- Logo Section -->
+        <div class="text-center mb-8">
+            <div class="flex justify-center items-center gap-4 mb-6">
+                <div class="bg-slate-800 rounded-lg p-3">
+                    <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess Logo" class="h-10">
+                </div>
+                <div class="bg-slate-800 rounded-lg p-3">
+                    <img src="https://i.ibb.co/1JBh9sQp/AP1-Gcz-MU7-E0z-Ww-Bq4-NY-s-WWho-Hek-H0-Sxd-Ek-Yjbtwf-Hk-No-Ne2gs-Ir-KUjb17-LVs-P3vxi-YPMp-Hpq8-MAq-Hjfn8e.webp" alt="Openserve Logo" class="h-10">
+                </div>
+            </div>
+            <h1 class="text-3xl font-bold text-white mb-2">Supabase Configuration</h1>
+            <p class="text-white/60">Enter your Supabase project credentials to get started</p>
+        </div>
+
+        <!-- Setup Form -->
+        <div class="glass-card rounded-2xl p-8">
+            <div class="mb-6 p-4 bg-blue-500/20 border border-blue-500/30 rounded-xl">
+                <div class="flex items-start gap-3">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-400 flex-shrink-0 mt-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <div class="text-sm text-blue-200">
+                        <p class="font-medium mb-1">Where to find these values:</p>
+                        <ol class="list-decimal list-inside space-y-1 text-blue-300/80">
+                            <li>Go to <a href="https://supabase.com" target="_blank" class="underline hover:text-blue-200">supabase.com</a> and open your project</li>
+                            <li>Navigate to <strong>Settings → API</strong></li>
+                            <li>Copy the <strong>Project URL</strong> and <strong>anon public</strong> key</li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+
+            <form id="setupForm" class="space-y-6">
+                <div>
+                    <label for="supabaseUrl" class="block text-white/80 text-sm font-medium mb-2">Supabase Project URL *</label>
+                    <input 
+                        type="url" 
+                        id="supabaseUrl" 
+                        name="supabaseUrl" 
+                        required
+                        class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white/40"
+                        placeholder="https://your-project.supabase.co"
+                    >
+                </div>
+
+                <div>
+                    <label for="supabaseKey" class="block text-white/80 text-sm font-medium mb-2">Supabase Anon Key *</label>
+                    <textarea 
+                        id="supabaseKey" 
+                        name="supabaseKey" 
+                        required
+                        rows="3"
+                        class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white/40 resize-none"
+                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                    ></textarea>
+                </div>
+
+                <div id="statusMessage" class="hidden p-4 rounded-xl text-sm"></div>
+
+                <button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-semibold text-lg flex items-center justify-center gap-2">
+                    <span>Save Configuration</span>
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </form>
+
+            <div class="mt-6 pt-6 border-t border-white/10">
+                <h4 class="text-white font-medium mb-3">Current Configuration</h4>
+                <div class="bg-black/20 rounded-lg p-4 text-sm">
+                    <div class="flex justify-between items-center mb-2">
+                        <span class="text-white/60">Project URL:</span>
+                        <span id="currentUrl" class="text-white/80 font-mono text-xs">Not configured</span>
+                    </div>
+                    <div class="flex justify-between items-center">
+                        <span class="text-white/60">API Key:</span>
+                        <span id="currentKey" class="text-white/80 font-mono text-xs">Not configured</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Navigation -->
+        <div class="text-center mt-6 flex justify-center gap-4">
+            <a href="index.html" class="text-white/50 hover:text-white text-sm flex items-center gap-2 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M9.707 16.707a1 1 0 01-1.414 0l-6-6a1 1 0 010-1.414l6-6a1 1 0 011.414 1.414L5.414 9H17a1 1 0 110 2H5.414l4.293 4.293a1 1 0 010 1.414z" clip-rule="evenodd" />
+                </svg>
+                Back to Home
+            </a>
+            <a href="login.html" class="text-white/50 hover:text-white text-sm flex items-center gap-2 transition">
+                Go to Login
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
+                </svg>
+            </a>
+        </div>
+    </div>
+
+    <script>
+        // Load current configuration
+        document.addEventListener('DOMContentLoaded', function() {
+            loadCurrentConfig();
+        });
+
+        function loadCurrentConfig() {
+            const url = localStorage.getItem('SUPABASE_URL');
+            const key = localStorage.getItem('SUPABASE_ANON_KEY');
+            
+            document.getElementById('currentUrl').textContent = url ? url : 'Not configured';
+            document.getElementById('currentKey').textContent = key ? key.substring(0, 20) + '...' : 'Not configured';
+            
+            if (url) document.getElementById('supabaseUrl').value = url;
+            if (key) document.getElementById('supabaseKey').value = key;
+        }
+
+        document.getElementById('setupForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const url = document.getElementById('supabaseUrl').value.trim();
+            const key = document.getElementById('supabaseKey').value.trim();
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Validate URL format
+            if (!url.includes('supabase.co')) {
+                showStatus('error', 'Please enter a valid Supabase project URL');
+                return;
+            }
+            
+            // Validate key format (should be a JWT)
+            if (!key.startsWith('eyJ')) {
+                showStatus('error', 'Please enter a valid Supabase anon key (starts with eyJ...)');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('SUPABASE_URL', url);
+            localStorage.setItem('SUPABASE_ANON_KEY', key);
+            
+            showStatus('success', 'Configuration saved successfully! Redirecting to login...');
+            
+            // Update display
+            loadCurrentConfig();
+            
+            // Redirect after a short delay
+            setTimeout(() => {
+                window.location.href = 'login.html';
+            }, 2000);
+        });
+
+        function showStatus(type, message) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.classList.remove('hidden', 'bg-green-500/20', 'border-green-500/30', 'text-green-300', 'bg-red-500/20', 'border-red-500/30', 'text-red-300');
+            
+            if (type === 'success') {
+                statusMessage.classList.add('bg-green-500/20', 'border', 'border-green-500/30', 'text-green-300');
+            } else {
+                statusMessage.classList.add('bg-red-500/20', 'border', 'border-red-500/30', 'text-red-300');
+            }
+            
+            statusMessage.textContent = message;
+            statusMessage.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxess Dealer Portal - Openserve Orders</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        .gradient-bg {
+            background: linear-gradient(135deg, #0a2e1a 0%, #051a0f 50%, #0d3320 100%);
+        }
+        .glass-card {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+            transition: all 0.3s ease;
+        }
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(34, 197, 94, 0.3);
+        }
+        .floating {
+            animation: float 6s ease-in-out infinite;
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+    </style>
+</head>
+<body class="gradient-bg min-h-screen">
+    <div class="min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="py-6 px-8">
+            <div class="max-w-7xl mx-auto flex justify-between items-center">
+                <div class="flex items-center gap-6">
+                    <div class="bg-slate-800 rounded-lg p-3">
+                        <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess Logo" class="h-10">
+                    </div>
+                    <div class="bg-slate-800 rounded-lg p-3">
+                        <img src="https://i.ibb.co/1JBh9sQp/AP1-Gcz-MU7-E0z-Ww-Bq4-NY-s-WWho-Hek-H0-Sxd-Ek-Yjbtwf-Hk-No-Ne2gs-Ir-KUjb17-LVs-P3vxi-YPMp-Hpq8-MAq-Hjfn8e.webp" alt="Openserve Logo" class="h-10">
+                    </div>
+                </div>
+                <nav class="flex items-center gap-4">
+                    <a href="setup.html" class="text-white/80 hover:text-white transition px-4 py-2">Setup</a>
+                    <a href="login.html" class="text-white/80 hover:text-white transition px-4 py-2">Login</a>
+                    <a href="login.html" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">Get Started</a>
+                </nav>
+            </div>
+        </header>
+
+        <!-- Hero Section -->
+        <main class="flex-1 flex items-center justify-center px-8">
+            <div class="max-w-7xl mx-auto grid lg:grid-cols-2 gap-12 items-center">
+                <div class="text-white">
+                    <h1 class="text-5xl lg:text-6xl font-bold leading-tight mb-6">
+                        Axxess Dealer
+                        <span class="text-transparent bg-clip-text bg-gradient-to-r from-green-400 to-green-600">Portal</span>
+                    </h1>
+                    <p class="text-xl text-white/70 mb-8 leading-relaxed">
+                        Streamline your Openserve fibre orders with our comprehensive dealer management system. 
+                        Track leads, manage orders, and grow your business efficiently.
+                    </p>
+                    <div class="flex flex-wrap gap-4">
+                        <a href="login.html" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
+                            </svg>
+                            Agent Login
+                        </a>
+                        <a href="login.html?admin=true" class="glass-card text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
+                            </svg>
+                            Admin Access
+                        </a>
+                    </div>
+                </div>
+
+                <!-- Feature Cards -->
+                <div class="grid gap-6">
+                    <div class="glass-card rounded-2xl p-6 floating" style="animation-delay: 0s;">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-green-500/20 p-3 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold text-lg mb-2">Lead Management</h3>
+                                <p class="text-white/60">Capture, track, and convert leads with ease. Mass import capabilities for efficient data entry.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 floating" style="animation-delay: 0.5s;">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-blue-500/20 p-3 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold text-lg mb-2">Order Tracking</h3>
+                                <p class="text-white/60">Monitor order status from lead to completion. Real-time updates and notifications.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="glass-card rounded-2xl p-6 floating" style="animation-delay: 1s;">
+                        <div class="flex items-start gap-4">
+                            <div class="bg-green-500/20 p-3 rounded-xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="text-white font-semibold text-lg mb-2">Performance Analytics</h3>
+                                <p class="text-white/60">Track agent performance, conversion rates, and revenue metrics at a glance.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Footer -->
+        <footer class="py-6 px-8 border-t border-white/10">
+            <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center gap-4">
+                <p class="text-white/50 text-sm">© 2026 Axxess. All rights reserved. Powered by Openserve.</p>
+                <div class="flex gap-6">
+                    <a href="#" class="text-white/50 hover:text-white text-sm transition">Privacy Policy</a>
+                    <a href="#" class="text-white/50 hover:text-white text-sm transition">Terms of Service</a>
+                    <a href="#" class="text-white/50 hover:text-white text-sm transition">Support</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+</body>
+</html>
