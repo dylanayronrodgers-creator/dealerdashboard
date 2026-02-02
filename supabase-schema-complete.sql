@@ -150,7 +150,6 @@ CREATE TABLE IF NOT EXISTS system_settings (
     id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
     key TEXT UNIQUE NOT NULL,
     value JSONB NOT NULL DEFAULT '{}',
-    description TEXT,
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
@@ -424,9 +423,9 @@ ON CONFLICT DO NOTHING;
 -- ============================================
 -- 22. INSERT DEFAULT SYSTEM SETTINGS
 -- ============================================
-INSERT INTO system_settings (key, value, description) VALUES
-    ('openserve_api', '{"enabled": false, "api_key": "", "api_url": ""}', 'Openserve API configuration'),
-    ('general', '{"company_name": "Axxess", "default_commission": 200}', 'General system settings')
+INSERT INTO system_settings (key, value) VALUES
+    ('openserve_api', '{"enabled": false, "api_key": "", "api_url": ""}'),
+    ('general', '{"company_name": "Axxess", "default_commission": 200}')
 ON CONFLICT (key) DO NOTHING;
 
 -- ============================================
