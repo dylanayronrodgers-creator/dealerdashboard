@@ -420,15 +420,59 @@ function renderRecentOrders() {
     `).join('');
 }
 
-// Dashboard Stats
+// Dashboard Stats - optimized single query approach
 async function loadDashboardStats() {
     try {
-        // Calculate conversion rate
+        // Calculate stats from already loaded data to minimize requests
         const convertedLeads = leads.filter(l => l.status === 'converted').length;
         const totalLeads = leads.length;
         const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
         
         document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+        
+        // Calculate revenue stats from leads (uses already loaded data)
+        let confirmedRevenue = 0;
+        let pendingRevenue = 0;
+        let rejectedRevenue = 0;
+        let confirmedCount = 0;
+        let pendingCount = 0;
+        let rejectedCount = 0;
+        
+        const FIBRE_COMMISSION = 200; // R200 per fibre install
+        
+        leads.forEach(lead => {
+            const commission = lead.commission_amount || (lead.package?.dealer_commission) || FIBRE_COMMISSION;
+            
+            if (lead.commission_status === 'confirmed' || lead.commission_status === 'paid') {
+                confirmedRevenue += commission;
+                confirmedCount++;
+            } else if (lead.commission_status === 'rejected') {
+                rejectedRevenue += commission;
+                rejectedCount++;
+            } else {
+                // pending is default
+                pendingRevenue += FIBRE_COMMISSION;
+                pendingCount++;
+            }
+        });
+        
+        // Update UI
+        const formatCurrency = (val) => `R${val.toLocaleString()}`;
+        
+        const confirmedRevenueEl = document.getElementById('confirmedRevenue');
+        const pendingRevenueEl = document.getElementById('pendingRevenue');
+        const rejectedRevenueEl = document.getElementById('rejectedRevenue');
+        const confirmedCountEl = document.getElementById('confirmedCount');
+        const pendingCountEl = document.getElementById('pendingCount');
+        const rejectedCountEl = document.getElementById('rejectedCount');
+        
+        if (confirmedRevenueEl) confirmedRevenueEl.textContent = formatCurrency(confirmedRevenue);
+        if (pendingRevenueEl) pendingRevenueEl.textContent = formatCurrency(pendingRevenue);
+        if (rejectedRevenueEl) rejectedRevenueEl.textContent = formatCurrency(rejectedRevenue);
+        if (confirmedCountEl) confirmedCountEl.textContent = confirmedCount;
+        if (pendingCountEl) pendingCountEl.textContent = pendingCount;
+        if (rejectedCountEl) rejectedCountEl.textContent = rejectedCount;
+        
     } catch (error) {
         console.error('Error loading stats:', error);
     }
