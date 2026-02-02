@@ -172,34 +172,22 @@ ON CONFLICT DO NOTHING;
 -- ============================================
 -- 7. FUNCTION TO MATCH PACKAGE BY NAME OR ALIAS
 -- ============================================
-CREATE OR REPLACE FUNCTION public.find_package_id(package_name TEXT)
-RETURNS UUID AS $$
+CREATE OR REPLACE FUNCTION public.find_package_id(p_name TEXT)
+RETURNS UUID AS $func$
 DECLARE
     found_id UUID;
 BEGIN
-    -- First try exact match on package name
-    SELECT id INTO found_id FROM packages WHERE LOWER(name) = LOWER(package_name) LIMIT 1;
-    IF found_id IS NOT NULL THEN
-        RETURN found_id;
-    END IF;
+    SELECT id INTO found_id FROM packages WHERE LOWER(name) = LOWER(p_name) LIMIT 1;
+    IF found_id IS NOT NULL THEN RETURN found_id; END IF;
     
-    -- Try alias match
-    SELECT package_id INTO found_id FROM package_aliases WHERE LOWER(alias) = LOWER(package_name) LIMIT 1;
-    IF found_id IS NOT NULL THEN
-        RETURN found_id;
-    END IF;
+    SELECT package_id INTO found_id FROM package_aliases WHERE LOWER(alias) = LOWER(p_name) LIMIT 1;
+    IF found_id IS NOT NULL THEN RETURN found_id; END IF;
     
-    -- Try partial match on package name
-    SELECT id INTO found_id FROM packages WHERE LOWER(name) LIKE '%' || LOWER(package_name) || '%' LIMIT 1;
-    IF found_id IS NOT NULL THEN
-        RETURN found_id;
-    END IF;
+    SELECT id INTO found_id FROM packages WHERE LOWER(name) LIKE '%' || LOWER(p_name) || '%' LIMIT 1;
+    IF found_id IS NOT NULL THEN RETURN found_id; END IF;
     
-    -- Try to extract speed and match
-    SELECT id INTO found_id FROM packages 
-    WHERE package_name ~* (speed::TEXT || '.*mbps|' || speed::TEXT || '/') 
-    ORDER BY speed DESC LIMIT 1;
+    SELECT id INTO found_id FROM packages WHERE p_name ~* (speed::TEXT || '.*mbps') ORDER BY speed DESC LIMIT 1;
     
     RETURN found_id;
 END;
-$$ LANGUAGE plpgsql STABLE;
+$func$ LANGUAGE plpgsql STABLE;

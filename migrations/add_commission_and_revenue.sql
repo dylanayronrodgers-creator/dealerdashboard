@@ -89,39 +89,35 @@ SELECT
 -- ============================================
 -- 5. CREATE FUNCTION TO CONFIRM LEAD AND CALCULATE COMMISSION
 -- ============================================
-CREATE OR REPLACE FUNCTION confirm_lead(lead_id UUID)
-RETURNS void AS $$
+CREATE OR REPLACE FUNCTION confirm_lead(p_lead_id UUID)
+RETURNS void AS $func$
 DECLARE
     pkg_commission DECIMAL(10,2);
 BEGIN
-    -- Get package commission
     SELECT COALESCE(p.dealer_commission, 200.00) INTO pkg_commission
-    FROM leads l
-    LEFT JOIN packages p ON l.package_id = p.id
-    WHERE l.id = lead_id;
+    FROM leads l LEFT JOIN packages p ON l.package_id = p.id
+    WHERE l.id = p_lead_id;
     
-    -- Update lead
     UPDATE leads SET
         commission_status = 'confirmed',
         commission_amount = pkg_commission,
         confirmed_at = NOW(),
         status = 'converted'
-    WHERE id = lead_id;
+    WHERE id = p_lead_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$func$ LANGUAGE plpgsql SECURITY DEFINER;
 
--- Function to reject lead
-CREATE OR REPLACE FUNCTION reject_lead(lead_id UUID, reason TEXT DEFAULT NULL)
-RETURNS void AS $$
+CREATE OR REPLACE FUNCTION reject_lead(p_lead_id UUID, p_reason TEXT DEFAULT NULL)
+RETURNS void AS $func$
 BEGIN
     UPDATE leads SET
         commission_status = 'rejected',
         rejected_at = NOW(),
-        rejection_reason = reason,
+        rejection_reason = p_reason,
         status = 'lost'
-    WHERE id = lead_id;
+    WHERE id = p_lead_id;
 END;
-$$ LANGUAGE plpgsql SECURITY DEFINER;
+$func$ LANGUAGE plpgsql SECURITY DEFINER;
 
 -- ============================================
 -- 6. GRANT ACCESS TO VIEWS
