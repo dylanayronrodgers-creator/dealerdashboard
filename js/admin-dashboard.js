@@ -39,6 +39,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Setup filters
     setupFilters();
+    
+    // Load Supabase settings for Settings page
+    loadSupabaseSettings();
 });
 
 function getInitials(name) {
@@ -1133,5 +1136,90 @@ async function saveOpenserveConfig() {
     } catch (error) {
         console.error('Error saving config:', error);
         alert('Error saving configuration: ' + error.message);
+    }
+}
+
+// ============================================
+// SUPABASE CONFIGURATION FUNCTIONS
+// ============================================
+function loadSupabaseSettings() {
+    const url = localStorage.getItem('SUPABASE_URL');
+    const key = localStorage.getItem('SUPABASE_ANON_KEY');
+    
+    const urlInput = document.getElementById('supabaseUrlSetting');
+    const keyInput = document.getElementById('supabaseKeySetting');
+    const statusText = document.getElementById('supabaseStatusText');
+    
+    if (urlInput && url) urlInput.value = url;
+    if (keyInput && key) keyInput.value = key;
+    
+    if (url && key && window.supabaseClient) {
+        if (statusText) {
+            statusText.textContent = 'Connected';
+            statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+        }
+    } else if (url && key) {
+        if (statusText) {
+            statusText.textContent = 'Configured (reload to connect)';
+            statusText.parentElement.className = 'p-3 bg-amber-50 rounded-xl text-sm text-amber-700';
+        }
+    } else {
+        if (statusText) {
+            statusText.textContent = 'Not configured';
+            statusText.parentElement.className = 'p-3 bg-gray-50 rounded-xl text-sm text-gray-600';
+        }
+    }
+}
+
+function saveSupabaseConfig() {
+    const url = document.getElementById('supabaseUrlSetting').value.trim();
+    const key = document.getElementById('supabaseKeySetting').value.trim();
+    
+    if (!url || !key) {
+        alert('Please enter both Supabase URL and API Key');
+        return;
+    }
+    
+    if (!url.includes('supabase.co')) {
+        alert('Please enter a valid Supabase project URL');
+        return;
+    }
+    
+    localStorage.setItem('SUPABASE_URL', url);
+    localStorage.setItem('SUPABASE_ANON_KEY', key);
+    
+    const statusText = document.getElementById('supabaseStatusText');
+    if (statusText) {
+        statusText.textContent = 'Saved! Reloading...';
+        statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+    }
+    
+    setTimeout(() => {
+        window.location.reload();
+    }, 1000);
+}
+
+async function testSupabaseConnection() {
+    const statusText = document.getElementById('supabaseStatusText');
+    
+    try {
+        if (!window.supabaseClient) {
+            throw new Error('Supabase client not initialized');
+        }
+        
+        statusText.textContent = 'Testing...';
+        
+        const { data, error } = await window.supabaseClient
+            .from('packages')
+            .select('id')
+            .limit(1);
+        
+        if (error) throw error;
+        
+        statusText.textContent = 'Connection successful!';
+        statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+    } catch (error) {
+        statusText.textContent = 'Connection failed: ' + error.message;
+        statusText.parentElement.className = 'p-3 bg-red-50 rounded-xl text-sm text-red-700';
     }
 }

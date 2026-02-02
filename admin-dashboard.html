@@ -509,6 +509,38 @@
             </div>
             
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- Supabase Configuration -->
+                <div class="card p-6">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <h4 class="font-semibold text-gray-800">Supabase Configuration</h4>
+                            <p class="text-sm text-gray-500">Database connection settings</p>
+                        </div>
+                    </div>
+                    <div class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Supabase Project URL</label>
+                            <input type="url" id="supabaseUrlSetting" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://your-project.supabase.co">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Supabase API Key (anon public)</label>
+                            <textarea id="supabaseKeySetting" rows="2" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs" placeholder="Enter your anon key"></textarea>
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="saveSupabaseConfig()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Save Configuration</button>
+                            <button onclick="testSupabaseConnection()" class="border px-4 py-2 rounded-xl text-sm hover:bg-gray-50">Test Connection</button>
+                        </div>
+                        <div id="supabaseConfigStatus" class="p-3 bg-gray-50 rounded-xl text-sm text-gray-600">
+                            <strong>Status:</strong> <span id="supabaseStatusText">Checking...</span>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Openserve API Integration -->
                 <div class="card p-6">
                     <div class="flex items-start justify-between mb-4">
