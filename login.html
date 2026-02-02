@@ -129,6 +129,16 @@
     <script src="js/supabase-config.js"></script>
     <script src="js/auth.js"></script>
     <script>
+        // Check if Supabase is configured on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            if (!window.isSupabaseConfigured || !window.isSupabaseConfigured()) {
+                const errorMessage = document.getElementById('errorMessage');
+                errorMessage.innerHTML = 'Supabase is not configured. <a href="setup.html" class="underline font-medium">Click here to set up</a>';
+                errorMessage.classList.remove('hidden');
+                document.getElementById('loginForm').querySelector('button[type="submit"]').disabled = true;
+            }
+        });
+
         function togglePassword() {
             const passwordInput = document.getElementById('password');
             const eyeIcon = document.getElementById('eyeIcon');

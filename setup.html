@@ -85,14 +85,14 @@
                 </div>
 
                 <div>
-                    <label for="supabaseKey" class="block text-white/80 text-sm font-medium mb-2">Supabase Anon Key *</label>
+                    <label for="supabaseKey" class="block text-white/80 text-sm font-medium mb-2">Supabase API Key (anon public) *</label>
                     <textarea 
                         id="supabaseKey" 
                         name="supabaseKey" 
                         required
                         rows="3"
                         class="input-field w-full px-4 py-3 rounded-xl text-white placeholder-white/40 resize-none"
-                        placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..."
+                        placeholder="sb_publishable_... or eyJhbGci..."
                     ></textarea>
                 </div>
 
@@ -168,9 +168,9 @@
                 return;
             }
             
-            // Validate key format (should be a JWT)
-            if (!key.startsWith('eyJ')) {
-                showStatus('error', 'Please enter a valid Supabase anon key (starts with eyJ...)');
+            // Validate key format (JWT or new sb_ format)
+            if (!key.startsWith('eyJ') && !key.startsWith('sb_')) {
+                showStatus('error', 'Please enter a valid Supabase API key');
                 return;
             }
             

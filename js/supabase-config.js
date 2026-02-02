@@ -6,25 +6,22 @@ function getSupabaseConfig() {
     const key = localStorage.getItem('SUPABASE_ANON_KEY');
     
     if (!url || !key) {
-        // Redirect to setup if not configured (except on setup/index pages)
-        const currentPath = window.location.pathname.toLowerCase();
-        if (!currentPath.includes('setup.html') && !currentPath.includes('index.html') && !currentPath.endsWith('/')) {
-            alert('Supabase is not configured. Please set up your API keys first.');
-            window.location.href = 'setup.html';
-            return null;
-        }
         return null;
     }
     
     return { url, key };
 }
 
+function isSupabaseConfigured() {
+    return getSupabaseConfig() !== null;
+}
+
 // Initialize Supabase client only if the library is loaded
-let supabase = null;
+let supabaseClient = null;
 
 function initSupabase() {
     // Check if Supabase library is available
-    if (typeof window.supabase === 'undefined') {
+    if (typeof window.supabase === 'undefined' || typeof window.supabase.createClient === 'undefined') {
         console.log('Supabase library not loaded on this page');
         return null;
     }
@@ -36,9 +33,10 @@ function initSupabase() {
     return null;
 }
 
-supabase = initSupabase();
+supabaseClient = initSupabase();
 
 // Export for use in other modules
-window.supabaseClient = supabase;
+window.supabaseClient = supabaseClient;
 window.getSupabaseConfig = getSupabaseConfig;
 window.initSupabase = initSupabase;
+window.isSupabaseConfigured = isSupabaseConfigured;
