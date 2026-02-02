@@ -172,6 +172,7 @@ ON CONFLICT DO NOTHING;
 -- ============================================
 -- 7. FUNCTION TO MATCH PACKAGE BY NAME OR ALIAS
 -- ============================================
+DROP FUNCTION IF EXISTS public.find_package_id(text);
 CREATE OR REPLACE FUNCTION public.find_package_id(p_name TEXT)
 RETURNS UUID AS $func$
 DECLARE
