@@ -1,7 +1,18 @@
 -- Safe Setup Script - Won't overwrite existing data
 -- Run this in Supabase SQL Editor
 
--- Drop existing policies first (prevents duplicate errors)
+-- Step 1: Create is_admin function (SECURITY DEFINER bypasses RLS to prevent recursion)
+CREATE OR REPLACE FUNCTION public.is_admin()
+RETURNS BOOLEAN AS $func$
+BEGIN
+    RETURN EXISTS (
+        SELECT 1 FROM profiles 
+        WHERE id = auth.uid() AND role = 'admin'
+    );
+END;
+$func$ LANGUAGE plpgsql SECURITY DEFINER STABLE;
+
+-- Step 2: Drop existing policies first (prevents duplicate errors)
 DROP POLICY IF EXISTS "Users can view their own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update their own profile" ON profiles;
 DROP POLICY IF EXISTS "Admins can view all profiles" ON profiles;
@@ -20,13 +31,13 @@ DROP POLICY IF EXISTS "Agents can update their own orders" ON orders;
 DROP POLICY IF EXISTS "Admins can view all orders" ON orders;
 DROP POLICY IF EXISTS "Admins can manage all orders" ON orders;
 
--- Enable RLS
+-- Step 3: Enable RLS
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE packages ENABLE ROW LEVEL SECURITY;
 ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
 ALTER TABLE orders ENABLE ROW LEVEL SECURITY;
 
--- Profiles policies
+-- Step 4: Profiles policies (using is_admin() function)
 CREATE POLICY "Users can view their own profile" ON profiles
     FOR SELECT USING (auth.uid() = id);
 
@@ -34,50 +45,38 @@ CREATE POLICY "Users can update their own profile" ON profiles
     FOR UPDATE USING (auth.uid() = id);
 
 CREATE POLICY "Admins can view all profiles" ON profiles
-    FOR SELECT USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR SELECT USING (public.is_admin());
 
 CREATE POLICY "Admins can insert profiles" ON profiles
-    FOR INSERT WITH CHECK (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR INSERT WITH CHECK (public.is_admin());
 
 CREATE POLICY "Admins can delete profiles" ON profiles
-    FOR DELETE USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR DELETE USING (public.is_admin());
 
--- Packages policies
+-- Step 5: Packages policies
 CREATE POLICY "Anyone can view packages" ON packages
     FOR SELECT USING (true);
 
 CREATE POLICY "Admins can manage packages" ON packages
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR ALL USING (public.is_admin());
 
--- Leads policies
+-- Step 6: Leads policies
 CREATE POLICY "Agents can view their own leads" ON leads
     FOR SELECT USING (agent_id = auth.uid());
 
 CREATE POLICY "Agents can insert leads" ON leads
-    FOR INSERT WITH CHECK (agent_id = auth.uid());
+    FOR INSERT WITH CHECK (true);
 
 CREATE POLICY "Agents can update their own leads" ON leads
     FOR UPDATE USING (agent_id = auth.uid());
 
 CREATE POLICY "Admins can view all leads" ON leads
-    FOR SELECT USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR SELECT USING (public.is_admin());
 
 CREATE POLICY "Admins can manage all leads" ON leads
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR ALL USING (public.is_admin());
 
--- Orders policies
+-- Step 7: Orders policies
 CREATE POLICY "Agents can view their own orders" ON orders
     FOR SELECT USING (agent_id = auth.uid());
 
@@ -88,14 +87,10 @@ CREATE POLICY "Agents can update their own orders" ON orders
     FOR UPDATE USING (agent_id = auth.uid());
 
 CREATE POLICY "Admins can view all orders" ON orders
-    FOR SELECT USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR SELECT USING (public.is_admin());
 
 CREATE POLICY "Admins can manage all orders" ON orders
-    FOR ALL USING (
-        EXISTS (SELECT 1 FROM profiles WHERE id = auth.uid() AND role = 'admin')
-    );
+    FOR ALL USING (public.is_admin());
 
 -- Function to automatically create profile on user signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
