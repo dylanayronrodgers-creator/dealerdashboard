@@ -1325,6 +1325,27 @@ function normalizeHeader(header) {
         'lead id': 'lead_id',
         'leadid': 'lead_id',
         'agent': 'agent_name',
+        'dealer': 'dealer_name',
+        'deal': 'package_name',
+        'isp': 'isp',
+        'lead type': 'lead_type',
+        'lead_type': 'lead_type',
+        'status': 'status',
+        'region': 'address',
+        'primary contact name': 'full_name',
+        'primary contact number': 'phone',
+        'primary contact email': 'email',
+        'secondary contact name': 'secondary_contact_name',
+        'secondary contact number': 'secondary_contact_number',
+        'secondary contact secondary': 'secondary_contact_secondary',
+        'secondary contact email': 'secondary_contact_email',
+        'secondary contact': 'secondary_contact',
+        'order number': 'order_number',
+        'order status': 'order_status',
+        'order date': 'order_date',
+        'date captured': 'date_captured',
+        'last updated': 'last_updated',
+        'captured by': 'captured_by_email',
         'full_name': 'full_name',
         'fullname': 'full_name',
         'name': 'full_name',
@@ -1342,31 +1363,17 @@ function normalizeHeader(header) {
         'package_name': 'package_name',
         'packagename': 'package_name',
         'notes': 'notes',
-        'captured by': 'captured_by_email',
         'captured_by': 'captured_by_email',
         'capturedby': 'captured_by_email',
-        'dealer': 'dealer_name',
         'dealer_name': 'dealer_name',
         'dealername': 'dealer_name',
-        'order number': 'order_number',
         'order_number': 'order_number',
-        'order status': 'order_status',
         'order_status': 'order_status',
-        'order date': 'order_date',
         'order_date': 'order_date',
-        'date captured': 'date_captured',
         'date_captured': 'date_captured',
-        'last updated': 'last_updated',
         'last_updated': 'last_updated',
-        'status': 'status',
-        'lead type': 'lead_type',
-        'lead_type': 'lead_type',
-        'isp': 'isp',
-        'secondary contact name': 'secondary_contact_name',
         'secondary_contact_name': 'secondary_contact_name',
-        'secondary contact number': 'secondary_contact_number',
         'secondary_contact_number': 'secondary_contact_number',
-        'secondary contact email': 'secondary_contact_email',
         'secondary_contact_email': 'secondary_contact_email'
     };
     
@@ -1612,7 +1619,10 @@ function cancelImport() {
 }
 
 function downloadTemplate() {
-    const template = 'LEAD ID,AGENT,full_name,email,phone,address,package_name,notes,CAPTURED BY,dealer\nL12345,Tumi Maila,John Doe,john@example.com,0821234567,123 Main St Gauteng,20/10Mbps Uncapped Fibre,Interested in fibre,agent@example.com,Mailstech\nL12346,Betty Holdings,Jane Smith,jane@example.com,0829876543,456 Oak Ave Limpopo,50/25 Mbps Uncapped Fibre,Referred by friend,sales@dealer.com,Betty Holdings';
+    const headers = 'LEAD ID,AGENT,DEALER,DEAL,ISP,LEAD TYPE,STATUS,REGION,PRIMARY CONTACT NAME,PRIMARY CONTACT NUMBER,PRIMARY CONTACT EMAIL,SECONDARY CONTACT NAME,SECONDARY CONTACT NUMBER,SECONDARY CONTACT SECONDARY,SECONDARY CONTACT EMAIL,ORDER NUMBER,ORDER STATUS,ORDER DATE,DATE CAPTURED,LAST UPDATED,CAPTURED BY,SECONDARY CONTACT';
+    const row1 = 'L12345,John Smith,Mailstech,20/10Mbps Uncapped Fibre,Openserve,New,new,Gauteng,Jane Doe,0821234567,jane@example.com,Bob Smith,0829876543,,bob@example.com,ORD001,pending,2024-01-15,2024-01-14,2024-01-15,agent@example.com,';
+    const row2 = 'L12346,Sarah Jones,Betty Holdings,50/25 Mbps Uncapped Fibre,Openserve,Upgrade,contacted,Limpopo,Mike Wilson,0831112222,mike@example.com,,,,,,,2024-01-16,2024-01-16,sales@dealer.com,';
+    const template = `${headers}\n${row1}\n${row2}`;
     
     const blob = new Blob([template], { type: 'text/csv' });
     const url = window.URL.createObjectURL(blob);

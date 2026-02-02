@@ -542,15 +542,19 @@
 
                 <div class="mb-6">
                     <h4 class="font-medium text-gray-700 mb-2">CSV Format Requirements:</h4>
-                    <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600">
-                        <p class="mb-2">Your CSV file can have any of the following columns:</p>
-                        <code class="bg-gray-200 px-2 py-1 rounded text-xs">LEAD ID, AGENT, full_name, email, phone, address, package_name, notes, CAPTURED BY, dealer</code>
+                    <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 overflow-x-auto">
+                        <p class="mb-2">Your CSV file should have the following columns:</p>
+                        <code class="bg-gray-200 px-2 py-1 rounded text-xs whitespace-nowrap">LEAD ID, AGENT, DEALER, DEAL, ISP, LEAD TYPE, STATUS, REGION, PRIMARY CONTACT NAME, PRIMARY CONTACT NUMBER, PRIMARY CONTACT EMAIL, SECONDARY CONTACT NAME, SECONDARY CONTACT NUMBER, SECONDARY CONTACT SECONDARY, SECONDARY CONTACT EMAIL, ORDER NUMBER, ORDER STATUS, ORDER DATE, DATE CAPTURED, LAST UPDATED, CAPTURED BY, SECONDARY CONTACT</code>
                         <ul class="mt-3 space-y-1 text-gray-500 text-xs">
                             <li>• <strong>LEAD ID</strong> - Unique identifier to avoid duplicates</li>
-                            <li>• <strong>full_name</strong> - Client's full name (or use first_name/last_name)</li>
-                            <li>• <strong>package_name</strong> - Automatically matched (e.g., "20/10Mbps Uncapped Fibre")</li>
-                            <li>• <strong>CAPTURED BY</strong> - Agent email (new agents require approval)</li>
-                            <li>• <strong>dealer</strong> - Dealer name to assign leads</li>
+                            <li>• <strong>AGENT</strong> - Agent name or email</li>
+                            <li>• <strong>DEALER</strong> - Dealer name</li>
+                            <li>• <strong>DEAL</strong> - Package/deal name</li>
+                            <li>• <strong>PRIMARY CONTACT NAME</strong> - Client's full name</li>
+                            <li>• <strong>PRIMARY CONTACT NUMBER</strong> - Client's phone</li>
+                            <li>• <strong>PRIMARY CONTACT EMAIL</strong> - Client's email</li>
+                            <li>• <strong>STATUS</strong> - Lead status (new, contacted, qualified, etc.)</li>
+                            <li>• <strong>REGION</strong> - Client's address/region</li>
                         </ul>
                     </div>
                 </div>
