@@ -19,6 +19,10 @@ CREATE TABLE IF NOT EXISTS dealers (
 -- Enable RLS on dealers
 ALTER TABLE dealers ENABLE ROW LEVEL SECURITY;
 
+-- Drop existing policies first
+DROP POLICY IF EXISTS "Anyone can view active dealers" ON dealers;
+DROP POLICY IF EXISTS "Admins can manage dealers" ON dealers;
+
 -- Dealers policies
 CREATE POLICY "Anyone can view active dealers" ON dealers
     FOR SELECT USING (is_active = true);
@@ -43,6 +47,7 @@ CREATE TABLE IF NOT EXISTS pending_agents (
 -- Enable RLS on pending_agents
 ALTER TABLE pending_agents ENABLE ROW LEVEL SECURITY;
 
+DROP POLICY IF EXISTS "Admins can manage pending agents" ON pending_agents;
 CREATE POLICY "Admins can manage pending agents" ON pending_agents
     FOR ALL USING (public.is_admin());
 
@@ -58,6 +63,9 @@ CREATE TABLE IF NOT EXISTS system_settings (
 
 -- Enable RLS on system_settings
 ALTER TABLE system_settings ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can view settings" ON system_settings;
+DROP POLICY IF EXISTS "Admins can manage settings" ON system_settings;
 
 CREATE POLICY "Anyone can view settings" ON system_settings
     FOR SELECT USING (true);
@@ -128,6 +136,9 @@ CREATE TABLE IF NOT EXISTS package_aliases (
 
 -- Enable RLS
 ALTER TABLE package_aliases ENABLE ROW LEVEL SECURITY;
+
+DROP POLICY IF EXISTS "Anyone can view package aliases" ON package_aliases;
+DROP POLICY IF EXISTS "Admins can manage package aliases" ON package_aliases;
 
 CREATE POLICY "Anyone can view package aliases" ON package_aliases
     FOR SELECT USING (true);
