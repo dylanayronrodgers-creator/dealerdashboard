@@ -8,6 +8,75 @@ let dealers = [];
 let pendingAgents = [];
 let systemSettings = {};
 
+// South African ID Number Validation
+function validateSAID(idNumber) {
+    if (!idNumber) return { valid: true, message: '' }; // Allow empty
+    
+    // Remove any spaces or dashes
+    idNumber = idNumber.replace(/[\s-]/g, '');
+    
+    // Must be exactly 13 digits
+    if (!/^\d{13}$/.test(idNumber)) {
+        return { valid: false, message: 'ID must be exactly 13 digits' };
+    }
+    
+    // Extract date parts
+    const year = parseInt(idNumber.substring(0, 2));
+    const month = parseInt(idNumber.substring(2, 4));
+    const day = parseInt(idNumber.substring(4, 6));
+    
+    // Validate month (01-12)
+    if (month < 1 || month > 12) {
+        return { valid: false, message: 'Invalid month in ID number' };
+    }
+    
+    // Validate day (01-31)
+    if (day < 1 || day > 31) {
+        return { valid: false, message: 'Invalid day in ID number' };
+    }
+    
+    // Luhn algorithm checksum validation
+    let sum = 0;
+    for (let i = 0; i < 13; i++) {
+        let digit = parseInt(idNumber[i]);
+        if (i % 2 === 1) {
+            digit *= 2;
+            if (digit > 9) digit -= 9;
+        }
+        sum += digit;
+    }
+    
+    if (sum % 10 !== 0) {
+        return { valid: false, message: 'Invalid ID number checksum' };
+    }
+    
+    return { valid: true, message: '' };
+}
+
+function setupIDValidation(inputElement, errorElementId) {
+    if (!inputElement) return;
+    
+    inputElement.addEventListener('blur', function() {
+        const result = validateSAID(this.value);
+        const errorEl = document.getElementById(errorElementId);
+        
+        if (!result.valid) {
+            this.classList.add('border-red-500');
+            this.classList.remove('border-gray-300');
+            if (errorEl) {
+                errorEl.textContent = result.message;
+                errorEl.classList.remove('hidden');
+            }
+        } else {
+            this.classList.remove('border-red-500');
+            this.classList.add('border-gray-300');
+            if (errorEl) {
+                errorEl.classList.add('hidden');
+            }
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', async function() {
     // Check authentication
     const auth = await requireAuth('admin');
@@ -36,6 +105,10 @@ document.addEventListener('DOMContentLoaded', async function() {
     
     // Setup form handlers
     setupFormHandlers();
+    
+    // Setup ID validation on ID number fields
+    setupIDValidation(document.getElementById('newLeadIdNumber'), 'newLeadIdError');
+    setupIDValidation(document.getElementById('editOrderIdNumber'), 'editOrderIdError');
     
     // Setup filters
     setupFilters();
@@ -838,6 +911,14 @@ function setupFormHandlers() {
         e.preventDefault();
         const formData = new FormData(e.target);
         
+        // Validate SA ID number
+        const idNumber = formData.get('id_number');
+        const idValidation = validateSAID(idNumber);
+        if (!idValidation.valid) {
+            alert('Invalid ID Number: ' + idValidation.message);
+            return;
+        }
+        
         try {
             const firstName = formData.get('first_name');
             const lastName = formData.get('last_name');
@@ -1192,6 +1273,14 @@ function setupFormHandlers() {
     document.getElementById('editOrderForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const leadId = document.getElementById('editOrderLeadId').value;
+        
+        // Validate SA ID number
+        const idNumber = document.getElementById('editOrderIdNumber').value;
+        const idValidation = validateSAID(idNumber);
+        if (!idValidation.valid) {
+            alert('Invalid ID Number: ' + idValidation.message);
+            return;
+        }
         
         try {
             // Update lead with order info
@@ -1690,6 +1779,14 @@ async function saveLeadChanges(e) {
     
     const form = e.target;
     const formData = new FormData(form);
+    
+    // Validate SA ID number
+    const idNumber = formData.get('id_number');
+    const idValidation = validateSAID(idNumber);
+    if (!idValidation.valid) {
+        alert('Invalid ID Number: ' + idValidation.message);
+        return;
+    }
     
     const updateData = {
         lead_id: formData.get('lead_id') || null,
