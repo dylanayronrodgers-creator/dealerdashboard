@@ -19,17 +19,29 @@ updateTime();
 // Load all data
 async function loadData() {
     try {
-        const [leadsRes, ordersRes, agentsRes, dealersRes] = await Promise.all([
-            window.supabaseClient.from('leads').select('*').order('created_at', { ascending: false }),
-            window.supabaseClient.from('orders').select('*, lead:leads(*), package:packages(*), agent:profiles(*)'),
-            window.supabaseClient.from('profiles').select('*').eq('role', 'agent'),
-            window.supabaseClient.from('dealers').select('*')
-        ]);
-
+        console.log('Loading TV dashboard data...');
+        
+        const leadsRes = await window.supabaseClient.from('leads').select('*').order('created_at', { ascending: false });
+        if (leadsRes.error) {
+            console.error('Leads error:', leadsRes.error);
+            showError('Leads: ' + leadsRes.error.message);
+        }
         leads = leadsRes.data || [];
+        console.log('Leads loaded:', leads.length);
+        
+        const ordersRes = await window.supabaseClient.from('orders').select('*, lead:leads(*), package:packages(*), agent:profiles(*)');
+        if (ordersRes.error) console.error('Orders error:', ordersRes.error);
         orders = ordersRes.data || [];
+        
+        const agentsRes = await window.supabaseClient.from('profiles').select('*').eq('role', 'agent');
+        if (agentsRes.error) console.error('Agents error:', agentsRes.error);
         agents = agentsRes.data || [];
+        
+        const dealersRes = await window.supabaseClient.from('dealers').select('*');
+        if (dealersRes.error) console.error('Dealers error:', dealersRes.error);
         dealers = dealersRes.data || [];
+
+        console.log('Data loaded - Leads:', leads.length, 'Orders:', orders.length, 'Agents:', agents.length, 'Dealers:', dealers.length);
 
         updateStats();
         updateLeadStatusBreakdown();
@@ -38,6 +50,14 @@ async function loadData() {
         updateDealerPerformance();
     } catch (error) {
         console.error('Error loading data:', error);
+        showError(error.message);
+    }
+}
+
+function showError(message) {
+    const container = document.getElementById('recentActivity');
+    if (container) {
+        container.innerHTML = `<p class="text-red-400 text-sm">Error: ${message}</p><p class="text-gray-500 text-xs mt-2">Run the migration: migrations/allow_public_read_for_tv_dashboard.sql</p>`;
     }
 }
 
