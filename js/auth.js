@@ -59,6 +59,8 @@ async function handleLogin(e) {
         // Redirect based on role
         if (profile.role === 'admin') {
             window.location.href = 'admin-dashboard.html';
+        } else if (profile.role === 'dealer') {
+            window.location.href = 'dealer-dashboard.html';
         } else {
             window.location.href = 'agent-dashboard.html';
         }
