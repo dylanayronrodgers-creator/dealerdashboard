@@ -270,7 +270,8 @@ async function loadLeads() {
             .select(`
                 *,
                 agent:profiles!leads_agent_id_fkey(id, full_name),
-                package:packages(id, name, price)
+                package:packages(id, name, price),
+                dealer:dealers(id, name)
             `)
             .order('created_at', { ascending: false });
         
@@ -307,7 +308,7 @@ function renderLeadsTable(filteredLeads = null) {
         const address = lead.address || '-';
         const packageName = lead.package?.name || lead.package_name || '-';
         const agentName = lead.agent?.full_name || lead.agent_name || '-';
-        const dealerName = lead.dealer?.name || lead.dealer_name || '';
+        const dealerName = lead.dealer?.name || lead.dealer_name || '-';
         
         return `
         <tr class="table-row border-b">
@@ -321,10 +322,8 @@ function renderLeadsTable(filteredLeads = null) {
             </td>
             <td class="py-4 text-sm text-gray-600">${address}</td>
             <td class="py-4 text-sm text-gray-600">${packageName}</td>
-            <td class="py-4">
-                <div class="text-sm text-gray-600">${agentName}</div>
-                ${dealerName ? `<div class="text-xs text-gray-400">${dealerName}</div>` : ''}
-            </td>
+            <td class="py-4 text-sm text-gray-600">${agentName}</td>
+            <td class="py-4 text-sm text-gray-600">${dealerName}</td>
             <td class="py-4">
                 <select onchange="updateLeadStatus('${lead.id}', this.value)" class="text-xs border rounded px-2 py-1 status-${lead.status}">
                     <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
@@ -336,6 +335,7 @@ function renderLeadsTable(filteredLeads = null) {
             </td>
             <td class="py-4">
                 <div class="flex gap-1 flex-wrap">
+                    <button onclick="viewLeadDetails('${lead.id}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded text-xs font-medium">View</button>
                     <button onclick="openConvertModal('${lead.id}')" class="bg-green-100 text-green-700 hover:bg-green-200 px-2 py-1 rounded text-xs font-medium">Convert</button>
                     <button onclick="returnToAgent('${lead.id}', 'lead')" class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-2 py-1 rounded text-xs font-medium">Return</button>
                 </div>
@@ -949,6 +949,74 @@ async function updateLeadStatus(leadId, newStatus) {
         alert('Error updating status: ' + error.message);
         await loadLeads();
     }
+}
+
+// View Lead Details
+function viewLeadDetails(leadId) {
+    const lead = leads.find(l => l.id === leadId);
+    if (!lead) return;
+    
+    const content = document.getElementById('viewLeadContent');
+    const formatValue = (val) => val || '-';
+    const formatDate = (val) => val ? new Date(val).toLocaleDateString() : '-';
+    
+    content.innerHTML = `
+        <div class="grid grid-cols-2 gap-4">
+            <div class="col-span-2 bg-blue-50 rounded-xl p-4 mb-2">
+                <h4 class="font-semibold text-blue-800 mb-2">Lead Information</h4>
+                <div class="grid grid-cols-2 gap-2 text-sm">
+                    <div><span class="text-gray-500">Lead ID:</span> <strong>${formatValue(lead.lead_id)}</strong></div>
+                    <div><span class="text-gray-500">Status:</span> <strong>${formatValue(lead.status)}</strong></div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-2">Client Details</h4>
+                <div class="space-y-1 text-sm">
+                    <div><span class="text-gray-500">Full Name:</span> ${formatValue(lead.full_name || ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim())}</div>
+                    <div><span class="text-gray-500">First Name:</span> ${formatValue(lead.first_name)}</div>
+                    <div><span class="text-gray-500">Last Name:</span> ${formatValue(lead.last_name)}</div>
+                    <div><span class="text-gray-500">ID Number:</span> ${formatValue(lead.id_number)}</div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-2">Contact Information</h4>
+                <div class="space-y-1 text-sm">
+                    <div><span class="text-gray-500">Email:</span> ${formatValue(lead.email)}</div>
+                    <div><span class="text-gray-500">Phone:</span> ${formatValue(lead.phone)}</div>
+                    <div><span class="text-gray-500">Address:</span> ${formatValue(lead.address)}</div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-2">Assignment</h4>
+                <div class="space-y-1 text-sm">
+                    <div><span class="text-gray-500">Agent:</span> ${formatValue(lead.agent?.full_name || lead.agent_name)}</div>
+                    <div><span class="text-gray-500">Dealer:</span> ${formatValue(lead.dealer?.name || lead.dealer_name)}</div>
+                    <div><span class="text-gray-500">Package:</span> ${formatValue(lead.package?.name || lead.package_name)}</div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-2">Dates</h4>
+                <div class="space-y-1 text-sm">
+                    <div><span class="text-gray-500">Created:</span> ${formatDate(lead.created_at)}</div>
+                    <div><span class="text-gray-500">Updated:</span> ${formatDate(lead.updated_at)}</div>
+                    <div><span class="text-gray-500">Date Captured:</span> ${formatDate(lead.date_captured)}</div>
+                </div>
+            </div>
+            
+            ${lead.notes ? `
+            <div class="col-span-2 bg-yellow-50 rounded-xl p-4">
+                <h4 class="font-semibold text-yellow-800 mb-2">Notes</h4>
+                <p class="text-sm text-gray-700">${lead.notes}</p>
+            </div>
+            ` : ''}
+        </div>
+    `;
+    
+    openModal('viewLeadModal');
 }
 
 let convertingLeadId = null;
