@@ -98,9 +98,9 @@
             th, td { padding: 0.5rem 0.25rem; }
         }
         
-        /* Large screens */
+        /* Large screens - use full width */
         @media (min-width: 1536px) {
-            .main-content { max-width: 1400px; margin-left: auto; margin-right: auto; padding-left: 16rem; }
+            .main-content { max-width: none; }
         }
         
         /* Scrollable tables */
@@ -118,7 +118,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     
     <!-- Sidebar -->
-    <aside class="sidebar sidebar-bg w-64 min-h-screen flex flex-col fixed left-0 top-0 z-50" id="sidebar">
+    <aside class="sidebar sidebar-bg w-72 min-h-screen flex flex-col fixed left-0 top-0 z-50" id="sidebar">
         <!-- Logo -->
         <div class="p-6 border-b border-white/10">
             <div class="flex items-center gap-3">
@@ -219,7 +219,7 @@
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content main-bg flex-1 ml-64 min-h-screen">
+    <main class="main-content main-bg flex-1 ml-72 min-h-screen">
         <!-- Header -->
         <header class="bg-white border-b px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-40">
             <!-- Mobile menu button -->

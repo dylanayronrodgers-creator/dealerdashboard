@@ -1771,15 +1771,27 @@ async function confirmImport() {
                 return isNaN(d.getTime()) ? null : d.toISOString();
             };
             
-            // Build lead data - insert empty object, let DB use defaults
-            const leadData = {};
+            // Build lead data with all available fields
+            const leadData = {
+                status: 'new'
+            };
             
-            // Add foreign keys if found (these are standard FK columns)
+            // Add text fields
+            if (row.lead_id) leadData.lead_id = row.lead_id;
+            if (fullName) leadData.full_name = fullName;
+            if (row.first_name) leadData.first_name = row.first_name;
+            if (row.last_name) leadData.last_name = row.last_name;
+            if (row.email) leadData.email = row.email;
+            if (row.phone) leadData.phone = row.phone;
+            if (row.address) leadData.address = row.address;
+            if (row.notes) leadData.notes = row.notes;
+            
+            // Add foreign keys if found
             if (packageId) leadData.package_id = packageId;
             if (agentId) leadData.agent_id = agentId;
             if (dealerId) leadData.dealer_id = dealerId;
             
-            console.log('Inserting minimal lead:', leadData);
+            console.log('Inserting lead:', leadData);
             
             // Try insert with minimal fields
             let insertResult = await window.supabaseClient
