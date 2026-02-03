@@ -215,7 +215,7 @@ function renderDealerOrdersTable() {
         const clientName = order.full_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || '-';
         const statusClass = order.commission_status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700';
         return `
-            <tr class="table-row border-b hover:bg-gray-50">
+            <tr class="table-row border-b hover:bg-gray-50 cursor-pointer" onclick="viewOrder('${order.id}')">
                 <td class="py-3 text-sm font-medium text-gray-800">${order.order_number || '-'}</td>
                 <td class="py-3 text-sm text-gray-600">${clientName}</td>
                 <td class="py-3 text-sm text-gray-600">${order.agent?.full_name || '-'}</td>
@@ -491,3 +491,40 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 });
+
+// View Order Details (read-only)
+function viewOrder(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+    
+    const lead = leads.find(l => l.id === order.lead_id) || order.lead || {};
+    const agent = agents.find(a => a.id === (lead.agent_id || order.agent_id));
+    
+    document.getElementById('viewOrderNumber').textContent = lead.order_number || order.order_number || '-';
+    
+    const status = lead.order_status || order.status || 'pending';
+    const statusEl = document.getElementById('viewOrderStatus');
+    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    statusEl.className = `px-3 py-1 rounded-full text-sm font-medium ${getStatusColor(status)}`;
+    
+    document.getElementById('viewOrderClientName').textContent = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-';
+    document.getElementById('viewOrderIdNumber').textContent = lead.id_number || '-';
+    document.getElementById('viewOrderEmail').textContent = lead.email || '-';
+    document.getElementById('viewOrderPhone').textContent = lead.phone || lead.cell_number || '-';
+    document.getElementById('viewOrderAddress').textContent = lead.address || '-';
+    document.getElementById('viewOrderAgent').textContent = agent?.full_name || '-';
+    document.getElementById('viewOrderCommission').textContent = `R${lead.commission_amount || order.commission_amount || 200}`;
+    
+    openModal('viewOrderModal');
+}
+
+function getStatusColor(status) {
+    const colors = {
+        pending: 'bg-yellow-100 text-yellow-800',
+        processing: 'bg-blue-100 text-blue-800',
+        scheduled: 'bg-purple-100 text-purple-800',
+        completed: 'bg-emerald-100 text-emerald-800',
+        cancelled: 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
+}

@@ -667,9 +667,41 @@ async function handleReturnedItem(itemId, itemType) {
 // View Order
 function viewOrder(orderId) {
     const order = myOrders.find(o => o.id === orderId);
-    if (order) {
-        alert(`Order Details:\n\nOrder ID: #${order.id.slice(0, 8)}\nClient: ${order.lead?.first_name} ${order.lead?.last_name}\nPackage: ${order.package?.name}\nStatus: ${order.status}\nCreated: ${new Date(order.created_at).toLocaleString()}`);
-    }
+    if (!order) return;
+    
+    const lead = myLeads.find(l => l.id === order.lead_id) || order.lead || {};
+    
+    document.getElementById('viewOrderNumber').textContent = lead.order_number || order.order_number || '-';
+    
+    const status = lead.order_status || order.status || 'pending';
+    const statusEl = document.getElementById('viewOrderStatus');
+    statusEl.textContent = status.charAt(0).toUpperCase() + status.slice(1);
+    statusEl.className = `px-3 py-1 rounded-full text-sm font-medium ${getOrderStatusColor(status)}`;
+    
+    document.getElementById('viewOrderClientName').textContent = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-';
+    document.getElementById('viewOrderIdNumber').textContent = lead.id_number || '-';
+    document.getElementById('viewOrderEmail').textContent = lead.email || '-';
+    document.getElementById('viewOrderPhone').textContent = lead.phone || lead.cell_number || '-';
+    document.getElementById('viewOrderAddress').textContent = lead.address || '-';
+    document.getElementById('viewOrderCommission').textContent = `R${lead.commission_amount || order.commission_amount || 200}`;
+    
+    const commStatus = lead.commission_status || order.commission_status || 'pending';
+    const commStatusEl = document.getElementById('viewOrderCommissionStatus');
+    commStatusEl.textContent = commStatus.charAt(0).toUpperCase() + commStatus.slice(1);
+    commStatusEl.className = `px-3 py-1 rounded-full text-sm font-medium ${commStatus === 'paid' ? 'bg-emerald-100 text-emerald-800' : 'bg-yellow-100 text-yellow-800'}`;
+    
+    openModal('viewOrderModal');
+}
+
+function getOrderStatusColor(status) {
+    const colors = {
+        pending: 'bg-yellow-100 text-yellow-800',
+        processing: 'bg-blue-100 text-blue-800',
+        scheduled: 'bg-purple-100 text-purple-800',
+        completed: 'bg-emerald-100 text-emerald-800',
+        cancelled: 'bg-red-100 text-red-800'
+    };
+    return colors[status] || 'bg-gray-100 text-gray-800';
 }
 
 // Filters

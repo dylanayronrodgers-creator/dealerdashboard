@@ -624,6 +624,70 @@
         </div>
     </div>
 
+    <!-- View Order Modal (Read-only) -->
+    <div id="viewOrderModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto">
+            <div class="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
+                <h3 class="text-xl font-semibold">Order Details</h3>
+                <button onclick="closeModal('viewOrderModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 space-y-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Order Number</label>
+                        <p id="viewOrderNumber" class="font-medium text-gray-800">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Status</label>
+                        <span id="viewOrderStatus" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                    </div>
+                </div>
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Client Information</h4>
+                    <div class="grid grid-cols-2 gap-3 text-sm">
+                        <div>
+                            <label class="block text-xs text-gray-500">Full Name</label>
+                            <p id="viewOrderClientName" class="text-gray-800">-</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">ID Number</label>
+                            <p id="viewOrderIdNumber" class="text-gray-800">-</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">Email</label>
+                            <p id="viewOrderEmail" class="text-gray-800">-</p>
+                        </div>
+                        <div>
+                            <label class="block text-xs text-gray-500">Phone</label>
+                            <p id="viewOrderPhone" class="text-gray-800">-</p>
+                        </div>
+                        <div class="col-span-2">
+                            <label class="block text-xs text-gray-500">Address</label>
+                            <p id="viewOrderAddress" class="text-gray-800">-</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Commission</label>
+                        <p id="viewOrderCommission" class="font-medium text-emerald-600">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-xs text-gray-500 mb-1">Commission Status</label>
+                        <span id="viewOrderCommissionStatus" class="px-3 py-1 rounded-full text-sm font-medium"></span>
+                    </div>
+                </div>
+                <div class="flex justify-end pt-4">
+                    <button type="button" onclick="closeModal('viewOrderModal')" class="px-6 py-2 bg-gray-100 hover:bg-gray-200 rounded-xl">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/supabase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/agent-dashboard.js"></script>

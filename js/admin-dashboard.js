@@ -1171,6 +1171,43 @@ function setupFormHandlers() {
             alert('Error updating dealer: ' + error.message);
         }
     });
+    
+    // Edit Order Form
+    document.getElementById('editOrderForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const leadId = document.getElementById('editOrderLeadId').value;
+        
+        try {
+            // Update lead with order info
+            const { error: leadError } = await window.supabaseClient
+                .from('leads')
+                .update({
+                    order_number: document.getElementById('editOrderNumber').value,
+                    order_status: document.getElementById('editOrderStatus').value,
+                    full_name: document.getElementById('editOrderClientName').value,
+                    id_number: document.getElementById('editOrderIdNumber').value,
+                    email: document.getElementById('editOrderEmail').value,
+                    phone: document.getElementById('editOrderPhone').value,
+                    address: document.getElementById('editOrderAddress').value,
+                    agent_id: document.getElementById('editOrderAgent').value || null,
+                    dealer_id: document.getElementById('editOrderDealer').value || null,
+                    commission_amount: parseFloat(document.getElementById('editOrderCommission').value) || 200,
+                    commission_status: document.getElementById('editOrderCommissionStatus').value,
+                    updated_at: new Date().toISOString()
+                })
+                .eq('id', leadId);
+            
+            if (leadError) throw leadError;
+            
+            alert('Order updated successfully!');
+            closeModal('viewOrderModal');
+            await loadLeads();
+            await loadOrders();
+        } catch (error) {
+            console.error('Error updating order:', error);
+            alert('Error updating order: ' + error.message);
+        }
+    });
 }
 
 // Return to Agent
@@ -1329,9 +1366,38 @@ function viewLead(leadId) {
 
 function viewOrder(orderId) {
     const order = orders.find(o => o.id === orderId);
-    if (order) {
-        alert(`Order Details:\n\nOrder ID: #${order.id.slice(0, 8)}\nClient: ${order.lead?.first_name} ${order.lead?.last_name}\nPackage: ${order.package?.name}\nStatus: ${order.status}\nCreated: ${new Date(order.created_at).toLocaleString()}`);
-    }
+    if (!order) return;
+    
+    // Get the lead data for this order
+    const lead = leads.find(l => l.id === order.lead_id) || order.lead || {};
+    
+    document.getElementById('editOrderLeadId').value = lead.id || '';
+    document.getElementById('editOrderNumber').value = lead.order_number || order.order_number || '';
+    document.getElementById('editOrderStatus').value = lead.order_status || order.status || 'pending';
+    document.getElementById('editOrderClientName').value = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '';
+    document.getElementById('editOrderIdNumber').value = lead.id_number || '';
+    document.getElementById('editOrderEmail').value = lead.email || '';
+    document.getElementById('editOrderPhone').value = lead.phone || lead.cell_number || '';
+    document.getElementById('editOrderAddress').value = lead.address || '';
+    document.getElementById('editOrderCommission').value = lead.commission_amount || order.commission_amount || 200;
+    document.getElementById('editOrderCommissionStatus').value = lead.commission_status || order.commission_status || 'pending';
+    document.getElementById('editOrderNotes').value = order.notes || '';
+    
+    // Populate agent select
+    const agentSelect = document.getElementById('editOrderAgent');
+    agentSelect.innerHTML = '<option value="">Select Agent</option>';
+    agents.forEach(a => {
+        agentSelect.innerHTML += `<option value="${a.id}" ${(lead.agent_id || order.agent_id) === a.id ? 'selected' : ''}>${a.full_name}</option>`;
+    });
+    
+    // Populate dealer select
+    const dealerSelect = document.getElementById('editOrderDealer');
+    dealerSelect.innerHTML = '<option value="">Select Dealer</option>';
+    dealers.forEach(d => {
+        dealerSelect.innerHTML += `<option value="${d.id}" ${lead.dealer_id === d.id ? 'selected' : ''}>${d.name}</option>`;
+    });
+    
+    openModal('viewOrderModal');
 }
 
 async function updateOrderStatus(orderId) {
