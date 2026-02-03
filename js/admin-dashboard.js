@@ -768,7 +768,12 @@ function setupFormHandlers() {
             alert('Agent approved and created successfully!');
         } catch (error) {
             console.error('Error approving agent:', error);
-            alert('Error approving agent: ' + error.message);
+            // Handle rate limit errors more gracefully
+            if (error.message && error.message.includes('security purposes')) {
+                alert('Rate limit reached. Please wait a few minutes before approving another agent.\n\nSupabase limits new user signups to prevent abuse.');
+            } else {
+                alert('Error approving agent: ' + error.message);
+            }
         }
     });
 }
