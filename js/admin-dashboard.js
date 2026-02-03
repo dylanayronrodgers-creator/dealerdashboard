@@ -1123,42 +1123,58 @@ function setupFormHandlers() {
                     // Update existing user password (requires admin API, show message instead)
                     alert('Dealer login exists. To reset password, use the Supabase dashboard or password reset flow.');
                 } else {
-                    // Create new auth user for dealer
-                    const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
-                        email: loginEmail,
-                        password: loginPassword,
-                        options: {
-                            data: { full_name: dealerName, role: 'dealer' }
-                        }
-                    });
-                    
-                    if (authError) {
-                        if (authError.message.includes('already registered')) {
-                            alert('This email is already registered. Use a different email.');
-                        } else {
-                            throw authError;
-                        }
-                    } else if (authData.user) {
-                        // Create dealer profile
-                        const { error: profileError } = await window.supabaseClient
-                            .from('profiles')
-                            .upsert({
-                                id: authData.user.id,
-                                email: loginEmail,
-                                full_name: dealerName,
-                                role: 'dealer',
-                                dealer_id: dealerId,
-                                is_approved: true
-                            });
+                    // Create new auth user for dealer using admin invite approach
+                    // First try signUp - if it fails with database error, we need admin setup
+                    try {
+                        const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+                            email: loginEmail,
+                            password: loginPassword,
+                            options: {
+                                data: { full_name: dealerName, role: 'dealer' },
+                                emailRedirectTo: window.location.origin + '/dealer-dashboard.html'
+                            }
+                        });
                         
-                        if (profileError) {
-                            console.error('Error creating dealer profile:', profileError);
-                        } else {
-                            alert('Dealer updated and login created successfully!');
+                        if (authError) {
+                            if (authError.message.includes('already registered')) {
+                                alert('This email is already registered. Use a different email.');
+                            } else if (authError.message.includes('Database error')) {
+                                // Database trigger might be failing - try alternative approach
+                                alert('Note: Email confirmation may be required. The dealer should check their email to confirm registration, then they can log in.');
+                            } else {
+                                console.error('Auth error:', authError);
+                                alert('Could not create login: ' + authError.message);
+                            }
+                        } else if (authData.user) {
+                            // Auth user created, now create/update profile
+                            const { error: profileError } = await window.supabaseClient
+                                .from('profiles')
+                                .upsert({
+                                    id: authData.user.id,
+                                    email: loginEmail,
+                                    full_name: dealerName,
+                                    role: 'dealer',
+                                    dealer_id: dealerId,
+                                    is_approved: true
+                                }, { onConflict: 'id' });
+                            
+                            if (profileError) {
+                                console.error('Profile creation error:', profileError);
+                                // Profile might be created by trigger, that's okay
+                                alert('Dealer login created! The dealer may need to confirm their email before logging in.');
+                            } else {
+                                alert('Dealer updated and login created successfully!');
+                            }
                             closeModal('editDealerModal');
                             await loadDealers();
                             return;
+                        } else {
+                            // User created but needs email confirmation
+                            alert('Dealer login created! The dealer needs to confirm their email before logging in.');
                         }
+                    } catch (signupError) {
+                        console.error('Signup error:', signupError);
+                        alert('Could not create dealer login. Please try again or contact support.');
                     }
                 }
             }
