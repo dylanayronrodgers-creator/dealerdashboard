@@ -1653,12 +1653,15 @@ async function confirmImport() {
         return;
     }
     
+    console.log('Starting import of', importData.length, 'rows');
+    console.log('Sample row:', importData[0]);
+    
     const progressDiv = document.getElementById('importProgress');
     const progressBar = document.getElementById('progressBar');
     const progressText = document.getElementById('progressText');
     
     progressDiv.classList.remove('hidden');
-    importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [], newDealers: [] };
+    importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [], newDealers: [], errorDetails: [] };
     
     for (let i = 0; i < importData.length; i++) {
         const row = importData[i];
@@ -1779,8 +1782,8 @@ async function confirmImport() {
                 return isNaN(d.getTime()) ? null : d.toISOString();
             };
             
-            // Insert lead with all available data
-            const { error } = await window.supabaseClient.from('leads').insert({
+            // Build lead data object - only include fields that exist
+            const leadData = {
                 lead_id: row.lead_id || null,
                 full_name: fullName || null,
                 first_name: row.first_name || null,
@@ -1788,40 +1791,73 @@ async function confirmImport() {
                 email: row.email || null,
                 phone: row.phone || null,
                 address: row.address || null,
-                package_id: packageId,
-                package_name: row.package_name || null,
-                agent_id: agentId,
-                agent_name: row.agent_name || null,
-                dealer_id: dealerId,
-                dealer_name: row.dealer_name || null,
                 notes: row.notes || null,
-                status: row.status || 'new',
-                captured_by_email: row.captured_by_email || null,
-                order_number: row.order_number || null,
-                order_status: row.order_status || null,
-                order_date: parseDate(row.order_date),
-                date_captured: parseDate(row.date_captured),
-                last_updated: parseDate(row.last_updated),
-                lead_type: row.lead_type || null,
-                isp: row.isp || null,
-                secondary_contact_name: row.secondary_contact_name || null,
-                secondary_contact_number: row.secondary_contact_number || null,
-                secondary_contact_email: row.secondary_contact_email || null
-            });
+                status: row.status || 'new'
+            };
             
-            if (error) throw error;
+            // Add optional foreign keys if they exist
+            if (packageId) leadData.package_id = packageId;
+            if (agentId) leadData.agent_id = agentId;
+            if (dealerId) leadData.dealer_id = dealerId;
+            
+            // Add optional text fields (these may not exist in DB yet)
+            if (row.package_name) leadData.package_name = row.package_name;
+            if (row.agent_name) leadData.agent_name = row.agent_name;
+            if (row.dealer_name) leadData.dealer_name = row.dealer_name;
+            if (row.captured_by_email) leadData.captured_by_email = row.captured_by_email;
+            if (row.order_number) leadData.order_number = row.order_number;
+            if (row.order_status) leadData.order_status = row.order_status;
+            if (row.lead_type) leadData.lead_type = row.lead_type;
+            if (row.isp) leadData.isp = row.isp;
+            if (row.secondary_contact_name) leadData.secondary_contact_name = row.secondary_contact_name;
+            if (row.secondary_contact_number) leadData.secondary_contact_number = row.secondary_contact_number;
+            if (row.secondary_contact_email) leadData.secondary_contact_email = row.secondary_contact_email;
+            
+            // Add dates if valid
+            const orderDate = parseDate(row.order_date);
+            const dateCaptured = parseDate(row.date_captured);
+            const lastUpdated = parseDate(row.last_updated);
+            if (orderDate) leadData.order_date = orderDate;
+            if (dateCaptured) leadData.date_captured = dateCaptured;
+            if (lastUpdated) leadData.last_updated = lastUpdated;
+            
+            console.log('Inserting lead:', leadData);
+            
+            // Insert lead
+            const { data: insertedLead, error } = await window.supabaseClient
+                .from('leads')
+                .insert(leadData)
+                .select();
+            
+            if (error) {
+                console.error('Insert error for row', i, ':', error);
+                throw error;
+            }
+            
+            console.log('Successfully inserted:', insertedLead);
             importStats.imported++;
         } catch (error) {
-            console.error('Error importing row:', error);
+            console.error('Error importing row', i, ':', error.message || error);
             importStats.errors++;
+            importStats.errorDetails.push({ row: i, error: error.message || String(error) });
         }
     }
     
     // Show results
+    console.log('Import complete:', importStats);
+    if (importStats.errorDetails.length > 0) {
+        console.log('Error details:', importStats.errorDetails);
+    }
+    
     let message = `Import Complete!\n\n`;
     message += `✓ Imported: ${importStats.imported}\n`;
     message += `○ Duplicates skipped: ${importStats.duplicates}\n`;
     message += `✗ Errors: ${importStats.errors}`;
+    
+    if (importStats.errors > 0 && importStats.errorDetails.length > 0) {
+        message += `\n\n⚠️ First error: ${importStats.errorDetails[0].error}`;
+        message += `\n(Check browser console for details)`;
+    }
     if (importStats.newDealers && importStats.newDealers.length > 0) {
         message += `\n\n🏢 New dealers created: ${importStats.newDealers.length}`;
         message += `\n   ${importStats.newDealers.slice(0, 5).join(', ')}${importStats.newDealers.length > 5 ? '...' : ''}`;
