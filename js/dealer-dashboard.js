@@ -76,7 +76,7 @@ function renderAgentsGrid() {
         const rate = agentLeads.length > 0 ? Math.round((converted / agentLeads.length) * 100) : 0;
         
         return `
-            <div class="card p-6">
+            <div class="card p-6 cursor-pointer hover:shadow-lg transition" onclick="openEditAgentModal('${agent.id}')">
                 <div class="flex items-center gap-4 mb-4">
                     <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
                         ${getInitials(agent.full_name)}
@@ -432,3 +432,62 @@ function logout() {
     window.supabaseClient.auth.signOut();
     window.location.href = 'index.html';
 }
+
+// Modal functions
+function openModal(modalId) {
+    document.getElementById(modalId).classList.add('active');
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).classList.remove('active');
+}
+
+// Edit Agent Modal
+function openEditAgentModal(agentId) {
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return;
+    
+    document.getElementById('editAgentId').value = agentId;
+    document.getElementById('editAgentName').value = agent.full_name || '';
+    document.getElementById('editAgentEmail').value = agent.email || '';
+    document.getElementById('editAgentPhone').value = agent.phone || '';
+    
+    // Calculate stats
+    const agentLeads = leads.filter(l => l.agent_id === agentId);
+    const agentOrders = orders.filter(o => o.agent_id === agentId);
+    const commission = agentOrders.reduce((sum, o) => sum + (o.commission_amount || 0), 0);
+    
+    document.getElementById('editAgentLeads').textContent = agentLeads.length;
+    document.getElementById('editAgentConverted').textContent = agentOrders.length;
+    document.getElementById('editAgentCommission').textContent = `R${commission.toLocaleString()}`;
+    
+    openModal('editAgentModal');
+}
+
+// Setup form handlers
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('editAgentForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const agentId = document.getElementById('editAgentId').value;
+        const formData = new FormData(e.target);
+        
+        try {
+            const { error } = await window.supabaseClient
+                .from('profiles')
+                .update({
+                    full_name: formData.get('full_name'),
+                    phone: formData.get('phone') || null
+                })
+                .eq('id', agentId);
+            
+            if (error) throw error;
+            
+            alert('Agent updated successfully!');
+            closeModal('editAgentModal');
+            await loadAgents();
+        } catch (error) {
+            console.error('Error updating agent:', error);
+            alert('Error updating agent: ' + error.message);
+        }
+    });
+});
