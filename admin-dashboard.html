@@ -875,6 +875,117 @@
         </div>
     </div>
 
+    <!-- Edit Agent Modal -->
+    <div id="editAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Edit Agent</h3>
+                <button onclick="closeModal('editAgentModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="editAgentForm" class="p-6 space-y-4">
+                <input type="hidden" name="agent_id" id="editAgentId">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" name="full_name" id="editAgentName" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" name="email" id="editAgentEmail" readonly class="w-full border rounded-xl px-4 py-2 bg-gray-50">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
+                    <input type="tel" name="phone" id="editAgentPhone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Dealer</label>
+                    <select name="dealer_id" id="editAgentDealer" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="">No dealer assigned</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                    <select name="is_approved" id="editAgentApproved" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <option value="true">Approved</option>
+                        <option value="false">Pending</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('editAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Edit Dealer Modal -->
+    <div id="editDealerModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-lg m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Edit Dealer</h3>
+                <button onclick="closeModal('editDealerModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="editDealerForm" class="p-6 space-y-4">
+                <input type="hidden" name="dealer_id" id="editDealerId">
+                <div class="flex items-center gap-4 mb-4">
+                    <div id="dealerLogoPreview" class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 overflow-hidden">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                    </div>
+                    <div class="flex-1">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
+                        <input type="url" name="logo_url" id="editDealerLogo" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="https://example.com/logo.png" oninput="previewDealerLogo(this.value)">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Name *</label>
+                    <input type="text" name="name" id="editDealerName" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Code</label>
+                        <input type="text" name="code" id="editDealerCode" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
+                        <select name="is_active" id="editDealerActive" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                            <option value="true">Active</option>
+                            <option value="false">Inactive</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
+                        <input type="email" name="contact_email" id="editDealerEmail" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
+                        <input type="tel" name="contact_phone" id="editDealerPhone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Assigned Agents</label>
+                    <div id="dealerAgentsList" class="bg-gray-50 rounded-xl p-3 max-h-32 overflow-y-auto text-sm text-gray-600">
+                        Loading agents...
+                    </div>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('editDealerModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl">Save Changes</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
     <!-- Add Package Modal -->
     <div id="addPackageModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
         <div class="bg-white rounded-2xl w-full max-w-md m-4">

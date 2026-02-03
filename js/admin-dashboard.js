@@ -297,6 +297,126 @@ async function loadAgentStats(agentId) {
     }
 }
 
+// View/Edit Agent Details
+function viewAgentDetails(agentId) {
+    const agent = agents.find(a => a.id === agentId);
+    if (!agent) return;
+    
+    document.getElementById('editAgentId').value = agentId;
+    document.getElementById('editAgentName').value = agent.full_name || '';
+    document.getElementById('editAgentEmail').value = agent.email || '';
+    document.getElementById('editAgentPhone').value = agent.phone || '';
+    document.getElementById('editAgentApproved').value = agent.is_approved ? 'true' : 'false';
+    
+    // Populate dealer select
+    const dealerSelect = document.getElementById('editAgentDealer');
+    dealerSelect.innerHTML = '<option value="">No dealer assigned</option>';
+    dealers.forEach(d => {
+        dealerSelect.innerHTML += `<option value="${d.id}" ${agent.dealer_id === d.id ? 'selected' : ''}>${d.name}</option>`;
+    });
+    
+    openModal('editAgentModal');
+}
+
+// Edit Agent Form Handler
+document.getElementById('editAgentForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const agentId = document.getElementById('editAgentId').value;
+    const formData = new FormData(e.target);
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('profiles')
+            .update({
+                full_name: formData.get('full_name'),
+                phone: formData.get('phone') || null,
+                dealer_id: formData.get('dealer_id') || null,
+                is_approved: formData.get('is_approved') === 'true'
+            })
+            .eq('id', agentId);
+        
+        if (error) throw error;
+        
+        alert('Agent updated successfully!');
+        closeModal('editAgentModal');
+        await loadAgents();
+    } catch (error) {
+        console.error('Error updating agent:', error);
+        alert('Error updating agent: ' + error.message);
+    }
+});
+
+// View/Edit Dealer Details
+function viewDealerDetails(dealerId) {
+    const dealer = dealers.find(d => d.id === dealerId);
+    if (!dealer) return;
+    
+    document.getElementById('editDealerId').value = dealerId;
+    document.getElementById('editDealerName').value = dealer.name || '';
+    document.getElementById('editDealerCode').value = dealer.code || '';
+    document.getElementById('editDealerEmail').value = dealer.contact_email || '';
+    document.getElementById('editDealerPhone').value = dealer.contact_phone || '';
+    document.getElementById('editDealerLogo').value = dealer.logo_url || '';
+    document.getElementById('editDealerActive').value = dealer.is_active ? 'true' : 'false';
+    
+    // Preview logo
+    previewDealerLogo(dealer.logo_url);
+    
+    // Show assigned agents
+    const assignedAgents = agents.filter(a => a.dealer_id === dealerId);
+    const agentsList = document.getElementById('dealerAgentsList');
+    if (assignedAgents.length === 0) {
+        agentsList.innerHTML = '<p class="text-gray-400">No agents assigned to this dealer</p>';
+    } else {
+        agentsList.innerHTML = assignedAgents.map(a => 
+            `<div class="flex items-center gap-2 py-1"><span class="w-2 h-2 bg-green-500 rounded-full"></span>${a.full_name}</div>`
+        ).join('');
+    }
+    
+    openModal('editDealerModal');
+}
+
+function previewDealerLogo(url) {
+    const preview = document.getElementById('dealerLogoPreview');
+    if (url && url.startsWith('http')) {
+        preview.innerHTML = `<img src="${url}" alt="Logo" class="w-full h-full object-contain" onerror="this.parentElement.innerHTML='<span class=\\'text-red-400 text-xs\\'>Invalid URL</span>'">`;
+    } else {
+        preview.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>`;
+    }
+}
+
+// Edit Dealer Form Handler
+document.getElementById('editDealerForm')?.addEventListener('submit', async function(e) {
+    e.preventDefault();
+    
+    const dealerId = document.getElementById('editDealerId').value;
+    const formData = new FormData(e.target);
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('dealers')
+            .update({
+                name: formData.get('name'),
+                code: formData.get('code') || null,
+                contact_email: formData.get('contact_email') || null,
+                contact_phone: formData.get('contact_phone') || null,
+                logo_url: formData.get('logo_url') || null,
+                is_active: formData.get('is_active') === 'true'
+            })
+            .eq('id', dealerId);
+        
+        if (error) throw error;
+        
+        alert('Dealer updated successfully!');
+        closeModal('editDealerModal');
+        await loadDealers();
+    } catch (error) {
+        console.error('Error updating dealer:', error);
+        alert('Error updating dealer: ' + error.message);
+    }
+});
+
 function populateAgentSelects() {
     const selects = ['leadAgentSelect', 'leadAgentFilter', 'orderAgentFilter'];
     
@@ -1495,10 +1615,13 @@ function renderDealersGrid() {
     grid.innerHTML = dealers.map(dealer => `
         <div class="card p-6">
             <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
+                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center overflow-hidden">
+                    ${dealer.logo_url 
+                        ? `<img src="${dealer.logo_url}" alt="${dealer.name}" class="w-full h-full object-contain">`
+                        : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>`
+                    }
                 </div>
                 <span class="px-2 py-1 text-xs rounded-full ${dealer.is_active ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-600'}">
                     ${dealer.is_active ? 'Active' : 'Inactive'}
@@ -1509,6 +1632,7 @@ function renderDealersGrid() {
             ${dealer.contact_email ? `<p class="text-sm text-gray-600">${dealer.contact_email}</p>` : ''}
             ${dealer.contact_phone ? `<p class="text-sm text-gray-600">${dealer.contact_phone}</p>` : ''}
             <div class="mt-4 pt-4 border-t flex gap-2">
+                <button onclick="viewDealerDetails('${dealer.id}')" class="text-sm text-blue-600 hover:text-blue-800">Edit</button>
                 <button onclick="toggleDealerStatus('${dealer.id}', ${!dealer.is_active})" class="text-sm ${dealer.is_active ? 'text-orange-600 hover:text-orange-800' : 'text-green-600 hover:text-green-800'}">
                     ${dealer.is_active ? 'Deactivate' : 'Activate'}
                 </button>

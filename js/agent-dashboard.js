@@ -20,6 +20,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     document.getElementById('userName').textContent = currentUser.full_name;
     document.getElementById('userInitials').textContent = getInitials(currentUser.full_name);
     
+    // Load dealer info if agent has one assigned
+    await loadAgentDealerInfo();
+    
     // Load initial data
     await Promise.all([
         loadPackages(),
@@ -41,6 +44,54 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function getInitials(name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+// Load agent's dealer info and display logo
+let agentDealer = null;
+
+async function loadAgentDealerInfo() {
+    if (!currentUser.dealer_id) {
+        // No dealer assigned
+        const dealerInfo = document.getElementById('agentDealerInfo');
+        if (dealerInfo) {
+            dealerInfo.innerHTML = '<p class="text-sm text-gray-400">No dealer assigned</p>';
+        }
+        return;
+    }
+    
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('dealers')
+            .select('*')
+            .eq('id', currentUser.dealer_id)
+            .single();
+        
+        if (error) throw error;
+        agentDealer = data;
+        
+        // Update dealer display in sidebar
+        const dealerInfo = document.getElementById('agentDealerInfo');
+        if (dealerInfo && agentDealer) {
+            dealerInfo.innerHTML = `
+                <div class="flex items-center gap-3 p-3 bg-white/10 rounded-xl">
+                    ${agentDealer.logo_url 
+                        ? `<img src="${agentDealer.logo_url}" alt="${agentDealer.name}" class="w-10 h-10 rounded-lg object-contain bg-white">`
+                        : `<div class="w-10 h-10 bg-white/20 rounded-lg flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white/70" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                        </div>`
+                    }
+                    <div>
+                        <p class="text-white font-medium text-sm">${agentDealer.name}</p>
+                        <p class="text-white/60 text-xs">Your Dealer</p>
+                    </div>
+                </div>
+            `;
+        }
+    } catch (error) {
+        console.error('Error loading dealer info:', error);
+    }
 }
 
 // Navigation
