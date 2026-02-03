@@ -391,8 +391,19 @@ function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
 }
 
+// Helper to validate UUID format
+function isValidUUID(str) {
+    if (!str || typeof str !== 'string') return false;
+    return str.length === 36 && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 // Return to Agent - Openserve sends item back to agent for fixes
 async function returnToAgent(leadId) {
+    if (!isValidUUID(leadId)) {
+        alert('Invalid order ID');
+        return;
+    }
+    
     const reason = prompt('Enter reason for returning to agent:');
     if (!reason) return;
     
@@ -421,6 +432,11 @@ async function returnToAgent(leadId) {
 
 // Return to Admin - Openserve sends item to admin for review
 async function returnToAdmin(leadId) {
+    if (!isValidUUID(leadId)) {
+        alert('Invalid order ID');
+        return;
+    }
+    
     const reason = prompt('Enter reason for returning to admin:');
     if (!reason) return;
     

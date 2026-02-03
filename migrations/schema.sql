@@ -115,6 +115,9 @@ CREATE TABLE IF NOT EXISTS leads (
     return_reason TEXT,
     returned_by UUID REFERENCES profiles(id),
     returned_at TIMESTAMPTZ,
+    return_resolved TEXT CHECK (return_resolved IN ('pending', 'acknowledged', 'resolved', 'rejected', 'forwarded')),
+    return_direction TEXT CHECK (return_direction IN ('to_openserve', 'to_admin', 'to_agent')),
+    resolution_notes TEXT,
     
     -- Notes
     notes TEXT,

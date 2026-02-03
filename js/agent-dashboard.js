@@ -665,8 +665,19 @@ async function handleReturnedItem(itemId, itemType) {
     }
 }
 
+// Helper to validate UUID format
+function isValidUUID(str) {
+    if (!str || typeof str !== 'string') return false;
+    return str.length === 36 && /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(str);
+}
+
 // Send to Admin - Agent returns item to admin for review
 async function sendToAdmin(leadId, type = 'lead') {
+    if (!isValidUUID(leadId)) {
+        alert('Invalid lead ID');
+        return;
+    }
+    
     const reason = prompt('Enter reason for sending to admin:');
     if (!reason) return;
     

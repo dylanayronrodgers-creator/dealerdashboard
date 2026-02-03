@@ -1934,29 +1934,33 @@ async function saveLeadChanges(e) {
         return;
     }
     
+    // Helper to convert empty strings to null (important for UUID fields)
+    const toNull = (val) => val && val.trim() !== '' ? val : null;
+    const toUUID = (val) => val && val.trim() !== '' && val.length > 30 ? val : null; // UUID is 36 chars
+    
     const updateData = {
-        lead_id: formData.get('lead_id') || null,
+        lead_id: toNull(formData.get('lead_id')),
         status: formData.get('status'),
-        lead_type: formData.get('lead_type') || null,
-        full_name: formData.get('full_name') || null,
-        first_name: formData.get('first_name') || null,
-        last_name: formData.get('last_name') || null,
-        id_number: formData.get('id_number') || null,
-        passport_number: formData.get('passport_number') || null,
-        email: formData.get('email') || null,
-        phone: formData.get('phone') || null,
-        address: formData.get('address') || null,
-        secondary_contact_name: formData.get('secondary_contact_name') || null,
-        secondary_contact_number: formData.get('secondary_contact_number') || null,
-        secondary_contact_email: formData.get('secondary_contact_email') || null,
-        agent_id: formData.get('agent_id') || null,
-        dealer_id: formData.get('dealer_id') || null,
-        package_id: formData.get('package_id') || null,
-        isp: formData.get('isp') || null,
-        order_number: formData.get('order_number') || null,
-        order_status: formData.get('order_status') || null,
-        order_date: formData.get('order_date') || null,
-        notes: formData.get('notes') || null
+        lead_type: toNull(formData.get('lead_type')),
+        full_name: toNull(formData.get('full_name')),
+        first_name: toNull(formData.get('first_name')),
+        last_name: toNull(formData.get('last_name')),
+        id_number: toNull(formData.get('id_number')),
+        passport_number: toNull(formData.get('passport_number')),
+        email: toNull(formData.get('email')),
+        phone: toNull(formData.get('phone')),
+        address: toNull(formData.get('address')),
+        secondary_contact_name: toNull(formData.get('secondary_contact_name')),
+        secondary_contact_number: toNull(formData.get('secondary_contact_number')),
+        secondary_contact_email: toNull(formData.get('secondary_contact_email')),
+        agent_id: toUUID(formData.get('agent_id')),
+        dealer_id: toUUID(formData.get('dealer_id')),
+        package_id: toUUID(formData.get('package_id')),
+        isp: toNull(formData.get('isp')),
+        order_number: toNull(formData.get('order_number')),
+        order_status: toNull(formData.get('order_status')),
+        order_date: toNull(formData.get('order_date')),
+        notes: toNull(formData.get('notes'))
     };
     
     try {
