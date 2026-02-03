@@ -1438,7 +1438,7 @@ async function confirmImport() {
     const progressText = document.getElementById('progressText');
     
     progressDiv.classList.remove('hidden');
-    importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [] };
+    importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [], newDealers: [] };
     
     for (let i = 0; i < importData.length; i++) {
         const row = importData[i];
@@ -1461,7 +1461,7 @@ async function confirmImport() {
                 }
             }
             
-            // Find or create dealer
+            // Find or CREATE dealer
             let dealerId = null;
             if (row.dealer_name) {
                 const { data: dealerData } = await window.supabaseClient
@@ -1472,36 +1472,54 @@ async function confirmImport() {
                 
                 if (dealerData && dealerData.length > 0) {
                     dealerId = dealerData[0].id;
+                } else {
+                    // Create new dealer
+                    const { data: newDealer, error: dealerError } = await window.supabaseClient
+                        .from('dealers')
+                        .insert({
+                            name: row.dealer_name,
+                            is_active: true
+                        })
+                        .select('id')
+                        .single();
+                    
+                    if (newDealer && !dealerError) {
+                        dealerId = newDealer.id;
+                        importStats.newDealers.push(row.dealer_name);
+                    }
                 }
             }
             
-            // Find agent by email
+            // Find agent by email or agent name, or CREATE pending agent
             let agentId = null;
-            if (row.captured_by_email) {
+            const agentEmail = row.captured_by_email || row.agent_name;
+            if (agentEmail) {
+                // Try to find by email first
                 const { data: agentData } = await window.supabaseClient
                     .from('profiles')
                     .select('id')
-                    .eq('email', row.captured_by_email)
+                    .or(`email.eq.${agentEmail},full_name.ilike.${row.agent_name || ''}`)
                     .limit(1);
                 
                 if (agentData && agentData.length > 0) {
                     agentId = agentData[0].id;
                 } else {
-                    // Add to pending agents
+                    // Add to pending agents if not exists
                     const { data: pendingExists } = await window.supabaseClient
                         .from('pending_agents')
                         .select('id')
-                        .eq('email', row.captured_by_email)
+                        .or(`email.eq.${agentEmail},full_name.ilike.${row.agent_name || ''}`)
                         .limit(1);
                     
                     if (!pendingExists || pendingExists.length === 0) {
+                        const agentEmailToUse = agentEmail.includes('@') ? agentEmail : `${agentEmail.toLowerCase().replace(/\s+/g, '.')}@pending.dealer`;
                         await window.supabaseClient.from('pending_agents').insert({
-                            email: row.captured_by_email,
-                            full_name: row.agent_name || row.captured_by_email.split('@')[0],
+                            email: agentEmailToUse,
+                            full_name: row.agent_name || agentEmail,
                             dealer_id: dealerId,
                             status: 'pending'
                         });
-                        importStats.newAgents.push(row.captured_by_email);
+                        importStats.newAgents.push(row.agent_name || agentEmail);
                     }
                 }
             }
@@ -1562,16 +1580,21 @@ async function confirmImport() {
     
     // Show results
     let message = `Import Complete!\n\n`;
-    message += `Imported: ${importStats.imported}\n`;
-    message += `Duplicates skipped: ${importStats.duplicates}\n`;
-    message += `Errors: ${importStats.errors}`;
+    message += `✓ Imported: ${importStats.imported}\n`;
+    message += `○ Duplicates skipped: ${importStats.duplicates}\n`;
+    message += `✗ Errors: ${importStats.errors}`;
+    if (importStats.newDealers && importStats.newDealers.length > 0) {
+        message += `\n\n🏢 New dealers created: ${importStats.newDealers.length}`;
+        message += `\n   ${importStats.newDealers.slice(0, 5).join(', ')}${importStats.newDealers.length > 5 ? '...' : ''}`;
+    }
     if (importStats.newAgents.length > 0) {
-        message += `\n\nNew agents pending approval: ${importStats.newAgents.length}`;
+        message += `\n\n👤 New agents pending approval: ${importStats.newAgents.length}`;
+        message += `\n   ${importStats.newAgents.slice(0, 5).join(', ')}${importStats.newAgents.length > 5 ? '...' : ''}`;
     }
     
     alert(message);
     cancelImport();
-    await Promise.all([loadLeads(), loadPendingAgents()]);
+    await Promise.all([loadLeads(), loadPendingAgents(), loadDealers()]);
 }
 
 async function findPackageByName(name) {
