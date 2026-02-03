@@ -373,8 +373,8 @@ function renderOrdersTable(filteredOrders = null) {
     table.innerHTML = displayOrders.map(order => `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">#${order.id.slice(0, 8)}</div>
-                <div class="text-xs text-gray-400">${order.notes?.match(/Order #([^-]+)/)?.[1] || ''}</div>
+                <div class="font-medium text-gray-800">${order.order_number || order.lead?.order_number || '-'}</div>
+                <div class="text-xs text-gray-400">Lead: ${order.lead?.lead_id || '-'}</div>
             </td>
             <td class="py-4">
                 <div class="font-medium text-gray-800">${order.lead?.full_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || '-'}</div>
@@ -978,15 +978,16 @@ async function convertToOrder() {
         
         if (leadError) throw leadError;
         
-        // Create order record
+        // Create order record with order_number
         const { error: orderError } = await window.supabaseClient
             .from('orders')
             .insert({
                 lead_id: convertingLeadId,
                 package_id: lead.package_id,
                 agent_id: lead.agent_id,
+                order_number: orderNumber,
                 status: 'pending',
-                notes: `Order #${orderNumber} - ${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
+                notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
             });
         
         if (orderError) throw orderError;
