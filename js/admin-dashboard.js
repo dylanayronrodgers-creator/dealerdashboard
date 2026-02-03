@@ -720,41 +720,91 @@ async function loadDashboardStats() {
 }
 
 // Charts
+let ordersChart = null;
+let leadsChart = null;
+
 function initCharts() {
-    // Orders Chart
+    updateChartsWithData();
+}
+
+function updateChartsWithData() {
+    // Calculate leads by month for the last 6 months
+    const now = new Date();
+    const monthLabels = [];
+    const leadsPerMonth = [];
+    const ordersPerMonth = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        monthLabels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+        
+        const monthLeads = leads.filter(l => {
+            const created = new Date(l.created_at);
+            return created.getMonth() === d.getMonth() && created.getFullYear() === d.getFullYear();
+        }).length;
+        leadsPerMonth.push(monthLeads);
+        
+        const monthOrders = orders.filter(o => {
+            const created = new Date(o.created_at);
+            return created.getMonth() === d.getMonth() && created.getFullYear() === d.getFullYear();
+        }).length;
+        ordersPerMonth.push(monthOrders);
+    }
+    
+    // Orders/Leads Trend Chart
     const ordersCtx = document.getElementById('ordersChart');
     if (ordersCtx) {
-        new Chart(ordersCtx, {
+        if (ordersChart) ordersChart.destroy();
+        ordersChart = new Chart(ordersCtx, {
             type: 'line',
             data: {
-                labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
-                datasets: [{
-                    label: 'Orders',
-                    data: [12, 19, 15, 25, 22, 30],
-                    borderColor: '#22c55e',
-                    backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                    fill: true,
-                    tension: 0.4
-                }]
+                labels: monthLabels,
+                datasets: [
+                    {
+                        label: 'Leads',
+                        data: leadsPerMonth,
+                        borderColor: '#3b82f6',
+                        backgroundColor: 'rgba(59, 130, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    },
+                    {
+                        label: 'Orders',
+                        data: ordersPerMonth,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4
+                    }
+                ]
             },
             options: {
                 responsive: true,
-                plugins: { legend: { display: false } },
+                plugins: { legend: { position: 'top' } },
                 scales: { y: { beginAtZero: true } }
             }
         });
     }
     
-    // Leads Chart
+    // Leads by Status Chart
+    const statusCounts = {
+        'new': leads.filter(l => l.status === 'new').length,
+        'contacted': leads.filter(l => l.status === 'contacted').length,
+        'qualified': leads.filter(l => l.status === 'qualified').length,
+        'converted': leads.filter(l => l.status === 'converted').length,
+        'lost': leads.filter(l => l.status === 'lost').length
+    };
+    
     const leadsCtx = document.getElementById('leadsChart');
     if (leadsCtx) {
-        new Chart(leadsCtx, {
+        if (leadsChart) leadsChart.destroy();
+        leadsChart = new Chart(leadsCtx, {
             type: 'doughnut',
             data: {
                 labels: ['New', 'Contacted', 'Qualified', 'Converted', 'Lost'],
                 datasets: [{
-                    data: [30, 25, 20, 15, 10],
-                    backgroundColor: ['#3b82f6', '#8b5cf6', '#10b981', '#22c55e', '#ef4444']
+                    data: [statusCounts.new, statusCounts.contacted, statusCounts.qualified, statusCounts.converted, statusCounts.lost],
+                    backgroundColor: ['#3b82f6', '#8b5cf6', '#f59e0b', '#22c55e', '#ef4444']
                 }]
             },
             options: {
