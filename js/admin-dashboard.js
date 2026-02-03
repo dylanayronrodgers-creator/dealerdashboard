@@ -1334,13 +1334,6 @@ function viewOrder(orderId) {
     }
 }
 
-function viewAgentDetails(agentId) {
-    const agent = agents.find(a => a.id === agentId);
-    if (agent) {
-        alert(`Agent Details:\n\nName: ${agent.full_name}\nEmail: ${agent.email}\nPhone: ${agent.phone || 'Not provided'}\nJoined: ${new Date(agent.created_at).toLocaleDateString()}`);
-    }
-}
-
 async function updateOrderStatus(orderId) {
     const newStatus = prompt('Enter new status (pending, processing, scheduled, completed, cancelled):');
     if (!newStatus) return;
