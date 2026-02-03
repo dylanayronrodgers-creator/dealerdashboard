@@ -336,7 +336,7 @@ function viewAgentDetails(agentId) {
 }
 
 // View/Edit Dealer Details
-function viewDealerDetails(dealerId) {
+async function viewDealerDetails(dealerId) {
     const dealer = dealers.find(d => d.id === dealerId);
     if (!dealer) return;
     
@@ -360,6 +360,30 @@ function viewDealerDetails(dealerId) {
         agentsList.innerHTML = assignedAgents.map(a => 
             `<div class="flex items-center gap-2 py-1"><span class="w-2 h-2 bg-green-500 rounded-full"></span>${a.full_name}</div>`
         ).join('');
+    }
+    
+    // Check for existing dealer login
+    document.getElementById('editDealerLoginEmail').value = '';
+    document.getElementById('editDealerLoginPassword').value = '';
+    const loginStatus = document.getElementById('dealerLoginStatus');
+    
+    try {
+        const { data: dealerProfile } = await window.supabaseClient
+            .from('profiles')
+            .select('id, email, full_name')
+            .eq('dealer_id', dealerId)
+            .eq('role', 'dealer')
+            .limit(1);
+        
+        if (dealerProfile && dealerProfile.length > 0) {
+            document.getElementById('editDealerLoginEmail').value = dealerProfile[0].email || '';
+            loginStatus.innerHTML = '<span class="text-emerald-600">✓ Dealer login exists</span>';
+        } else {
+            loginStatus.innerHTML = '<span class="text-gray-400">No login configured yet</span>';
+        }
+    } catch (error) {
+        console.error('Error checking dealer login:', error);
+        loginStatus.innerHTML = '';
     }
     
     openModal('editDealerModal');
@@ -1065,12 +1089,16 @@ function setupFormHandlers() {
         e.preventDefault();
         const dealerId = document.getElementById('editDealerId').value;
         const formData = new FormData(e.target);
+        const dealerName = formData.get('name');
+        const loginEmail = formData.get('login_email');
+        const loginPassword = formData.get('login_password');
         
         try {
+            // Update dealer info
             const { error } = await window.supabaseClient
                 .from('dealers')
                 .update({
-                    name: formData.get('name'),
+                    name: dealerName,
                     code: formData.get('code') || null,
                     contact_email: formData.get('contact_email') || null,
                     contact_phone: formData.get('contact_phone') || null,
@@ -1080,6 +1108,60 @@ function setupFormHandlers() {
                 .eq('id', dealerId);
             
             if (error) throw error;
+            
+            // Handle dealer login credentials
+            if (loginEmail && loginPassword) {
+                // Check if dealer profile already exists
+                const { data: existingProfile } = await window.supabaseClient
+                    .from('profiles')
+                    .select('id, email')
+                    .eq('dealer_id', dealerId)
+                    .eq('role', 'dealer')
+                    .limit(1);
+                
+                if (existingProfile && existingProfile.length > 0) {
+                    // Update existing user password (requires admin API, show message instead)
+                    alert('Dealer login exists. To reset password, use the Supabase dashboard or password reset flow.');
+                } else {
+                    // Create new auth user for dealer
+                    const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
+                        email: loginEmail,
+                        password: loginPassword,
+                        options: {
+                            data: { full_name: dealerName, role: 'dealer' }
+                        }
+                    });
+                    
+                    if (authError) {
+                        if (authError.message.includes('already registered')) {
+                            alert('This email is already registered. Use a different email.');
+                        } else {
+                            throw authError;
+                        }
+                    } else if (authData.user) {
+                        // Create dealer profile
+                        const { error: profileError } = await window.supabaseClient
+                            .from('profiles')
+                            .upsert({
+                                id: authData.user.id,
+                                email: loginEmail,
+                                full_name: dealerName,
+                                role: 'dealer',
+                                dealer_id: dealerId,
+                                is_approved: true
+                            });
+                        
+                        if (profileError) {
+                            console.error('Error creating dealer profile:', profileError);
+                        } else {
+                            alert('Dealer updated and login created successfully!');
+                            closeModal('editDealerModal');
+                            await loadDealers();
+                            return;
+                        }
+                    }
+                }
+            }
             
             alert('Dealer updated successfully!');
             closeModal('editDealerModal');
