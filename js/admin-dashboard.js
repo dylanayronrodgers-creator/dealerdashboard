@@ -1771,14 +1771,13 @@ async function confirmImport() {
                 return isNaN(d.getTime()) ? null : d.toISOString();
             };
             
-            // Build lead data - use ONLY status field which must exist
-            const leadData = {
-                status: 'new'
-            };
+            // Build lead data - insert empty object, let DB use defaults
+            const leadData = {};
             
             // Add foreign keys if found (these are standard FK columns)
             if (packageId) leadData.package_id = packageId;
             if (agentId) leadData.agent_id = agentId;
+            if (dealerId) leadData.dealer_id = dealerId;
             
             console.log('Inserting minimal lead:', leadData);
             
