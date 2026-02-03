@@ -303,22 +303,29 @@ function renderLeadsTable(filteredLeads = null) {
     table.innerHTML = displayLeads.map(lead => `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">${lead.first_name} ${lead.last_name}</div>
+                <div class="font-medium text-gray-800">${lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}</div>
+                <div class="text-xs text-gray-400">${lead.lead_id || ''}</div>
             </td>
             <td class="py-4">
-                <div class="text-sm text-gray-600">${lead.email}</div>
-                <div class="text-sm text-gray-500">${lead.phone}</div>
+                <div class="text-sm text-gray-600">${lead.email || '-'}</div>
+                <div class="text-sm text-gray-500">${lead.phone || '-'}</div>
             </td>
             <td class="py-4 text-sm text-gray-600">${lead.address || '-'}</td>
-            <td class="py-4 text-sm text-gray-600">${lead.package?.name || '-'}</td>
-            <td class="py-4 text-sm text-gray-600">${lead.agent?.full_name || 'Unassigned'}</td>
+            <td class="py-4 text-sm text-gray-600">${lead.package?.name || lead.package_name || '-'}</td>
+            <td class="py-4 text-sm text-gray-600">${lead.agent?.full_name || lead.dealer?.name || '-'}</td>
             <td class="py-4">
-                <span class="status-${lead.status} px-3 py-1 rounded-full text-xs font-medium">${lead.status}</span>
+                <select onchange="updateLeadStatus('${lead.id}', this.value)" class="text-xs border rounded px-2 py-1 status-${lead.status}">
+                    <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+                    <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                    <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+                    <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
+                    <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+                </select>
             </td>
             <td class="py-4">
-                <div class="flex gap-2">
-                    <button onclick="viewLead('${lead.id}')" class="text-blue-600 hover:text-blue-800 text-sm">View</button>
-                    <button onclick="returnToAgent('${lead.id}', 'lead')" class="text-yellow-600 hover:text-yellow-800 text-sm">Return</button>
+                <div class="flex gap-1 flex-wrap">
+                    <button onclick="openConvertModal('${lead.id}')" class="bg-green-100 text-green-700 hover:bg-green-200 px-2 py-1 rounded text-xs font-medium">Convert</button>
+                    <button onclick="returnToAgent('${lead.id}', 'lead')" class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-2 py-1 rounded text-xs font-medium">Return</button>
                 </div>
             </td>
         </tr>
@@ -365,22 +372,30 @@ function renderOrdersTable(filteredOrders = null) {
     
     table.innerHTML = displayOrders.map(order => `
         <tr class="table-row border-b">
-            <td class="py-4 font-medium text-gray-800">#${order.id.slice(0, 8)}</td>
             <td class="py-4">
-                <div class="font-medium text-gray-800">${order.lead?.first_name || ''} ${order.lead?.last_name || ''}</div>
+                <div class="font-medium text-gray-800">#${order.id.slice(0, 8)}</div>
+                <div class="text-xs text-gray-400">${order.notes?.match(/Order #([^-]+)/)?.[1] || ''}</div>
+            </td>
+            <td class="py-4">
+                <div class="font-medium text-gray-800">${order.lead?.full_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || '-'}</div>
                 <div class="text-sm text-gray-500">${order.lead?.email || ''}</div>
             </td>
             <td class="py-4 text-sm text-gray-600">${order.package?.name || '-'}</td>
             <td class="py-4 text-sm text-gray-600">${order.agent?.full_name || 'Unassigned'}</td>
             <td class="py-4">
-                <span class="status-${order.status} px-3 py-1 rounded-full text-xs font-medium">${order.status}</span>
+                <select onchange="updateOrderStatusDropdown('${order.id}', this.value)" class="text-xs border rounded px-2 py-1 status-${order.status}">
+                    <option value="pending" ${order.status === 'pending' ? 'selected' : ''}>Pending</option>
+                    <option value="processing" ${order.status === 'processing' ? 'selected' : ''}>Processing</option>
+                    <option value="scheduled" ${order.status === 'scheduled' ? 'selected' : ''}>Scheduled</option>
+                    <option value="completed" ${order.status === 'completed' ? 'selected' : ''}>Completed</option>
+                    <option value="cancelled" ${order.status === 'cancelled' ? 'selected' : ''}>Cancelled</option>
+                </select>
             </td>
             <td class="py-4 text-sm text-gray-500">${new Date(order.created_at).toLocaleDateString()}</td>
             <td class="py-4">
-                <div class="flex gap-2">
-                    <button onclick="viewOrder('${order.id}')" class="text-blue-600 hover:text-blue-800 text-sm">View</button>
-                    <button onclick="updateOrderStatus('${order.id}')" class="text-green-600 hover:text-green-800 text-sm">Update</button>
-                    <button onclick="returnToAgent('${order.id}', 'order')" class="text-yellow-600 hover:text-yellow-800 text-sm">Return</button>
+                <div class="flex gap-1">
+                    <button onclick="viewOrder('${order.id}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded text-xs">View</button>
+                    <button onclick="returnToAgent('${order.id}', 'order')" class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-2 py-1 rounded text-xs">Return</button>
                 </div>
             </td>
         </tr>
@@ -885,6 +900,197 @@ function editPackage(packageId) {
     const pkg = packages.find(p => p.id === packageId);
     if (pkg) {
         alert('Edit functionality coming soon. Package: ' + pkg.name);
+    }
+}
+
+// ============================================
+// LEAD STATUS & ORDER CONVERSION
+// ============================================
+async function updateLeadStatus(leadId, newStatus) {
+    try {
+        const updateData = { status: newStatus, updated_at: new Date().toISOString() };
+        
+        // If converting, set commission status
+        if (newStatus === 'converted') {
+            updateData.commission_status = 'pending';
+        }
+        
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update(updateData)
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        // Update local data
+        const lead = leads.find(l => l.id === leadId);
+        if (lead) lead.status = newStatus;
+        
+    } catch (error) {
+        console.error('Error updating lead status:', error);
+        alert('Error updating status: ' + error.message);
+        await loadLeads();
+    }
+}
+
+let convertingLeadId = null;
+
+function openConvertModal(leadId) {
+    convertingLeadId = leadId;
+    const lead = leads.find(l => l.id === leadId);
+    if (lead) {
+        document.getElementById('convertLeadName').textContent = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown';
+        document.getElementById('convertOrderNumber').value = lead.order_number || '';
+    }
+    openModal('convertToOrderModal');
+}
+
+async function convertToOrder() {
+    if (!convertingLeadId) return;
+    
+    const orderNumber = document.getElementById('convertOrderNumber').value.trim();
+    const productType = document.getElementById('convertProductType').value;
+    
+    if (!orderNumber) {
+        alert('Please enter an order number');
+        return;
+    }
+    
+    try {
+        const lead = leads.find(l => l.id === convertingLeadId);
+        if (!lead) throw new Error('Lead not found');
+        
+        // Calculate commission based on product type
+        const commissionAmount = productType === 'prepaid' ? 100 : 200;
+        
+        // Update lead with order info and commission
+        const { error: leadError } = await window.supabaseClient
+            .from('leads')
+            .update({
+                status: 'converted',
+                order_number: orderNumber,
+                order_status: 'pending',
+                commission_status: 'pending',
+                commission_amount: commissionAmount,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', convertingLeadId);
+        
+        if (leadError) throw leadError;
+        
+        // Create order record
+        const { error: orderError } = await window.supabaseClient
+            .from('orders')
+            .insert({
+                lead_id: convertingLeadId,
+                package_id: lead.package_id,
+                agent_id: lead.agent_id,
+                status: 'pending',
+                notes: `Order #${orderNumber} - ${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
+            });
+        
+        if (orderError) throw orderError;
+        
+        closeModal('convertToOrderModal');
+        convertingLeadId = null;
+        
+        await Promise.all([loadLeads(), loadOrders(), updateRevenueStats()]);
+        alert(`Lead converted! Order #${orderNumber} created.\nCommission: R${commissionAmount} (${productType === 'prepaid' ? 'Prepaid' : 'Normal'})`);
+        
+    } catch (error) {
+        console.error('Error converting lead:', error);
+        alert('Error converting lead: ' + error.message);
+    }
+}
+
+async function updateOrderStatusDropdown(orderId, newStatus) {
+    try {
+        const updateData = { status: newStatus, updated_at: new Date().toISOString() };
+        
+        // If completed, confirm commission
+        if (newStatus === 'completed') {
+            updateData.completed_at = new Date().toISOString();
+            
+            // Update lead commission status to confirmed
+            const order = orders.find(o => o.id === orderId);
+            if (order && order.lead_id) {
+                await window.supabaseClient
+                    .from('leads')
+                    .update({ 
+                        commission_status: 'confirmed',
+                        confirmed_at: new Date().toISOString(),
+                        order_status: 'completed'
+                    })
+                    .eq('id', order.lead_id);
+            }
+        }
+        
+        // If cancelled, reject commission
+        if (newStatus === 'cancelled') {
+            const order = orders.find(o => o.id === orderId);
+            if (order && order.lead_id) {
+                await window.supabaseClient
+                    .from('leads')
+                    .update({ 
+                        commission_status: 'rejected',
+                        rejected_at: new Date().toISOString(),
+                        rejection_reason: 'Order cancelled',
+                        order_status: 'cancelled'
+                    })
+                    .eq('id', order.lead_id);
+            }
+        }
+        
+        const { error } = await window.supabaseClient
+            .from('orders')
+            .update(updateData)
+            .eq('id', orderId);
+        
+        if (error) throw error;
+        
+        await Promise.all([loadOrders(), loadLeads(), updateRevenueStats()]);
+        
+    } catch (error) {
+        console.error('Error updating order status:', error);
+        alert('Error updating order: ' + error.message);
+    }
+}
+
+async function updateRevenueStats() {
+    try {
+        // Get confirmed leads for revenue
+        const { data: confirmedLeads } = await window.supabaseClient
+            .from('leads')
+            .select('commission_amount')
+            .eq('commission_status', 'confirmed');
+        
+        const { data: pendingLeads } = await window.supabaseClient
+            .from('leads')
+            .select('commission_amount')
+            .eq('commission_status', 'pending');
+        
+        const { data: rejectedLeads } = await window.supabaseClient
+            .from('leads')
+            .select('commission_amount')
+            .eq('commission_status', 'rejected');
+        
+        const confirmedRevenue = (confirmedLeads || []).reduce((sum, l) => sum + (l.commission_amount || 0), 0);
+        const pendingRevenue = (pendingLeads || []).reduce((sum, l) => sum + (l.commission_amount || 0), 0);
+        const rejectedRevenue = (rejectedLeads || []).reduce((sum, l) => sum + (l.commission_amount || 0), 0);
+        
+        document.getElementById('confirmedRevenue').textContent = `R${confirmedRevenue.toLocaleString()}`;
+        document.getElementById('pendingRevenue').textContent = `R${pendingRevenue.toLocaleString()}`;
+        document.getElementById('confirmedCount').textContent = (confirmedLeads || []).length;
+        document.getElementById('pendingCount').textContent = (pendingLeads || []).length;
+        
+        // Update rejected if element exists
+        const rejectedEl = document.getElementById('rejectedRevenue');
+        if (rejectedEl) rejectedEl.textContent = `R${rejectedRevenue.toLocaleString()}`;
+        const rejectedCountEl = document.getElementById('rejectedCount');
+        if (rejectedCountEl) rejectedCountEl.textContent = (rejectedLeads || []).length;
+        
+    } catch (error) {
+        console.error('Error updating revenue stats:', error);
     }
 }
 
