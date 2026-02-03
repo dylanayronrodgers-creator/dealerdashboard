@@ -2136,6 +2136,11 @@ async function confirmImport() {
     progressDiv.classList.remove('hidden');
     importStats = { imported: 0, duplicates: 0, errors: 0, newAgents: [], newDealers: [], errorDetails: [] };
     
+    // Cache for agents and dealers to avoid repeated lookups
+    const agentCache = {};
+    const pendingAgentCache = {};
+    const dealerCache = {};
+    
     for (let i = 0; i < importData.length; i++) {
         const row = importData[i];
         const progress = Math.round(((i + 1) / importData.length) * 100);
@@ -2146,76 +2151,83 @@ async function confirmImport() {
             // Log row data for debugging
             console.log('Processing row', i, '- dealer_name:', row.dealer_name, 'agent_name:', row.agent_name);
             
-            // Find or CREATE dealer
+            // Find or CREATE dealer (with caching)
             let dealerId = null;
             if (row.dealer_name) {
-                const { data: dealerData } = await window.supabaseClient
-                    .from('dealers')
-                    .select('id')
-                    .ilike('name', row.dealer_name)
-                    .limit(1);
+                const dealerKey = row.dealer_name.toLowerCase().trim();
                 
-                if (dealerData && dealerData.length > 0) {
-                    dealerId = dealerData[0].id;
-                    console.log('Found existing dealer:', row.dealer_name, '-> ID:', dealerId);
+                if (dealerCache[dealerKey]) {
+                    dealerId = dealerCache[dealerKey];
                 } else {
-                    // Create new dealer
-                    const { data: newDealer, error: dealerError } = await window.supabaseClient
+                    const { data: dealerData } = await window.supabaseClient
                         .from('dealers')
-                        .insert({
-                            name: row.dealer_name,
-                            is_active: true
-                        })
                         .select('id')
-                        .single();
+                        .ilike('name', row.dealer_name)
+                        .limit(1);
                     
-                    if (newDealer && !dealerError) {
-                        dealerId = newDealer.id;
-                        importStats.newDealers.push(row.dealer_name);
+                    if (dealerData && dealerData.length > 0) {
+                        dealerId = dealerData[0].id;
+                        dealerCache[dealerKey] = dealerId;
+                        console.log('Found existing dealer:', row.dealer_name, '-> ID:', dealerId);
+                    } else {
+                        // Create new dealer
+                        const { data: newDealer, error: dealerError } = await window.supabaseClient
+                            .from('dealers')
+                            .insert({
+                                name: row.dealer_name,
+                                is_active: true
+                            })
+                            .select('id')
+                            .single();
+                        
+                        if (newDealer && !dealerError) {
+                            dealerId = newDealer.id;
+                            dealerCache[dealerKey] = dealerId;
+                            importStats.newDealers.push(row.dealer_name);
+                        }
                     }
                 }
             }
             
-            // Find agent by name, or AUTO-CREATE agent and assign to dealer
+            // Find agent by name, or add to pending_agents
             let agentId = null;
             const agentName = row.agent_name || '';
             
             if (agentName) {
-                // Try to find existing agent by name
-                const { data: agentData } = await window.supabaseClient
-                    .from('profiles')
-                    .select('id, full_name')
-                    .ilike('full_name', agentName)
-                    .limit(1);
-                
-                if (agentData && agentData.length > 0) {
-                    agentId = agentData[0].id;
-                    console.log('Found existing agent:', agentName, '-> ID:', agentId);
+                // Check cache first
+                const cacheKey = agentName.toLowerCase().trim();
+                if (agentCache[cacheKey]) {
+                    agentId = agentCache[cacheKey];
                 } else {
-                    // AUTO-CREATE the agent in profiles table
-                    // Generate a unique ID for the agent
-                    const newAgentId = crypto.randomUUID();
-                    const agentEmail = `${agentName.toLowerCase().replace(/\s+/g, '.')}@agent.local`;
-                    
-                    const { data: newAgent, error: agentError } = await window.supabaseClient
+                    // Try to find existing agent by name
+                    const { data: agentData } = await window.supabaseClient
                         .from('profiles')
-                        .insert({
-                            id: newAgentId,
-                            email: agentEmail,
-                            full_name: agentName,
-                            role: 'agent',
-                            is_approved: true,
-                            dealer_id: dealerId  // Assign to dealer from same row
-                        })
-                        .select('id')
-                        .single();
+                        .select('id, full_name')
+                        .ilike('full_name', agentName)
+                        .limit(1);
                     
-                    if (newAgent && !agentError) {
-                        agentId = newAgent.id;
-                        importStats.newAgents.push(agentName);
-                        console.log('Created new agent:', agentName, '-> ID:', agentId, 'Dealer:', dealerId);
-                    } else if (agentError) {
-                        console.error('Error creating agent:', agentName, agentError.message);
+                    if (agentData && agentData.length > 0) {
+                        agentId = agentData[0].id;
+                        agentCache[cacheKey] = agentId;
+                        console.log('Found existing agent:', agentName, '-> ID:', agentId);
+                    } else if (!pendingAgentCache[cacheKey]) {
+                        // Add to pending_agents (not profiles - profiles requires auth.users FK)
+                        const agentEmail = `${agentName.toLowerCase().replace(/\s+/g, '.')}@pending.dealer`;
+                        
+                        const { error: pendingError } = await window.supabaseClient
+                            .from('pending_agents')
+                            .insert({
+                                email: agentEmail,
+                                full_name: agentName,
+                                dealer_id: dealerId,
+                                status: 'pending'
+                            });
+                        
+                        if (!pendingError) {
+                            pendingAgentCache[cacheKey] = true;
+                            importStats.newAgents.push(agentName);
+                            console.log('Added pending agent:', agentName, 'for dealer:', dealerId);
+                        }
                     }
                 }
             }
