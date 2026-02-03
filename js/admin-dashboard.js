@@ -1782,59 +1782,40 @@ async function confirmImport() {
                 return isNaN(d.getTime()) ? null : d.toISOString();
             };
             
-            // Build lead data object - only include fields that exist
+            // Build lead data object - start with minimal required fields
             const leadData = {
-                lead_id: row.lead_id || null,
-                full_name: fullName || null,
-                first_name: row.first_name || null,
-                last_name: row.last_name || null,
-                email: row.email || null,
-                phone: row.phone || null,
-                address: row.address || null,
-                notes: row.notes || null,
-                status: row.status || 'new'
+                status: 'new'
             };
             
-            // Add optional foreign keys if they exist
+            // Add basic text fields (these should exist in base schema)
+            if (row.lead_id) leadData.lead_id = row.lead_id;
+            if (fullName) leadData.full_name = fullName;
+            if (row.first_name) leadData.first_name = row.first_name;
+            if (row.last_name) leadData.last_name = row.last_name;
+            if (row.email) leadData.email = row.email;
+            if (row.phone) leadData.phone = row.phone;
+            if (row.address) leadData.address = row.address;
+            if (row.notes) leadData.notes = row.notes;
+            
+            // Add foreign keys if found
             if (packageId) leadData.package_id = packageId;
             if (agentId) leadData.agent_id = agentId;
             if (dealerId) leadData.dealer_id = dealerId;
             
-            // Add optional text fields (these may not exist in DB yet)
-            if (row.package_name) leadData.package_name = row.package_name;
-            if (row.agent_name) leadData.agent_name = row.agent_name;
-            if (row.dealer_name) leadData.dealer_name = row.dealer_name;
-            if (row.captured_by_email) leadData.captured_by_email = row.captured_by_email;
-            if (row.order_number) leadData.order_number = row.order_number;
-            if (row.order_status) leadData.order_status = row.order_status;
-            if (row.lead_type) leadData.lead_type = row.lead_type;
-            if (row.isp) leadData.isp = row.isp;
-            if (row.secondary_contact_name) leadData.secondary_contact_name = row.secondary_contact_name;
-            if (row.secondary_contact_number) leadData.secondary_contact_number = row.secondary_contact_number;
-            if (row.secondary_contact_email) leadData.secondary_contact_email = row.secondary_contact_email;
+            console.log('Inserting lead with basic fields:', leadData);
             
-            // Add dates if valid
-            const orderDate = parseDate(row.order_date);
-            const dateCaptured = parseDate(row.date_captured);
-            const lastUpdated = parseDate(row.last_updated);
-            if (orderDate) leadData.order_date = orderDate;
-            if (dateCaptured) leadData.date_captured = dateCaptured;
-            if (lastUpdated) leadData.last_updated = lastUpdated;
-            
-            console.log('Inserting lead:', leadData);
-            
-            // Insert lead
-            const { data: insertedLead, error } = await window.supabaseClient
+            // Try insert with basic fields first
+            let insertResult = await window.supabaseClient
                 .from('leads')
                 .insert(leadData)
                 .select();
             
-            if (error) {
-                console.error('Insert error for row', i, ':', error);
-                throw error;
+            if (insertResult.error) {
+                console.error('Insert error for row', i, ':', insertResult.error);
+                throw insertResult.error;
             }
             
-            console.log('Successfully inserted:', insertedLead);
+            console.log('Successfully inserted:', insertResult.data);
             importStats.imported++;
         } catch (error) {
             console.error('Error importing row', i, ':', error.message || error);
