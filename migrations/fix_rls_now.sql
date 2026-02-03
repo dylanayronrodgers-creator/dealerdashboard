@@ -13,10 +13,8 @@ DROP POLICY IF EXISTS "Enable read access for users" ON profiles;
 DROP POLICY IF EXISTS "Enable insert for authenticated users only" ON profiles;
 DROP POLICY IF EXISTS "Enable update for users based on id" ON profiles;
 
--- Step 2: Drop the is_admin function if it exists (to recreate cleanly)
-DROP FUNCTION IF EXISTS public.is_admin();
-
--- Step 3: Create is_admin function with SECURITY DEFINER
+-- Step 2: Create or REPLACE is_admin function with SECURITY DEFINER
+-- (Don't drop - other policies depend on it)
 -- This bypasses RLS when checking admin status, preventing recursion
 CREATE OR REPLACE FUNCTION public.is_admin()
 RETURNS BOOLEAN
