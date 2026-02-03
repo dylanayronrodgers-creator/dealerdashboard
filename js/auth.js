@@ -77,7 +77,16 @@ async function handleLogin(e) {
 }
 
 async function checkAuthState() {
+    // Don't auto-redirect on login page - let users choose their account
+    // This function is now only used for dashboard pages to verify auth
     if (!window.supabaseClient) return;
+    
+    // Skip auto-redirect on login/index pages
+    if (window.location.pathname.includes('login.html') || 
+        window.location.pathname === '/' || 
+        window.location.pathname.includes('index.html')) {
+        return;
+    }
     
     try {
         const { data: { session } } = await window.supabaseClient.auth.getSession();
@@ -91,14 +100,8 @@ async function checkAuthState() {
                 .single();
 
             if (profile) {
-                // Redirect to appropriate dashboard if on login page
-                if (window.location.pathname.includes('login.html') || window.location.pathname === '/' || window.location.pathname.includes('index.html')) {
-                    if (profile.role === 'admin') {
-                        window.location.href = 'admin-dashboard.html';
-                    } else {
-                        window.location.href = 'agent-dashboard.html';
-                    }
-                }
+                // Store session info
+                sessionStorage.setItem('userRole', profile.role);
             }
         }
     } catch (error) {
