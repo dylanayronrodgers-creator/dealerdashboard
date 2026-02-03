@@ -1068,93 +1068,233 @@ async function updateLeadStatus(leadId, newStatus) {
     }
 }
 
-// View Lead Details
+// View/Edit Lead Details
+let editingLeadId = null;
+
 function viewLeadDetails(leadId) {
     const lead = leads.find(l => l.id === leadId);
     if (!lead) return;
     
+    editingLeadId = leadId;
     const content = document.getElementById('viewLeadContent');
-    const formatValue = (val) => val || '-';
-    const formatDate = (val) => val ? new Date(val).toLocaleDateString() : '-';
+    const inputClass = "w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500";
+    const labelClass = "text-xs text-gray-500 block mb-1";
+    
+    // Build agent options
+    const agentOptions = agents.map(a => 
+        `<option value="${a.id}" ${lead.agent_id === a.id ? 'selected' : ''}>${a.full_name}</option>`
+    ).join('');
+    
+    // Build dealer options
+    const dealerOptions = dealers.map(d => 
+        `<option value="${d.id}" ${lead.dealer_id === d.id ? 'selected' : ''}>${d.name}</option>`
+    ).join('');
+    
+    // Build package options
+    const packageOptions = packages.map(p => 
+        `<option value="${p.id}" ${lead.package_id === p.id ? 'selected' : ''}>${p.name}</option>`
+    ).join('');
     
     content.innerHTML = `
-        <div class="grid grid-cols-2 gap-4">
-            <div class="col-span-2 bg-blue-50 rounded-xl p-4 mb-2">
-                <h4 class="font-semibold text-blue-800 mb-2">Lead Information</h4>
-                <div class="grid grid-cols-3 gap-2 text-sm">
-                    <div><span class="text-gray-500">Lead ID:</span> <strong>${formatValue(lead.lead_id)}</strong></div>
-                    <div><span class="text-gray-500">Status:</span> <strong>${formatValue(lead.status)}</strong></div>
-                    <div><span class="text-gray-500">Lead Type:</span> <strong>${formatValue(lead.lead_type)}</strong></div>
+        <form id="editLeadForm" class="space-y-4">
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="${labelClass}">Lead ID</label>
+                    <input type="text" name="lead_id" value="${lead.lead_id || ''}" class="${inputClass}">
+                </div>
+                <div>
+                    <label class="${labelClass}">Status</label>
+                    <select name="status" class="${inputClass}">
+                        <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+                        <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                        <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+                        <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
+                        <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="${labelClass}">Lead Type</label>
+                    <input type="text" name="lead_type" value="${lead.lead_type || ''}" class="${inputClass}">
                 </div>
             </div>
             
             <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Client Details</h4>
-                <div class="space-y-1 text-sm">
-                    <div><span class="text-gray-500">Full Name:</span> ${formatValue(lead.full_name || ((lead.first_name || '') + ' ' + (lead.last_name || '')).trim())}</div>
-                    <div><span class="text-gray-500">First Name:</span> ${formatValue(lead.first_name)}</div>
-                    <div><span class="text-gray-500">Last Name:</span> ${formatValue(lead.last_name)}</div>
-                    <div><span class="text-gray-500">ID Number:</span> ${formatValue(lead.id_number)}</div>
+                <h4 class="font-semibold text-gray-700 mb-3">Client Details</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="${labelClass}">Full Name</label>
+                        <input type="text" name="full_name" value="${lead.full_name || ''}" class="${inputClass}">
+                    </div>
+                    <div>
+                        <label class="${labelClass}">ID Number</label>
+                        <input type="text" name="id_number" value="${lead.id_number || ''}" class="${inputClass}">
+                    </div>
+                    <div>
+                        <label class="${labelClass}">First Name</label>
+                        <input type="text" name="first_name" value="${lead.first_name || ''}" class="${inputClass}">
+                    </div>
+                    <div>
+                        <label class="${labelClass}">Last Name</label>
+                        <input type="text" name="last_name" value="${lead.last_name || ''}" class="${inputClass}">
+                    </div>
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Primary Contact</h4>
-                <div class="space-y-1 text-sm">
-                    <div><span class="text-gray-500">Email:</span> ${formatValue(lead.email)}</div>
-                    <div><span class="text-gray-500">Phone:</span> ${formatValue(lead.phone)}</div>
-                    <div><span class="text-gray-500">Address/Region:</span> ${formatValue(lead.address)}</div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Primary Contact</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${labelClass}">Email</label>
+                            <input type="email" name="email" value="${lead.email || ''}" class="${inputClass}">
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Phone</label>
+                            <input type="text" name="phone" value="${lead.phone || ''}" class="${inputClass}">
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Address/Region</label>
+                            <input type="text" name="address" value="${lead.address || ''}" class="${inputClass}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Secondary Contact</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${labelClass}">Name</label>
+                            <input type="text" name="secondary_contact_name" value="${lead.secondary_contact_name || ''}" class="${inputClass}">
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Number</label>
+                            <input type="text" name="secondary_contact_number" value="${lead.secondary_contact_number || ''}" class="${inputClass}">
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Email</label>
+                            <input type="email" name="secondary_contact_email" value="${lead.secondary_contact_email || ''}" class="${inputClass}">
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Secondary Contact</h4>
-                <div class="space-y-1 text-sm">
-                    <div><span class="text-gray-500">Name:</span> ${formatValue(lead.secondary_contact_name)}</div>
-                    <div><span class="text-gray-500">Number:</span> ${formatValue(lead.secondary_contact_number)}</div>
-                    <div><span class="text-gray-500">Email:</span> ${formatValue(lead.secondary_contact_email)}</div>
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Assignment</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${labelClass}">Agent</label>
+                            <select name="agent_id" class="${inputClass}">
+                                <option value="">Select Agent</option>
+                                ${agentOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Dealer</label>
+                            <select name="dealer_id" class="${inputClass}">
+                                <option value="">Select Dealer</option>
+                                ${dealerOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Package</label>
+                            <select name="package_id" class="${inputClass}">
+                                <option value="">Select Package</option>
+                                ${packageOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="${labelClass}">ISP</label>
+                            <input type="text" name="isp" value="${lead.isp || ''}" class="${inputClass}">
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Order Info</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${labelClass}">Order Number</label>
+                            <input type="text" name="order_number" value="${lead.order_number || ''}" class="${inputClass}">
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Order Status</label>
+                            <input type="text" name="order_status" value="${lead.order_status || ''}" class="${inputClass}">
+                        </div>
+                        <div>
+                            <label class="${labelClass}">Order Date</label>
+                            <input type="date" name="order_date" value="${lead.order_date ? lead.order_date.split('T')[0] : ''}" class="${inputClass}">
+                        </div>
+                    </div>
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Assignment</h4>
-                <div class="space-y-1 text-sm">
-                    <div><span class="text-gray-500">Agent:</span> ${formatValue(lead.agent?.full_name || lead.agent_name)}</div>
-                    <div><span class="text-gray-500">Dealer:</span> ${formatValue(lead.dealer?.name || lead.dealer_name)}</div>
-                    <div><span class="text-gray-500">Package/Deal:</span> ${formatValue(lead.package?.name || lead.package_name)}</div>
-                    <div><span class="text-gray-500">ISP:</span> ${formatValue(lead.isp)}</div>
-                </div>
+            <div class="bg-yellow-50 rounded-xl p-4">
+                <label class="${labelClass}">Notes</label>
+                <textarea name="notes" rows="3" class="${inputClass}">${lead.notes || ''}</textarea>
             </div>
             
-            <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Order Info</h4>
-                <div class="space-y-1 text-sm">
-                    <div><span class="text-gray-500">Order Number:</span> ${formatValue(lead.order_number)}</div>
-                    <div><span class="text-gray-500">Order Status:</span> ${formatValue(lead.order_status)}</div>
-                    <div><span class="text-gray-500">Order Date:</span> ${formatDate(lead.order_date)}</div>
-                </div>
+            <div class="flex justify-end gap-3 pt-2 border-t">
+                <button type="button" onclick="closeModal('viewLeadModal')" class="px-4 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-medium">Save Changes</button>
             </div>
-            
-            <div class="col-span-2 bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Dates & Tracking</h4>
-                <div class="grid grid-cols-4 gap-2 text-sm">
-                    <div><span class="text-gray-500">Created:</span> ${formatDate(lead.created_at)}</div>
-                    <div><span class="text-gray-500">Updated:</span> ${formatDate(lead.updated_at)}</div>
-                    <div><span class="text-gray-500">Date Captured:</span> ${formatDate(lead.date_captured)}</div>
-                    <div><span class="text-gray-500">Captured By:</span> ${formatValue(lead.captured_by_email)}</div>
-                </div>
-            </div>
-            
-            ${lead.notes ? `
-            <div class="col-span-2 bg-yellow-50 rounded-xl p-4">
-                <h4 class="font-semibold text-yellow-800 mb-2">Notes</h4>
-                <p class="text-sm text-gray-700">${lead.notes}</p>
-            </div>
-            ` : ''}
-        </div>
+        </form>
     `;
     
+    // Add form submit handler
+    document.getElementById('editLeadForm').addEventListener('submit', saveLeadChanges);
+    
     openModal('viewLeadModal');
+}
+
+async function saveLeadChanges(e) {
+    e.preventDefault();
+    
+    if (!editingLeadId) return;
+    
+    const form = e.target;
+    const formData = new FormData(form);
+    
+    const updateData = {
+        lead_id: formData.get('lead_id') || null,
+        status: formData.get('status'),
+        lead_type: formData.get('lead_type') || null,
+        full_name: formData.get('full_name') || null,
+        first_name: formData.get('first_name') || null,
+        last_name: formData.get('last_name') || null,
+        id_number: formData.get('id_number') || null,
+        email: formData.get('email') || null,
+        phone: formData.get('phone') || null,
+        address: formData.get('address') || null,
+        secondary_contact_name: formData.get('secondary_contact_name') || null,
+        secondary_contact_number: formData.get('secondary_contact_number') || null,
+        secondary_contact_email: formData.get('secondary_contact_email') || null,
+        agent_id: formData.get('agent_id') || null,
+        dealer_id: formData.get('dealer_id') || null,
+        package_id: formData.get('package_id') || null,
+        isp: formData.get('isp') || null,
+        order_number: formData.get('order_number') || null,
+        order_status: formData.get('order_status') || null,
+        order_date: formData.get('order_date') || null,
+        notes: formData.get('notes') || null
+    };
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update(updateData)
+            .eq('id', editingLeadId);
+        
+        if (error) throw error;
+        
+        alert('Lead updated successfully!');
+        closeModal('viewLeadModal');
+        await loadLeads();
+        
+    } catch (error) {
+        console.error('Error updating lead:', error);
+        alert('Error updating lead: ' + error.message);
+    }
 }
 
 let convertingLeadId = null;
