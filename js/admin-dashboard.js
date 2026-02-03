@@ -931,6 +931,7 @@ function setupFormHandlers() {
                 email: formData.get('email'),
                 phone: formData.get('phone'),
                 id_number: formData.get('id_number') || null,
+                passport_number: formData.get('passport_number') || null,
                 address: formData.get('address'),
                 package_id: formData.get('package_id') || null,
                 agent_id: formData.get('agent_id') || null,
@@ -1291,6 +1292,7 @@ function setupFormHandlers() {
                     order_status: document.getElementById('editOrderStatus').value,
                     full_name: document.getElementById('editOrderClientName').value,
                     id_number: document.getElementById('editOrderIdNumber').value,
+                    passport_number: document.getElementById('editOrderPassport').value || null,
                     email: document.getElementById('editOrderEmail').value,
                     phone: document.getElementById('editOrderPhone').value,
                     address: document.getElementById('editOrderAddress').value,
@@ -1481,6 +1483,7 @@ function viewOrder(orderId) {
     document.getElementById('editOrderStatus').value = lead.order_status || order.status || 'pending';
     document.getElementById('editOrderClientName').value = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '';
     document.getElementById('editOrderIdNumber').value = lead.id_number || '';
+    document.getElementById('editOrderPassport').value = lead.passport_number || '';
     document.getElementById('editOrderEmail').value = lead.email || '';
     document.getElementById('editOrderPhone').value = lead.phone || lead.cell_number || '';
     document.getElementById('editOrderAddress').value = lead.address || '';
@@ -1652,7 +1655,11 @@ function viewLeadDetails(leadId) {
                     </div>
                     <div>
                         <label class="${labelClass}">ID Number</label>
-                        <input type="text" name="id_number" value="${lead.id_number || ''}" class="${inputClass}">
+                        <input type="text" name="id_number" maxlength="13" value="${lead.id_number || ''}" class="${inputClass}" placeholder="13-digit SA ID">
+                    </div>
+                    <div>
+                        <label class="${labelClass}">Passport Number</label>
+                        <input type="text" name="passport_number" value="${lead.passport_number || ''}" class="${inputClass}" placeholder="Passport">
                     </div>
                     <div>
                         <label class="${labelClass}">First Name</label>
@@ -1796,6 +1803,7 @@ async function saveLeadChanges(e) {
         first_name: formData.get('first_name') || null,
         last_name: formData.get('last_name') || null,
         id_number: formData.get('id_number') || null,
+        passport_number: formData.get('passport_number') || null,
         email: formData.get('email') || null,
         phone: formData.get('phone') || null,
         address: formData.get('address') || null,
