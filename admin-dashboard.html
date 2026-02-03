@@ -249,9 +249,9 @@
         </header>
 
         <!-- Dashboard Section -->
-        <section id="section-dashboard" class="p-4 md:p-6">
+        <section id="section-dashboard" class="p-3 md:p-4">
             <!-- Stats Cards -->
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 md:gap-3 mb-3">
                 <div class="card p-4">
                     <div class="flex items-center justify-between mb-2">
                         <div class="w-10 h-10 bg-blue-100 rounded-lg flex items-center justify-center">
@@ -306,8 +306,8 @@
             </div>
 
             <!-- Revenue Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 md:gap-4 mb-6">
-                <div class="card p-6 border-l-4 border-emerald-500">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-2 md:gap-3 mb-3">
+                <div class="card p-4 border-l-4 border-emerald-500">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Confirmed Revenue</p>
@@ -321,7 +321,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card p-6 border-l-4 border-amber-500">
+                <div class="card p-4 border-l-4 border-amber-500">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Pending Revenue</p>
@@ -335,7 +335,7 @@
                         </div>
                     </div>
                 </div>
-                <div class="card p-6 border-l-4 border-red-400">
+                <div class="card p-4 border-l-4 border-red-400">
                     <div class="flex items-center justify-between">
                         <div>
                             <p class="text-sm text-gray-500 mb-1">Rejected/Lost</p>
@@ -352,20 +352,20 @@
             </div>
 
             <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-                <div class="card p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Orders Overview</h3>
-                    <canvas id="ordersChart" height="200"></canvas>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
+                <div class="card p-4">
+                    <h3 class="text-base font-semibold text-gray-800 mb-2">Orders Overview</h3>
+                    <canvas id="ordersChart" height="140"></canvas>
                 </div>
-                <div class="card p-6">
-                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Lead Sources</h3>
-                    <canvas id="leadsChart" height="200"></canvas>
+                <div class="card p-4">
+                    <h3 class="text-base font-semibold text-gray-800 mb-2">Lead Sources</h3>
+                    <canvas id="leadsChart" height="140"></canvas>
                 </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="card p-6">
-                <div class="flex items-center justify-between mb-6">
+            <div class="card p-4">
+                <div class="flex items-center justify-between mb-3">
                     <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
                     <a href="#orders" onclick="showSection('orders')" class="text-green-500 hover:text-green-600 text-sm font-medium">View All</a>
                 </div>
