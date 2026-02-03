@@ -299,22 +299,39 @@ async function loadAgentStats(agentId) {
 
 // View/Edit Agent Details
 function viewAgentDetails(agentId) {
+    console.log('viewAgentDetails called with:', agentId);
     const agent = agents.find(a => a.id === agentId);
-    if (!agent) return;
+    if (!agent) {
+        console.error('Agent not found:', agentId);
+        return;
+    }
+    console.log('Found agent:', agent);
     
-    document.getElementById('editAgentId').value = agentId;
-    document.getElementById('editAgentName').value = agent.full_name || '';
-    document.getElementById('editAgentEmail').value = agent.email || '';
-    document.getElementById('editAgentPhone').value = agent.phone || '';
-    document.getElementById('editAgentApproved').value = agent.is_approved ? 'true' : 'false';
+    const idField = document.getElementById('editAgentId');
+    const nameField = document.getElementById('editAgentName');
+    const emailField = document.getElementById('editAgentEmail');
+    const phoneField = document.getElementById('editAgentPhone');
+    const approvedField = document.getElementById('editAgentApproved');
+    const dealerSelect = document.getElementById('editAgentDealer');
+    
+    if (!idField || !nameField || !emailField || !phoneField || !approvedField || !dealerSelect) {
+        console.error('Missing form fields for edit agent modal');
+        return;
+    }
+    
+    idField.value = agentId;
+    nameField.value = agent.full_name || '';
+    emailField.value = agent.email || '';
+    phoneField.value = agent.phone || '';
+    approvedField.value = agent.is_approved ? 'true' : 'false';
     
     // Populate dealer select
-    const dealerSelect = document.getElementById('editAgentDealer');
     dealerSelect.innerHTML = '<option value="">No dealer assigned</option>';
     dealers.forEach(d => {
         dealerSelect.innerHTML += `<option value="${d.id}" ${agent.dealer_id === d.id ? 'selected' : ''}>${d.name}</option>`;
     });
     
+    console.log('Opening edit agent modal');
     openModal('editAgentModal');
 }
 
