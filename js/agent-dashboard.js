@@ -122,12 +122,20 @@ function showSection(section) {
         'my-leads': { title: 'My Leads', subtitle: 'Manage your leads' },
         'my-orders': { title: 'My Orders', subtitle: 'Track your orders' },
         'returned': { title: 'Returned Items', subtitle: 'Items returned by admin for review' },
-        'import': { title: 'Import Leads', subtitle: 'Mass import leads from CSV' }
+        'commissions': { title: 'Commissions', subtitle: 'Track your earnings' },
+        'reports': { title: 'Reports', subtitle: 'Your performance analytics' }
     };
     
     if (titles[section]) {
         document.getElementById('pageTitle').textContent = titles[section].title;
         document.getElementById('pageSubtitle').textContent = titles[section].subtitle;
+    }
+    
+    // Load section-specific data
+    if (section === 'commissions') {
+        loadCommissions();
+    } else if (section === 'reports') {
+        loadReports();
     }
 }
 
@@ -1060,4 +1068,135 @@ function downloadTemplate() {
     a.download = 'leads_import_template.csv';
     a.click();
     window.URL.revokeObjectURL(url);
+}
+
+// Commission Functions
+function loadCommissions() {
+    const convertedLeads = myLeads.filter(l => l.status === 'converted');
+    
+    let totalEarned = 0;
+    let pending = 0;
+    let paid = 0;
+    
+    convertedLeads.forEach(lead => {
+        const amount = lead.commission_amount || 0;
+        if (lead.commission_status === 'paid') {
+            paid += amount;
+            totalEarned += amount;
+        } else {
+            pending += amount;
+            totalEarned += amount;
+        }
+    });
+    
+    document.getElementById('totalCommissionEarned').textContent = `R${totalEarned.toLocaleString()}`;
+    document.getElementById('pendingCommission').textContent = `R${pending.toLocaleString()}`;
+    document.getElementById('paidCommission').textContent = `R${paid.toLocaleString()}`;
+    
+    renderCommissionTable(convertedLeads);
+}
+
+function renderCommissionTable(convertedLeads) {
+    const table = document.getElementById('commissionTable');
+    if (!table) return;
+    
+    if (convertedLeads.length === 0) {
+        table.innerHTML = `<tr class="table-row border-b"><td class="py-4" colspan="6"><p class="text-gray-500 text-center">No commissions yet</p></td></tr>`;
+        return;
+    }
+    
+    table.innerHTML = convertedLeads.map(lead => {
+        const clientName = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown';
+        const packageName = lead.package?.name || '-';
+        const amount = lead.commission_amount || 0;
+        const status = lead.commission_status || 'pending';
+        const statusClass = status === 'paid' ? 'bg-emerald-100 text-emerald-700' : 'bg-yellow-100 text-yellow-700';
+        const date = lead.updated_at ? new Date(lead.updated_at).toLocaleDateString() : '-';
+        
+        return `
+            <tr class="table-row border-b hover:bg-gray-50">
+                <td class="py-3 text-sm font-medium text-gray-800">${lead.order_number || '-'}</td>
+                <td class="py-3 text-sm text-gray-600">${clientName}</td>
+                <td class="py-3 text-sm text-gray-600">${packageName}</td>
+                <td class="py-3 text-sm font-semibold text-emerald-600">R${amount}</td>
+                <td class="py-3"><span class="px-2 py-1 rounded-full text-xs font-medium ${statusClass}">${status}</span></td>
+                <td class="py-3 text-sm text-gray-500">${date}</td>
+            </tr>
+        `;
+    }).join('');
+}
+
+// Report Functions
+function loadReports() {
+    const totalLeads = myLeads.length;
+    const convertedLeads = myLeads.filter(l => l.status === 'converted').length;
+    const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+    const totalCommission = myLeads.filter(l => l.status === 'converted').reduce((sum, l) => sum + (l.commission_amount || 0), 0);
+    
+    document.getElementById('reportTotalLeads').textContent = totalLeads;
+    document.getElementById('reportConvertedLeads').textContent = convertedLeads;
+    document.getElementById('reportConversionRate').textContent = `${conversionRate}%`;
+    document.getElementById('reportTotalCommission').textContent = `R${totalCommission.toLocaleString()}`;
+    
+    // Status breakdown
+    document.getElementById('reportStatusNew').textContent = myLeads.filter(l => l.status === 'new').length;
+    document.getElementById('reportStatusContacted').textContent = myLeads.filter(l => l.status === 'contacted').length;
+    document.getElementById('reportStatusQualified').textContent = myLeads.filter(l => l.status === 'qualified').length;
+    document.getElementById('reportStatusConverted').textContent = myLeads.filter(l => l.status === 'converted').length;
+    document.getElementById('reportStatusLost').textContent = myLeads.filter(l => l.status === 'lost').length;
+    
+    // Performance chart
+    initAgentPerformanceChart();
+}
+
+function initAgentPerformanceChart() {
+    const ctx = document.getElementById('agentPerformanceChart');
+    if (!ctx) return;
+    
+    const now = new Date();
+    const monthLabels = [];
+    const leadsPerMonth = [];
+    const conversionsPerMonth = [];
+    
+    for (let i = 5; i >= 0; i--) {
+        const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
+        monthLabels.push(d.toLocaleDateString('en-US', { month: 'short' }));
+        
+        const monthLeads = myLeads.filter(l => {
+            const created = new Date(l.created_at);
+            return created.getMonth() === d.getMonth() && created.getFullYear() === d.getFullYear();
+        }).length;
+        leadsPerMonth.push(monthLeads);
+        
+        const monthConversions = myLeads.filter(l => {
+            if (l.status !== 'converted') return false;
+            const updated = new Date(l.updated_at);
+            return updated.getMonth() === d.getMonth() && updated.getFullYear() === d.getFullYear();
+        }).length;
+        conversionsPerMonth.push(monthConversions);
+    }
+    
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: monthLabels,
+            datasets: [
+                {
+                    label: 'Leads Assigned',
+                    data: leadsPerMonth,
+                    backgroundColor: 'rgba(59, 130, 246, 0.7)',
+                },
+                {
+                    label: 'Converted',
+                    data: conversionsPerMonth,
+                    backgroundColor: 'rgba(16, 185, 129, 0.7)',
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            plugins: { legend: { position: 'top' } },
+            scales: { y: { beginAtZero: true } }
+        }
+    });
 }

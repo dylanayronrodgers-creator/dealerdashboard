@@ -1,0 +1,411 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealer Dashboard - Axxess Dealer Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        :root {
+            --axxess-blue: #2c4a6e;
+            --axxess-blue-dark: #1a3a5c;
+            --axxess-blue-light: #3d5a7e;
+            --openserve-green: #10b981;
+        }
+        .sidebar-bg { 
+            background: linear-gradient(180deg, var(--axxess-blue) 0%, var(--axxess-blue-light) 100%);
+        }
+        .main-bg { background: #f1f5f9; }
+        .card { 
+            background: white; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--axxess-blue) 0%, var(--axxess-blue-dark) 100%);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 12px rgba(44, 74, 110, 0.3); }
+        .nav-item.active { background: rgba(255,255,255,0.15); }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        .table-row:hover { background: #f8fafc; }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; position: fixed; z-index: 50; height: 100vh; }
+            .sidebar.open { transform: translateX(0); }
+            .main-content { margin-left: 0 !important; }
+        }
+    </style>
+</head>
+<body class="main-bg">
+    <!-- Sidebar -->
+    <aside id="sidebar" class="sidebar sidebar-bg fixed left-0 top-0 h-screen w-80 flex flex-col z-50">
+        <div class="p-6 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <img src="images/axxess-logo.png" alt="Axxess" class="h-12 w-auto" onerror="this.style.display='none'">
+                <div>
+                    <h1 class="text-white font-bold text-xl">Dealer Portal</h1>
+                    <p class="text-white/60 text-xs">Dealership Management</p>
+                </div>
+            </div>
+        </div>
+        
+        <nav class="flex-1 p-4 space-y-1 overflow-y-auto">
+            <a href="#dashboard" class="nav-item active flex items-center gap-3 text-white px-4 py-3 rounded-xl" onclick="showSection('dashboard')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="#agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('agents')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                </svg>
+                My Agents
+                <span id="agentCount" class="ml-auto bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+            </a>
+            <a href="#leads" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('leads')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                All Leads
+            </a>
+            <a href="#orders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('orders')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                All Orders
+            </a>
+            <a href="#performance" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('performance')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Agent Performance
+            </a>
+            <a href="#commissions" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('commissions')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Dealer Commission
+            </a>
+            <a href="#reports" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('reports')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Reports
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-white/10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-bold">
+                    <span id="userInitials">D</span>
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm" id="userName">Dealer</p>
+                    <p class="text-white/50 text-xs" id="dealerName">Dealership</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white hover:bg-white/10 py-2 px-4 rounded-lg transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="ml-80 min-h-screen">
+        <header class="bg-white border-b px-8 py-4 flex items-center justify-between">
+            <div>
+                <h2 class="text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h2>
+                <p class="text-gray-500 text-sm" id="pageSubtitle">Dealership overview</p>
+            </div>
+        </header>
+
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="p-8">
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Agents</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalAgents">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Leads</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalLeads">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Orders</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalOrders">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Commission Due</p>
+                            <h3 class="text-2xl font-bold text-emerald-600" id="totalCommission">R0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Performance</h3>
+                    <canvas id="dealerPerformanceChart" height="200"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Top Performing Agents</h3>
+                    <div id="topAgentsList" class="space-y-3">
+                        <p class="text-gray-500 text-sm">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agents Section -->
+        <section id="section-agents" class="p-8 hidden">
+            <div class="card p-6">
+                <div class="flex items-center justify-between mb-6">
+                    <h3 class="text-lg font-semibold text-gray-800">My Agents</h3>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="agentsGrid">
+                    <p class="text-gray-500">Loading agents...</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Leads Section -->
+        <section id="section-leads" class="p-8 hidden">
+            <div class="card p-6">
+                <div class="flex flex-wrap items-center gap-3 mb-6">
+                    <input type="text" id="leadSearchFilter" placeholder="Search..." class="border rounded-xl px-4 py-2 w-64" oninput="filterDealerLeads()">
+                    <select id="leadStatusFilter" class="border rounded-xl px-4 py-2" onchange="filterDealerLeads()">
+                        <option value="">All Status</option>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="converted">Converted</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                    <select id="leadAgentFilter" class="border rounded-xl px-4 py-2" onchange="filterDealerLeads()">
+                        <option value="">All Agents</option>
+                    </select>
+                    <span id="dealerLeadCount" class="text-sm text-gray-500 ml-auto"></span>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Client</th>
+                                <th class="pb-4 font-medium">Contact</th>
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Package</th>
+                                <th class="pb-4 font-medium">Status</th>
+                                <th class="pb-4 font-medium">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dealerLeadsTable">
+                            <tr><td colspan="6" class="py-4 text-center text-gray-500">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="section-orders" class="p-8 hidden">
+            <div class="card p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">All Orders</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Order #</th>
+                                <th class="pb-4 font-medium">Client</th>
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Package</th>
+                                <th class="pb-4 font-medium">Commission</th>
+                                <th class="pb-4 font-medium">Status</th>
+                                <th class="pb-4 font-medium">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dealerOrdersTable">
+                            <tr><td colspan="7" class="py-4 text-center text-gray-500">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Agent Performance Section -->
+        <section id="section-performance" class="p-8 hidden">
+            <div class="card p-6 mb-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">Agent Performance Comparison</h3>
+                <canvas id="agentComparisonChart" height="300"></canvas>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">Performance Details</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Leads</th>
+                                <th class="pb-4 font-medium">Converted</th>
+                                <th class="pb-4 font-medium">Conversion %</th>
+                                <th class="pb-4 font-medium">Commission</th>
+                            </tr>
+                        </thead>
+                        <tbody id="performanceTable">
+                            <tr><td colspan="5" class="py-4 text-center text-gray-500">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Dealer Commission Section -->
+        <section id="section-commissions" class="p-8 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Commission Due</p>
+                            <h3 class="text-2xl font-bold text-emerald-600" id="dealerTotalCommission">R0</h3>
+                            <p class="text-xs text-gray-400">From Openserve</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Pending Payment</p>
+                            <h3 class="text-2xl font-bold text-yellow-600" id="dealerPendingCommission">R0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Paid Out</p>
+                            <h3 class="text-2xl font-bold text-blue-600" id="dealerPaidCommission">R0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">Commission Breakdown by Agent</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Agent</th>
+                                <th class="pb-4 font-medium">Orders</th>
+                                <th class="pb-4 font-medium">Pending</th>
+                                <th class="pb-4 font-medium">Paid</th>
+                                <th class="pb-4 font-medium">Total</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commissionBreakdownTable">
+                            <tr><td colspan="5" class="py-4 text-center text-gray-500">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="section-reports" class="p-8 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Dealership Summary</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Active Agents</span>
+                            <span class="font-bold text-gray-800" id="reportActiveAgents">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Total Leads This Month</span>
+                            <span class="font-bold text-gray-800" id="reportMonthlyLeads">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Conversions This Month</span>
+                            <span class="font-bold text-emerald-600" id="reportMonthlyConversions">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Avg Conversion Rate</span>
+                            <span class="font-bold text-blue-600" id="reportAvgConversion">0%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Commission This Month</span>
+                            <span class="font-bold text-emerald-600" id="reportMonthlyCommission">R0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Lead Status Distribution</h3>
+                    <canvas id="dealerLeadStatusChart" height="200"></canvas>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/dealer-dashboard.js"></script>
+</body>
+</html>

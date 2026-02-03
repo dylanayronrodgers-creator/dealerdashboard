@@ -151,6 +151,18 @@
                 Returned Items
                 <span id="returnedCount" class="ml-auto bg-yellow-500 text-white text-xs px-2 py-0.5 rounded-full notification-badge hidden">0</span>
             </a>
+            <a href="#commissions" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('commissions')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Commissions
+            </a>
+            <a href="#reports" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('reports')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Reports
+            </a>
             </nav>
 
         <!-- Dealer Info -->
@@ -265,17 +277,17 @@
                 <div class="card p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Quick Actions</h3>
                     <div class="grid grid-cols-2 gap-4">
-                        <button onclick="openModal('addLeadModal')" class="btn-primary text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
+                        <button onclick="showSection('my-leads')" class="btn-primary text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                             </svg>
-                            New Lead
+                            My Leads
                         </button>
-                        <button onclick="showSection('import')" class="bg-blue-600 hover:bg-blue-700 text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
+                        <button onclick="showSection('commissions')" class="bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-4 rounded-xl font-medium flex items-center justify-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
                             </svg>
-                            Import Leads
+                            Commissions
                         </button>
                     </div>
                 </div>
@@ -421,6 +433,131 @@
                             </tr>
                         </tbody>
                     </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Commissions Section -->
+        <section id="section-commissions" class="p-8 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Earned</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalCommissionEarned">R0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Pending</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="pendingCommission">R0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Paid Out</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="paidCommission">R0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-6">Commission History</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-gray-500 text-sm border-b">
+                                <th class="pb-4 font-medium">Order</th>
+                                <th class="pb-4 font-medium">Client</th>
+                                <th class="pb-4 font-medium">Package</th>
+                                <th class="pb-4 font-medium">Amount</th>
+                                <th class="pb-4 font-medium">Status</th>
+                                <th class="pb-4 font-medium">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="commissionTable">
+                            <tr class="table-row border-b">
+                                <td class="py-4" colspan="6">
+                                    <p class="text-gray-500 text-center">Loading commissions...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Reports Section -->
+        <section id="section-reports" class="p-8 hidden">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Performance Summary</h3>
+                    <div class="space-y-4">
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Total Leads Assigned</span>
+                            <span class="font-bold text-gray-800" id="reportTotalLeads">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Converted to Orders</span>
+                            <span class="font-bold text-emerald-600" id="reportConvertedLeads">0</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Conversion Rate</span>
+                            <span class="font-bold text-blue-600" id="reportConversionRate">0%</span>
+                        </div>
+                        <div class="flex justify-between items-center">
+                            <span class="text-gray-600">Total Commission Earned</span>
+                            <span class="font-bold text-emerald-600" id="reportTotalCommission">R0</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="text-lg font-semibold text-gray-800 mb-4">Monthly Breakdown</h3>
+                    <canvas id="agentPerformanceChart" height="200"></canvas>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="text-lg font-semibold text-gray-800 mb-4">Leads by Status</h3>
+                <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                    <div class="bg-blue-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-blue-600" id="reportStatusNew">0</p>
+                        <p class="text-sm text-gray-600">New</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-purple-600" id="reportStatusContacted">0</p>
+                        <p class="text-sm text-gray-600">Contacted</p>
+                    </div>
+                    <div class="bg-yellow-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-yellow-600" id="reportStatusQualified">0</p>
+                        <p class="text-sm text-gray-600">Qualified</p>
+                    </div>
+                    <div class="bg-emerald-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-emerald-600" id="reportStatusConverted">0</p>
+                        <p class="text-sm text-gray-600">Converted</p>
+                    </div>
+                    <div class="bg-red-50 rounded-xl p-4 text-center">
+                        <p class="text-2xl font-bold text-red-600" id="reportStatusLost">0</p>
+                        <p class="text-sm text-gray-600">Lost</p>
+                    </div>
                 </div>
             </div>
         </section>

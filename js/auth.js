@@ -150,6 +150,8 @@ async function requireAuth(requiredRole = null) {
             // Redirect to appropriate dashboard
             if (profile.role === 'admin') {
                 window.location.href = 'admin-dashboard.html';
+            } else if (profile.role === 'dealer') {
+                window.location.href = 'dealer-dashboard.html';
             } else {
                 window.location.href = 'agent-dashboard.html';
             }
