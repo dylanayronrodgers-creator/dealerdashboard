@@ -1675,8 +1675,8 @@ async function confirmImport() {
         progressText.textContent = progress + '%';
         
         try {
-            // Skip duplicate check - column may not exist yet
-            // Duplicates will be handled by unique constraint if present
+            // Log row data for debugging
+            console.log('Processing row', i, '- dealer_name:', row.dealer_name, 'agent_name:', row.agent_name);
             
             // Find or CREATE dealer
             let dealerId = null;
@@ -1689,6 +1689,7 @@ async function confirmImport() {
                 
                 if (dealerData && dealerData.length > 0) {
                     dealerId = dealerData[0].id;
+                    console.log('Found existing dealer:', row.dealer_name, '-> ID:', dealerId);
                 } else {
                     // Create new dealer
                     const { data: newDealer, error: dealerError } = await window.supabaseClient
@@ -1726,6 +1727,7 @@ async function confirmImport() {
                 
                 if (agentData && agentData.length > 0) {
                     agentId = agentData[0].id;
+                    console.log('Found existing agent:', agentName || agentEmail, '-> ID:', agentId);
                 } else {
                     // Check if already in pending agents
                     let pendingQuery = window.supabaseClient.from('pending_agents').select('id');
