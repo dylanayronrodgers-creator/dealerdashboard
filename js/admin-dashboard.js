@@ -2054,53 +2054,46 @@ async function confirmImport() {
                 }
             }
             
-            // Find agent by email or agent name, or CREATE pending agent
+            // Find agent by name, or AUTO-CREATE agent and assign to dealer
             let agentId = null;
             const agentName = row.agent_name || '';
-            const agentEmail = row.captured_by_email || '';
             
-            if (agentName || agentEmail) {
-                // Try to find existing agent by email or name
-                let agentQuery = window.supabaseClient.from('profiles').select('id, full_name');
-                
-                if (agentEmail && agentEmail.includes('@')) {
-                    agentQuery = agentQuery.eq('email', agentEmail);
-                } else if (agentName) {
-                    agentQuery = agentQuery.ilike('full_name', agentName);
-                }
-                
-                const { data: agentData } = await agentQuery.limit(1);
+            if (agentName) {
+                // Try to find existing agent by name
+                const { data: agentData } = await window.supabaseClient
+                    .from('profiles')
+                    .select('id, full_name')
+                    .ilike('full_name', agentName)
+                    .limit(1);
                 
                 if (agentData && agentData.length > 0) {
                     agentId = agentData[0].id;
-                    console.log('Found existing agent:', agentName || agentEmail, '-> ID:', agentId);
+                    console.log('Found existing agent:', agentName, '-> ID:', agentId);
                 } else {
-                    // Check if already in pending agents
-                    let pendingQuery = window.supabaseClient.from('pending_agents').select('id');
-                    if (agentEmail && agentEmail.includes('@')) {
-                        pendingQuery = pendingQuery.eq('email', agentEmail);
-                    } else if (agentName) {
-                        pendingQuery = pendingQuery.ilike('full_name', agentName);
-                    }
+                    // AUTO-CREATE the agent in profiles table
+                    // Generate a unique ID for the agent
+                    const newAgentId = crypto.randomUUID();
+                    const agentEmail = `${agentName.toLowerCase().replace(/\s+/g, '.')}@agent.local`;
                     
-                    const { data: pendingExists } = await pendingQuery.limit(1);
+                    const { data: newAgent, error: agentError } = await window.supabaseClient
+                        .from('profiles')
+                        .insert({
+                            id: newAgentId,
+                            email: agentEmail,
+                            full_name: agentName,
+                            role: 'agent',
+                            is_approved: true,
+                            dealer_id: dealerId  // Assign to dealer from same row
+                        })
+                        .select('id')
+                        .single();
                     
-                    if (!pendingExists || pendingExists.length === 0) {
-                        // Create pending agent with proper email
-                        const pendingAgentEmail = (agentEmail && agentEmail.includes('@')) 
-                            ? agentEmail 
-                            : `${(agentName || 'unknown').toLowerCase().replace(/\s+/g, '.')}@pending.dealer`;
-                        
-                        const { error: pendingError } = await window.supabaseClient.from('pending_agents').insert({
-                            email: pendingAgentEmail,
-                            full_name: agentName || agentEmail.split('@')[0] || 'Unknown Agent',
-                            dealer_id: dealerId,
-                            status: 'pending'
-                        });
-                        
-                        if (!pendingError) {
-                            importStats.newAgents.push(agentName || agentEmail);
-                        }
+                    if (newAgent && !agentError) {
+                        agentId = newAgent.id;
+                        importStats.newAgents.push(agentName);
+                        console.log('Created new agent:', agentName, '-> ID:', agentId, 'Dealer:', dealerId);
+                    } else if (agentError) {
+                        console.error('Error creating agent:', agentName, agentError.message);
                     }
                 }
             }
