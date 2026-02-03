@@ -153,7 +153,11 @@ function renderOrdersTable(filteredOrders = null) {
         const status = order.order_status || 'pending';
         return `
             <tr class="table-row border-b">
-                <td class="py-3 px-6 text-sm font-medium text-gray-800">#${order.id?.slice(-8) || '-'}</td>
+                <td class="py-3 px-6">
+                    <div class="text-sm font-medium text-gray-800">${order.order_number || '-'}</div>
+                    <div class="text-xs text-gray-400">Service: ${order.service_id || '-'}</div>
+                    <div class="text-xs text-gray-400">Lead: ${order.id?.slice(0, 8) || '-'}</div>
+                </td>
                 <td class="py-3 px-6 text-sm text-gray-600">${clientName}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${order.phone || order.email || '-'}</td>
                 <td class="py-3 px-6 text-sm text-gray-600 max-w-xs truncate">${order.address || '-'}</td>
@@ -161,8 +165,12 @@ function renderOrdersTable(filteredOrders = null) {
                 <td class="py-3 px-6"><span class="px-2 py-1 rounded-full text-xs font-medium status-${status}">${status}</span></td>
                 <td class="py-3 px-6 text-sm text-gray-500">${order.created_at ? new Date(order.created_at).toLocaleDateString() : '-'}</td>
                 <td class="py-3 px-6">
-                    <button onclick="openUpdateModal('${order.id}')" class="text-sm text-emerald-600 hover:text-emerald-800 mr-2">Update</button>
-                    <button onclick="viewOrderDetails('${order.id}')" class="text-sm text-blue-600 hover:text-blue-800">View</button>
+                    <div class="flex flex-wrap gap-1">
+                        <button onclick="openUpdateModal('${order.id}')" class="text-xs text-emerald-600 hover:text-emerald-800">Update</button>
+                        <button onclick="returnToAdmin('${order.id}')" class="text-xs text-orange-600 hover:text-orange-800">→Admin</button>
+                        <button onclick="returnToAgent('${order.id}')" class="text-xs text-purple-600 hover:text-purple-800">→Agent</button>
+                        <button onclick="viewOrderDetails('${order.id}')" class="text-xs text-blue-600 hover:text-blue-800">View</button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -181,7 +189,10 @@ function renderReturnedTable() {
         const clientName = item.full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || '-';
         return `
             <tr class="table-row border-b">
-                <td class="py-3 px-6 text-sm font-medium text-gray-800">#${item.id?.slice(-8) || '-'}</td>
+                <td class="py-3 px-6">
+                    <div class="text-sm font-medium text-gray-800">${item.order_number || '-'}</div>
+                    <div class="text-xs text-gray-400">Service: ${item.service_id || '-'}</div>
+                </td>
                 <td class="py-3 px-6 text-sm text-gray-600">${clientName}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${item.return_reason || '-'}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${item.agent?.full_name || '-'}</td>
@@ -280,8 +291,10 @@ async function saveStatusUpdate() {
         
         if (newStatus === 'returned' && returnReason) {
             updateData.return_reason = returnReason;
+            updateData.return_direction = 'to_admin';
             updateData.returned_by = currentUser.id;
             updateData.returned_at = new Date().toISOString();
+            updateData.return_resolved = null;
         }
         
         if (newStatus === 'scheduled' && scheduleDate) {
@@ -376,6 +389,62 @@ function showSection(section) {
 
 function closeModal(modalId) {
     document.getElementById(modalId).classList.remove('active');
+}
+
+// Return to Agent - Openserve sends item back to agent for fixes
+async function returnToAgent(leadId) {
+    const reason = prompt('Enter reason for returning to agent:');
+    if (!reason) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'returned',
+                return_reason: reason,
+                return_direction: 'to_agent',
+                returned_by: currentUser.id,
+                returned_at: new Date().toISOString(),
+                return_resolved: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item returned to agent');
+        await loadDashboardData();
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+// Return to Admin - Openserve sends item to admin for review
+async function returnToAdmin(leadId) {
+    const reason = prompt('Enter reason for returning to admin:');
+    if (!reason) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'returned',
+                return_reason: reason,
+                return_direction: 'to_admin',
+                returned_by: currentUser.id,
+                returned_at: new Date().toISOString(),
+                return_resolved: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item returned to admin');
+        await loadDashboardData();
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
 }
 
 function toggleSidebar() {

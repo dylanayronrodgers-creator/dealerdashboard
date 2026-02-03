@@ -157,7 +157,11 @@ function renderDealerLeadsTable(filteredLeads = null) {
         const clientName = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-';
         return `
             <tr class="table-row border-b hover:bg-gray-50">
-                <td class="py-3 text-sm font-medium text-gray-800">${clientName}</td>
+                <td class="py-3">
+                    <div class="text-sm font-medium text-gray-800">${clientName}</div>
+                    ${lead.order_number ? `<div class="text-xs text-gray-400">Order: ${lead.order_number}</div>` : ''}
+                    ${lead.service_id ? `<div class="text-xs text-gray-400">Service: ${lead.service_id}</div>` : ''}
+                </td>
                 <td class="py-3 text-sm text-gray-600">${lead.email || lead.phone || '-'}</td>
                 <td class="py-3 text-sm text-gray-600">${lead.agent?.full_name || '-'}</td>
                 <td class="py-3 text-sm text-gray-600">${lead.package?.name || '-'}</td>

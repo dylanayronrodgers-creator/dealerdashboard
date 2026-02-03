@@ -247,7 +247,8 @@ function renderMyLeadsTable(filteredLeads = null) {
         <tr class="table-row border-b">
             <td class="py-4">
                 <div class="font-medium text-gray-800">${displayName}</div>
-                ${lead.lead_id ? `<div class="text-xs text-gray-400">ID: ${lead.lead_id}</div>` : ''}
+                ${lead.order_number ? `<div class="text-xs text-gray-400">Order: ${lead.order_number}</div>` : ''}
+                ${lead.service_id ? `<div class="text-xs text-gray-400">Service: ${lead.service_id}</div>` : ''}
             </td>
             <td class="py-4">
                 <div class="text-sm text-gray-600">${lead.email}</div>
@@ -661,6 +662,62 @@ async function handleReturnedItem(itemId, itemType) {
     } catch (error) {
         console.error('Error updating item:', error);
         alert('Error updating item: ' + error.message);
+    }
+}
+
+// Send to Admin - Agent returns item to admin for review
+async function sendToAdmin(leadId, type = 'lead') {
+    const reason = prompt('Enter reason for sending to admin:');
+    if (!reason) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'returned',
+                return_reason: reason,
+                return_direction: 'to_admin',
+                returned_by: currentUser.id,
+                returned_at: new Date().toISOString(),
+                return_resolved: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item sent to admin for review');
+        await Promise.all([loadMyLeads(), loadMyOrders(), loadReturnedItems()]);
+    } catch (error) {
+        alert('Error: ' + error.message);
+    }
+}
+
+// Return to Openserve - Agent sends directly to Openserve
+async function returnToOpenserve(leadId) {
+    const reason = prompt('Enter reason for returning to Openserve:');
+    if (!reason) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'returned',
+                return_reason: reason,
+                return_direction: 'to_openserve',
+                returned_by: currentUser.id,
+                returned_at: new Date().toISOString(),
+                return_resolved: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item returned to Openserve');
+        await Promise.all([loadMyLeads(), loadMyOrders(), loadReturnedItems()]);
+    } catch (error) {
+        alert('Error: ' + error.message);
     }
 }
 

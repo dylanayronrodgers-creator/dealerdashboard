@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS dealers (
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );
 
--- Add foreign key for dealer_id in profiles
+-- Add foreign key for dealer_id in profiles (drop first if exists)
+ALTER TABLE profiles DROP CONSTRAINT IF EXISTS fk_profiles_dealer;
 ALTER TABLE profiles 
 ADD CONSTRAINT fk_profiles_dealer 
 FOREIGN KEY (dealer_id) REFERENCES dealers(id) ON DELETE SET NULL;
@@ -86,6 +87,10 @@ CREATE TABLE IF NOT EXISTS leads (
     postal_code TEXT,
     complex_name TEXT,
     unit_number TEXT,
+    
+    -- Order Tracking (Universal IDs)
+    service_id TEXT,              -- Internal ID from Openserve
+    order_number TEXT,            -- Universal Order Number
     
     -- Lead Details
     agent_id UUID REFERENCES profiles(id) ON DELETE SET NULL,
@@ -136,6 +141,13 @@ CREATE TABLE IF NOT EXISTS returned_items (
     resolution_notes TEXT,
     resolved_by UUID REFERENCES profiles(id),
     resolved_at TIMESTAMPTZ,
+    
+    -- Hierarchy flow fields
+    return_direction TEXT DEFAULT 'to_admin' CHECK (return_direction IN ('to_openserve', 'to_admin', 'to_agent')),
+    target_user_id UUID REFERENCES profiles(id),
+    source_role TEXT,
+    target_role TEXT,
+    
     created_at TIMESTAMPTZ DEFAULT NOW(),
     updated_at TIMESTAMPTZ DEFAULT NOW()
 );

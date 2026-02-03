@@ -641,7 +641,8 @@ function renderLeadsTable(filteredLeads = null) {
         <tr class="table-row border-b">
             <td class="py-4">
                 <div class="font-medium text-gray-800">${clientName}</div>
-                <div class="text-xs text-gray-400">${lead.lead_id || ''}</div>
+                <div class="text-xs text-gray-400">${lead.order_number ? 'Order: ' + lead.order_number : ''}</div>
+                <div class="text-xs text-gray-400">${lead.service_id ? 'Service: ' + lead.service_id : ''}</div>
             </td>
             <td class="py-4">
                 <div class="text-sm text-gray-600">${contact}</div>
@@ -682,7 +683,7 @@ async function loadOrders() {
                 *,
                 agent:profiles!orders_agent_id_fkey(id, full_name),
                 package:packages(id, name, price),
-                lead:leads(id, first_name, last_name, email, phone, address)
+                lead:leads(id, first_name, last_name, full_name, email, phone, address, order_number, service_id)
             `)
             .order('created_at', { ascending: false });
         
@@ -714,8 +715,9 @@ function renderOrdersTable(filteredOrders = null) {
     table.innerHTML = displayOrders.map(order => `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">${order.order_number || order.lead?.order_number || '-'}</div>
-                <div class="text-xs text-gray-400">Lead: ${order.lead?.lead_id || '-'}</div>
+                <div class="font-medium text-gray-800">${order.lead?.order_number || order.order_number || '-'}</div>
+                <div class="text-xs text-gray-400">Service ID: ${order.lead?.service_id || '-'}</div>
+                <div class="text-xs text-gray-400">Lead ID: ${order.lead?.id?.slice(0, 8) || '-'}</div>
             </td>
             <td class="py-4">
                 <div class="font-medium text-gray-800">${order.lead?.full_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || '-'}</div>
@@ -3364,21 +3366,31 @@ function renderReturnedItemsTable(filtered = null) {
     table.innerHTML = items.map(item => {
         const clientName = item.full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || '-';
         const status = item.return_resolved || 'pending';
+        const direction = item.return_direction || 'to_admin';
+        const directionLabel = direction === 'to_openserve' ? '→ Openserve' : direction === 'to_agent' ? '→ Agent' : '→ Admin';
+        const directionColor = direction === 'to_openserve' ? 'text-purple-600' : direction === 'to_agent' ? 'text-orange-600' : 'text-blue-600';
         
         return `
             <tr class="border-b hover:bg-gray-50">
-                <td class="py-3 px-4 text-sm font-medium text-gray-800">#${item.id?.slice(-8) || '-'}</td>
+                <td class="py-3 px-4">
+                    <div class="text-sm font-medium text-gray-800">${item.order_number || '#' + (item.id?.slice(-8) || '-')}</div>
+                    <div class="text-xs text-gray-400">Service: ${item.service_id || '-'}</div>
+                </td>
                 <td class="py-3 px-4 text-sm text-gray-600">${clientName}</td>
                 <td class="py-3 px-4 text-sm text-gray-600">${item.agent?.full_name || 'Openserve'}</td>
                 <td class="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">${item.return_reason || '-'}</td>
                 <td class="py-3 px-4">
                     <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[status]}">${status}</span>
+                    <span class="text-xs ${directionColor} ml-1">${directionLabel}</span>
                 </td>
                 <td class="py-3 px-4 text-sm text-gray-500">${item.returned_at ? new Date(item.returned_at).toLocaleDateString() : new Date(item.updated_at).toLocaleDateString()}</td>
                 <td class="py-3 px-4">
-                    <button onclick="resolveReturnedItem('${item.id}')" class="text-green-600 hover:text-green-800 text-sm mr-2">Resolve</button>
-                    <button onclick="rejectReturnedItem('${item.id}')" class="text-red-600 hover:text-red-800 text-sm mr-2">Reject</button>
-                    <button onclick="viewReturnedDetails('${item.id}')" class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                    <div class="flex flex-wrap gap-1">
+                        <button onclick="resolveReturnedItem('${item.id}')" class="text-green-600 hover:text-green-800 text-xs">Resolve</button>
+                        <button onclick="returnToAgent('${item.id}')" class="text-orange-600 hover:text-orange-800 text-xs">→Agent</button>
+                        <button onclick="forwardToOpenserve('${item.id}')" class="text-purple-600 hover:text-purple-800 text-xs">→Openserve</button>
+                        <button onclick="viewReturnedDetails('${item.id}')" class="text-blue-600 hover:text-blue-800 text-xs">View</button>
+                    </div>
                 </td>
             </tr>
         `;
@@ -3484,4 +3496,86 @@ function exportReturnedItems() {
     ]);
     
     downloadCSV(headers, rows, 'returned_items_export');
+}
+
+// Return to Openserve - Admin sends item to Openserve for completion
+async function returnToOpenserve(leadId) {
+    const reason = prompt('Enter reason for returning to Openserve:');
+    if (!reason) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'returned',
+                return_reason: reason,
+                return_direction: 'to_openserve',
+                returned_by: currentUser.id,
+                returned_at: new Date().toISOString(),
+                return_resolved: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item returned to Openserve successfully');
+        await Promise.all([loadLeads(), loadOrders(), loadReturnedItems()]);
+    } catch (error) {
+        alert('Error returning to Openserve: ' + error.message);
+    }
+}
+
+// Return to Agent - Admin sends item back to agent for fixes
+async function returnToAgent(leadId, type = 'lead') {
+    const reason = prompt('Enter reason for returning to agent:');
+    if (!reason) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'returned',
+                return_reason: reason,
+                return_direction: 'to_agent',
+                returned_by: currentUser.id,
+                returned_at: new Date().toISOString(),
+                return_resolved: null,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item returned to agent successfully');
+        await Promise.all([loadLeads(), loadOrders(), loadReturnedItems()]);
+    } catch (error) {
+        alert('Error returning to agent: ' + error.message);
+    }
+}
+
+// Forward to Openserve - Escalate from admin to Openserve
+async function forwardToOpenserve(leadId) {
+    const notes = prompt('Enter notes for Openserve:');
+    if (notes === null) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                order_status: 'processing',
+                return_direction: 'to_openserve',
+                resolution_notes: notes,
+                return_resolved: 'forwarded',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        alert('Item forwarded to Openserve');
+        await loadReturnedItems();
+    } catch (error) {
+        alert('Error forwarding: ' + error.message);
+    }
 }
