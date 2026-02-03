@@ -10,11 +10,11 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Poppins', sans-serif; }
-        /* Axxess Blue with subtle Openserve Green */
+        /* Axxess Blue with subtle Openserve Green - lighter shade */
         :root {
-            --axxess-blue: #1e3a5f;
-            --axxess-blue-dark: #0f2640;
-            --axxess-blue-light: #2d4a6f;
+            --axxess-blue: #2c4a6e;
+            --axxess-blue-dark: #1a3a5c;
+            --axxess-blue-light: #3d5a7e;
             --openserve-green: #10b981;
             --openserve-green-light: #34d399;
             --accent-50: #eff6ff;
@@ -24,7 +24,7 @@
             --accent-700: #1d4ed8;
         }
         .sidebar-bg { 
-            background: linear-gradient(180deg, var(--axxess-blue-dark) 0%, var(--axxess-blue) 100%);
+            background: linear-gradient(180deg, var(--axxess-blue) 0%, var(--axxess-blue-light) 100%);
         }
         .main-bg { background: #f1f5f9; }
         .card { 
@@ -352,38 +352,38 @@
             </div>
 
             <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-3 mb-3">
-                <div class="card p-4">
-                    <h3 class="text-base font-semibold text-gray-800 mb-2">Orders Overview</h3>
-                    <canvas id="ordersChart" height="140"></canvas>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-2 mb-2">
+                <div class="card p-3">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-1">Orders Overview</h3>
+                    <canvas id="ordersChart" height="100"></canvas>
                 </div>
-                <div class="card p-4">
-                    <h3 class="text-base font-semibold text-gray-800 mb-2">Lead Sources</h3>
-                    <canvas id="leadsChart" height="140"></canvas>
+                <div class="card p-3">
+                    <h3 class="text-sm font-semibold text-gray-800 mb-1">Lead Sources</h3>
+                    <canvas id="leadsChart" height="100"></canvas>
                 </div>
             </div>
 
             <!-- Recent Activity -->
-            <div class="card p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-lg font-semibold text-gray-800">Recent Orders</h3>
+            <div class="card p-3">
+                <div class="flex items-center justify-between mb-2">
+                    <h3 class="text-sm font-semibold text-gray-800">Recent Orders</h3>
                     <a href="#orders" onclick="showSection('orders')" class="text-green-500 hover:text-green-600 text-sm font-medium">View All</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead>
-                            <tr class="text-left text-gray-500 text-sm border-b">
-                                <th class="pb-4 font-medium">Client</th>
-                                <th class="pb-4 font-medium">Package</th>
-                                <th class="pb-4 font-medium">Agent</th>
-                                <th class="pb-4 font-medium">Status</th>
-                                <th class="pb-4 font-medium">Date</th>
-                                <th class="pb-4 font-medium">Actions</th>
+                            <tr class="text-left text-gray-500 text-xs border-b">
+                                <th class="pb-2 font-medium">Client</th>
+                                <th class="pb-2 font-medium">Package</th>
+                                <th class="pb-2 font-medium">Agent</th>
+                                <th class="pb-2 font-medium">Status</th>
+                                <th class="pb-2 font-medium">Date</th>
+                                <th class="pb-2 font-medium">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="recentOrdersTable">
                             <tr class="table-row border-b">
-                                <td class="py-4" colspan="6">
+                                <td class="py-2" colspan="6">
                                     <p class="text-gray-500 text-center">Loading...</p>
                                 </td>
                             </tr>
