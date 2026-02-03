@@ -2432,6 +2432,45 @@ async function confirmImport() {
             if (agentId) leadData.agent_id = agentId;
             if (dealerId) leadData.dealer_id = dealerId;
             
+            console.log('Checking for duplicate lead:', leadData);
+            
+            // Check for existing lead by lead_id to prevent duplicates
+            if (row.lead_id) {
+                const { data: existingLead } = await window.supabaseClient
+                    .from('leads')
+                    .select('id, status')
+                    .eq('lead_id', row.lead_id)
+                    .limit(1);
+                
+                if (existingLead && existingLead.length > 0) {
+                    console.log('Skipping duplicate lead_id:', row.lead_id, 'status:', existingLead[0].status);
+                    importStats.duplicates++;
+                    continue;
+                }
+            }
+            
+            // Also check by email + phone combination if no lead_id
+            if (!row.lead_id && (row.email || row.phone)) {
+                let duplicateQuery = window.supabaseClient
+                    .from('leads')
+                    .select('id, status');
+                
+                if (row.email) {
+                    duplicateQuery = duplicateQuery.eq('email', row.email);
+                }
+                if (row.phone) {
+                    duplicateQuery = duplicateQuery.eq('phone', row.phone);
+                }
+                
+                const { data: existingByContact } = await duplicateQuery.limit(1);
+                
+                if (existingByContact && existingByContact.length > 0) {
+                    console.log('Skipping duplicate by contact - email:', row.email, 'phone:', row.phone);
+                    importStats.duplicates++;
+                    continue;
+                }
+            }
+            
             console.log('Inserting lead:', leadData);
             
             // Try insert with minimal fields
