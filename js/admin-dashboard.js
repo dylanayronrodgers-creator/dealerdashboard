@@ -459,18 +459,37 @@ function populatePackageSelects() {
 // Load Leads
 async function loadLeads() {
     try {
-        const { data, error } = await window.supabaseClient
-            .from('leads')
-            .select(`
-                *,
-                agent:profiles!leads_agent_id_fkey(id, full_name),
-                package:packages(id, name, price),
-                dealer:dealers(id, name)
-            `)
-            .order('created_at', { ascending: false });
+        // Supabase default limit is 1000, so we need to fetch in batches for large datasets
+        let allLeads = [];
+        let from = 0;
+        const batchSize = 1000;
+        let hasMore = true;
         
-        if (error) throw error;
-        leads = data || [];
+        while (hasMore) {
+            const { data, error } = await window.supabaseClient
+                .from('leads')
+                .select(`
+                    *,
+                    agent:profiles!leads_agent_id_fkey(id, full_name),
+                    package:packages(id, name, price),
+                    dealer:dealers(id, name)
+                `)
+                .order('created_at', { ascending: false })
+                .range(from, from + batchSize - 1);
+            
+            if (error) throw error;
+            
+            if (data && data.length > 0) {
+                allLeads = allLeads.concat(data);
+                from += batchSize;
+                hasMore = data.length === batchSize;
+            } else {
+                hasMore = false;
+            }
+        }
+        
+        leads = allLeads;
+        console.log('Loaded', leads.length, 'leads');
         
         renderLeadsTable();
         renderRecentOrders();
