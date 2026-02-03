@@ -964,9 +964,10 @@ function viewLeadDetails(leadId) {
         <div class="grid grid-cols-2 gap-4">
             <div class="col-span-2 bg-blue-50 rounded-xl p-4 mb-2">
                 <h4 class="font-semibold text-blue-800 mb-2">Lead Information</h4>
-                <div class="grid grid-cols-2 gap-2 text-sm">
+                <div class="grid grid-cols-3 gap-2 text-sm">
                     <div><span class="text-gray-500">Lead ID:</span> <strong>${formatValue(lead.lead_id)}</strong></div>
                     <div><span class="text-gray-500">Status:</span> <strong>${formatValue(lead.status)}</strong></div>
+                    <div><span class="text-gray-500">Lead Type:</span> <strong>${formatValue(lead.lead_type)}</strong></div>
                 </div>
             </div>
             
@@ -981,11 +982,20 @@ function viewLeadDetails(leadId) {
             </div>
             
             <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Contact Information</h4>
+                <h4 class="font-semibold text-gray-700 mb-2">Primary Contact</h4>
                 <div class="space-y-1 text-sm">
                     <div><span class="text-gray-500">Email:</span> ${formatValue(lead.email)}</div>
                     <div><span class="text-gray-500">Phone:</span> ${formatValue(lead.phone)}</div>
-                    <div><span class="text-gray-500">Address:</span> ${formatValue(lead.address)}</div>
+                    <div><span class="text-gray-500">Address/Region:</span> ${formatValue(lead.address)}</div>
+                </div>
+            </div>
+            
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-2">Secondary Contact</h4>
+                <div class="space-y-1 text-sm">
+                    <div><span class="text-gray-500">Name:</span> ${formatValue(lead.secondary_contact_name)}</div>
+                    <div><span class="text-gray-500">Number:</span> ${formatValue(lead.secondary_contact_number)}</div>
+                    <div><span class="text-gray-500">Email:</span> ${formatValue(lead.secondary_contact_email)}</div>
                 </div>
             </div>
             
@@ -994,16 +1004,27 @@ function viewLeadDetails(leadId) {
                 <div class="space-y-1 text-sm">
                     <div><span class="text-gray-500">Agent:</span> ${formatValue(lead.agent?.full_name || lead.agent_name)}</div>
                     <div><span class="text-gray-500">Dealer:</span> ${formatValue(lead.dealer?.name || lead.dealer_name)}</div>
-                    <div><span class="text-gray-500">Package:</span> ${formatValue(lead.package?.name || lead.package_name)}</div>
+                    <div><span class="text-gray-500">Package/Deal:</span> ${formatValue(lead.package?.name || lead.package_name)}</div>
+                    <div><span class="text-gray-500">ISP:</span> ${formatValue(lead.isp)}</div>
                 </div>
             </div>
             
             <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-2">Dates</h4>
+                <h4 class="font-semibold text-gray-700 mb-2">Order Info</h4>
                 <div class="space-y-1 text-sm">
+                    <div><span class="text-gray-500">Order Number:</span> ${formatValue(lead.order_number)}</div>
+                    <div><span class="text-gray-500">Order Status:</span> ${formatValue(lead.order_status)}</div>
+                    <div><span class="text-gray-500">Order Date:</span> ${formatDate(lead.order_date)}</div>
+                </div>
+            </div>
+            
+            <div class="col-span-2 bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-2">Dates & Tracking</h4>
+                <div class="grid grid-cols-4 gap-2 text-sm">
                     <div><span class="text-gray-500">Created:</span> ${formatDate(lead.created_at)}</div>
                     <div><span class="text-gray-500">Updated:</span> ${formatDate(lead.updated_at)}</div>
                     <div><span class="text-gray-500">Date Captured:</span> ${formatDate(lead.date_captured)}</div>
+                    <div><span class="text-gray-500">Captured By:</span> ${formatValue(lead.captured_by_email)}</div>
                 </div>
             </div>
             
