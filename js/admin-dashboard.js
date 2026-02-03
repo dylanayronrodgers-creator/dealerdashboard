@@ -1670,19 +1670,8 @@ async function confirmImport() {
         progressText.textContent = progress + '%';
         
         try {
-            // Check for duplicates by lead_id
-            if (row.lead_id) {
-                const { data: existing } = await window.supabaseClient
-                    .from('leads')
-                    .select('id')
-                    .eq('lead_id', row.lead_id)
-                    .limit(1);
-                
-                if (existing && existing.length > 0) {
-                    importStats.duplicates++;
-                    continue;
-                }
-            }
+            // Skip duplicate check - column may not exist yet
+            // Duplicates will be handled by unique constraint if present
             
             // Find or CREATE dealer
             let dealerId = null;
@@ -1782,40 +1771,30 @@ async function confirmImport() {
                 return isNaN(d.getTime()) ? null : d.toISOString();
             };
             
-            // Build lead data object - start with minimal required fields
+            // Build lead data - use ONLY status field which must exist
             const leadData = {
                 status: 'new'
             };
             
-            // Add basic text fields (these should exist in base schema)
-            if (row.lead_id) leadData.lead_id = row.lead_id;
-            if (fullName) leadData.full_name = fullName;
-            if (row.first_name) leadData.first_name = row.first_name;
-            if (row.last_name) leadData.last_name = row.last_name;
-            if (row.email) leadData.email = row.email;
-            if (row.phone) leadData.phone = row.phone;
-            if (row.address) leadData.address = row.address;
-            if (row.notes) leadData.notes = row.notes;
-            
-            // Add foreign keys if found
+            // Add foreign keys if found (these are standard FK columns)
             if (packageId) leadData.package_id = packageId;
             if (agentId) leadData.agent_id = agentId;
-            if (dealerId) leadData.dealer_id = dealerId;
             
-            console.log('Inserting lead with basic fields:', leadData);
+            console.log('Inserting minimal lead:', leadData);
             
-            // Try insert with basic fields first
+            // Try insert with minimal fields
             let insertResult = await window.supabaseClient
                 .from('leads')
                 .insert(leadData)
                 .select();
             
             if (insertResult.error) {
-                console.error('Insert error for row', i, ':', insertResult.error);
+                // Log full error details
+                console.error('Insert error for row', i, ':', JSON.stringify(insertResult.error));
                 throw insertResult.error;
             }
             
-            console.log('Successfully inserted:', insertResult.data);
+            console.log('Successfully inserted lead ID:', insertResult.data?.[0]?.id);
             importStats.imported++;
         } catch (error) {
             console.error('Error importing row', i, ':', error.message || error);

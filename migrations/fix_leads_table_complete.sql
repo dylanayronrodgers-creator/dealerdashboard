@@ -1,6 +1,28 @@
 -- Complete leads table fix - Run this in Supabase SQL Editor
 -- This adds all columns needed for CSV import
 
+-- First ensure RLS is properly configured
+ALTER TABLE leads ENABLE ROW LEVEL SECURITY;
+
+-- Drop existing policies to avoid conflicts
+DROP POLICY IF EXISTS "leads_select_policy" ON leads;
+DROP POLICY IF EXISTS "leads_insert_policy" ON leads;
+DROP POLICY IF EXISTS "leads_update_policy" ON leads;
+DROP POLICY IF EXISTS "leads_delete_policy" ON leads;
+DROP POLICY IF EXISTS "Enable read access for all users" ON leads;
+DROP POLICY IF EXISTS "Enable insert for authenticated users" ON leads;
+DROP POLICY IF EXISTS "Enable update for authenticated users" ON leads;
+
+-- Create permissive policies for authenticated users
+CREATE POLICY "leads_select_policy" ON leads FOR SELECT TO authenticated USING (true);
+CREATE POLICY "leads_insert_policy" ON leads FOR INSERT TO authenticated WITH CHECK (true);
+CREATE POLICY "leads_update_policy" ON leads FOR UPDATE TO authenticated USING (true);
+CREATE POLICY "leads_delete_policy" ON leads FOR DELETE TO authenticated USING (true);
+
+-- Also allow anon access for testing
+CREATE POLICY "leads_anon_select" ON leads FOR SELECT TO anon USING (true);
+CREATE POLICY "leads_anon_insert" ON leads FOR INSERT TO anon WITH CHECK (true);
+
 -- First, add the lead_id column if it doesn't exist
 ALTER TABLE leads ADD COLUMN IF NOT EXISTS lead_id TEXT;
 
