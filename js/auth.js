@@ -72,6 +72,8 @@ async function handleLogin(e) {
             window.location.href = 'admin-dashboard.html';
         } else if (profile.role === 'dealer') {
             window.location.href = 'dealer-dashboard.html';
+        } else if (profile.role === 'openserve') {
+            window.location.href = 'openserve-dashboard.html';
         } else {
             window.location.href = 'agent-dashboard.html';
         }

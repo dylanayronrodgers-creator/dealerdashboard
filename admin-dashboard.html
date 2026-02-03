@@ -122,9 +122,7 @@
         <!-- Logo -->
         <div class="p-6 border-b border-white/10">
             <div class="flex items-center gap-3">
-                <div class="bg-slate-700 rounded-lg p-2">
-                    <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-8">
-                </div>
+                <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-12">
                 <div>
                     <h1 class="text-white font-bold">Axxess</h1>
                     <p class="text-white/50 text-xs">Admin Portal</p>
@@ -169,6 +167,13 @@
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                 </svg>
                 Reports
+            </a>
+            <a href="#returned" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('returned')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                Returned Items
+                <span id="returnedItemsBadge" class="hidden bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
             </a>
             <a href="#import" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('import')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -560,6 +565,65 @@
             </div>
         </section>
 
+        <!-- Returned Items Section -->
+        <section id="section-returned" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Returned Items</h2>
+                    <p class="text-gray-500 text-sm">Orders returned for follow-up or correction</p>
+                </div>
+                <div class="flex gap-2">
+                    <select id="returnedStatusFilter" onchange="filterReturnedItems()" class="border rounded-xl px-4 py-2 focus:outline-none">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending Review</option>
+                        <option value="acknowledged">Acknowledged</option>
+                        <option value="resolved">Resolved</option>
+                        <option value="rejected">Rejected</option>
+                    </select>
+                    <button onclick="exportReturnedItems()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Export</button>
+                </div>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="card p-4">
+                    <p class="text-gray-500 text-sm">Total Returned</p>
+                    <p class="text-2xl font-bold text-gray-800" id="totalReturned">0</p>
+                </div>
+                <div class="card p-4">
+                    <p class="text-gray-500 text-sm">Pending Review</p>
+                    <p class="text-2xl font-bold text-yellow-600" id="pendingReturned">0</p>
+                </div>
+                <div class="card p-4">
+                    <p class="text-gray-500 text-sm">Resolved</p>
+                    <p class="text-2xl font-bold text-green-600" id="resolvedReturned">0</p>
+                </div>
+                <div class="card p-4">
+                    <p class="text-gray-500 text-sm">Rejected</p>
+                    <p class="text-2xl font-bold text-red-600" id="rejectedReturned">0</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Order</th>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Client</th>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Returned By</th>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Reason</th>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="returnedItemsTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
         <!-- Import Section -->
         <section id="section-import" class="p-4 md:p-8 hidden">
             <div class="card p-6">
@@ -776,6 +840,102 @@
                                 <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
                             </label>
                         </div>
+                        <div class="flex items-center justify-between py-3 border-b">
+                            <div>
+                                <p class="font-medium text-gray-700">Auto-confirm commissions</p>
+                                <p class="text-sm text-gray-500">Auto-confirm after 30 days</p>
+                            </div>
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="autoConfirmCommissions" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-emerald-600"></div>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Privileges Management -->
+            <div class="mt-6">
+                <div class="card p-6">
+                    <div class="flex items-center justify-between mb-6">
+                        <div>
+                            <h4 class="font-semibold text-gray-800">User Privileges Management</h4>
+                            <p class="text-sm text-gray-500">Assign roles and permissions to users</p>
+                        </div>
+                        <button onclick="openModal('addPrivilegeModal')" class="btn-primary text-white px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                            </svg>
+                            Add User
+                        </button>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">User</th>
+                                    <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Role</th>
+                                    <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Privileges</th>
+                                    <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Status</th>
+                                    <th class="text-left py-3 px-4 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="privilegesTable"></tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Data Management -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
+                <div class="card p-6">
+                    <h4 class="font-semibold text-gray-800 mb-4">Data Export</h4>
+                    <p class="text-sm text-gray-500 mb-4">Export your data for backup or analysis</p>
+                    <div class="space-y-3">
+                        <button onclick="exportData('leads')" class="w-full flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50">
+                            <span class="font-medium text-gray-700">Export All Leads</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                        <button onclick="exportData('agents')" class="w-full flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50">
+                            <span class="font-medium text-gray-700">Export All Agents</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                        <button onclick="exportData('dealers')" class="w-full flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50">
+                            <span class="font-medium text-gray-700">Export All Dealers</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                        <button onclick="exportData('all')" class="w-full flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100">
+                            <span class="font-medium text-emerald-700">Export Complete Backup</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="card p-6">
+                    <h4 class="font-semibold text-gray-800 mb-4">Danger Zone</h4>
+                    <p class="text-sm text-gray-500 mb-4">Irreversible and destructive actions</p>
+                    <div class="space-y-3">
+                        <button onclick="confirmResetStats()" class="w-full flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-xl hover:bg-orange-100">
+                            <span class="font-medium text-orange-700">Reset Dashboard Statistics</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                            </svg>
+                        </button>
+                        <button onclick="confirmClearNotifications()" class="w-full flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-xl hover:bg-orange-100">
+                            <span class="font-medium text-orange-700">Clear All Notifications</span>
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
+                            </svg>
+                        </button>
                     </div>
                 </div>
             </div>

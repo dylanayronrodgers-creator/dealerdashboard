@@ -119,10 +119,10 @@ async function loadDealerLeads() {
     try {
         const { data, error } = await window.supabaseClient
             .from('leads')
-            .select(`*, agent:profiles!leads_agent_id_fkey(id, full_name), package:packages(id, name, price)`)
+            .select(`*, agent:profiles!leads_agent_id_fkey(id, full_name), package:packages(id, name, price)`, { count: 'exact' })
             .eq('dealer_id', currentUser.dealer_id)
             .order('created_at', { ascending: false })
-            .limit(500);
+            .range(0, 9999);
         
         if (error) throw error;
         leads = data || [];

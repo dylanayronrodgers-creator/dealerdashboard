@@ -124,6 +124,32 @@ function getInitials(name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
 
+function getAgentAvatar(agent) {
+    // Use custom avatar if set, otherwise generate unique avatar using DiceBear
+    if (agent.avatar_url) return agent.avatar_url;
+    
+    // Use agent's avatar_seed if set, otherwise use their id for consistency
+    const seed = agent.avatar_seed || agent.id || agent.email || agent.full_name;
+    
+    // DiceBear avatars - using 'avataaars' style for professional look
+    // Other styles: lorelei, adventurer, big-smile, micah, miniavs, open-peeps, personas, pixel-art
+    const styles = ['avataaars', 'lorelei', 'adventurer', 'big-smile', 'micah'];
+    const styleIndex = Math.abs(hashCode(seed)) % styles.length;
+    const style = styles[styleIndex];
+    
+    return `https://api.dicebear.com/7.x/${style}/svg?seed=${encodeURIComponent(seed)}&backgroundColor=b6e3f4,c0aede,d1d4f9,ffd5dc,ffdfbf`;
+}
+
+function hashCode(str) {
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) {
+        const char = str.charCodeAt(i);
+        hash = ((hash << 5) - hash) + char;
+        hash = hash & hash;
+    }
+    return hash;
+}
+
 // Global Search
 function globalSearchHandler(query) {
     const searchTerm = query.toLowerCase().trim();
@@ -321,12 +347,12 @@ function renderAgentsGrid() {
         return;
     }
     
-    grid.innerHTML = agents.map(agent => `
+    grid.innerHTML = agents.map(agent => {
+        const avatarUrl = getAgentAvatar(agent);
+        return `
         <div class="card p-6">
             <div class="flex items-center gap-4 mb-4">
-                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center text-white font-bold">
-                    ${getInitials(agent.full_name)}
-                </div>
+                <img src="${avatarUrl}" alt="${agent.full_name}" class="w-12 h-12 rounded-full object-cover border-2 border-blue-200">
                 <div>
                     <h4 class="font-semibold text-gray-800">${agent.full_name}</h4>
                     <p class="text-gray-500 text-sm">${agent.email}</p>
@@ -347,7 +373,7 @@ function renderAgentsGrid() {
                 <button onclick="deleteAgent('${agent.id}')" class="flex-1 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm font-medium">Remove</button>
             </div>
         </div>
-    `).join('');
+    `}).join('');
     
     // Load agent stats
     agents.forEach(agent => loadAgentStats(agent.id));
@@ -773,15 +799,20 @@ async function loadDashboardStats() {
         leads.forEach(lead => {
             const commission = lead.commission_amount || (lead.package?.dealer_commission) || FIBRE_COMMISSION;
             
-            if (lead.commission_status === 'confirmed' || lead.commission_status === 'paid') {
+            // Check both commission_status and order_status for completed sales
+            const isConfirmed = lead.commission_status === 'confirmed' || 
+                               lead.commission_status === 'paid' || 
+                               lead.order_status === 'completed';
+            
+            if (isConfirmed) {
                 confirmedRevenue += commission;
                 confirmedCount++;
-            } else if (lead.commission_status === 'rejected') {
+            } else if (lead.commission_status === 'rejected' || lead.order_status === 'cancelled') {
                 rejectedRevenue += commission;
                 rejectedCount++;
-            } else {
-                // pending is default
-                pendingRevenue += FIBRE_COMMISSION;
+            } else if (lead.status === 'converted') {
+                // Converted but not yet completed
+                pendingRevenue += commission;
                 pendingCount++;
             }
         });
@@ -899,6 +930,112 @@ function updateChartsWithData() {
             options: {
                 responsive: true,
                 plugins: { legend: { position: 'bottom' } }
+            }
+        });
+    }
+    
+    // Reports Section Charts
+    renderReportsCharts();
+}
+
+// Render Reports Section Charts
+function renderReportsCharts() {
+    // Agent Performance Chart - Top 10 agents by conversions
+    const agentPerformanceCtx = document.getElementById('agentPerformanceChart');
+    if (agentPerformanceCtx) {
+        const agentStats = agents.map(agent => {
+            const agentLeads = leads.filter(l => l.agent_id === agent.id);
+            const converted = agentLeads.filter(l => l.status === 'converted').length;
+            return { name: agent.full_name || 'Unknown', converted, total: agentLeads.length };
+        }).sort((a, b) => b.converted - a.converted).slice(0, 10);
+        
+        // Destroy existing chart if exists
+        const existingChart = Chart.getChart(agentPerformanceCtx);
+        if (existingChart) existingChart.destroy();
+        
+        new Chart(agentPerformanceCtx, {
+            type: 'bar',
+            data: {
+                labels: agentStats.map(a => a.name.split(' ')[0]),
+                datasets: [
+                    {
+                        label: 'Converted',
+                        data: agentStats.map(a => a.converted),
+                        backgroundColor: '#22c55e'
+                    },
+                    {
+                        label: 'Total Leads',
+                        data: agentStats.map(a => a.total),
+                        backgroundColor: '#3b82f6'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true } }
+            }
+        });
+    }
+    
+    // Monthly Conversions Chart - Last 12 months
+    const monthlyConversionsCtx = document.getElementById('monthlyConversionsChart');
+    if (monthlyConversionsCtx) {
+        const monthLabels = [];
+        const conversionsPerMonth = [];
+        const revenuePerMonth = [];
+        
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            monthLabels.push(d.toLocaleDateString('en-US', { month: 'short', year: '2-digit' }));
+            
+            const monthConversions = leads.filter(l => {
+                if (l.status !== 'converted') return false;
+                const created = new Date(l.converted_at || l.updated_at || l.created_at);
+                return created.getMonth() === d.getMonth() && created.getFullYear() === d.getFullYear();
+            });
+            
+            conversionsPerMonth.push(monthConversions.length);
+            revenuePerMonth.push(monthConversions.reduce((sum, l) => sum + (l.commission_amount || 0), 0));
+        }
+        
+        // Destroy existing chart if exists
+        const existingChart = Chart.getChart(monthlyConversionsCtx);
+        if (existingChart) existingChart.destroy();
+        
+        new Chart(monthlyConversionsCtx, {
+            type: 'line',
+            data: {
+                labels: monthLabels,
+                datasets: [
+                    {
+                        label: 'Conversions',
+                        data: conversionsPerMonth,
+                        borderColor: '#22c55e',
+                        backgroundColor: 'rgba(34, 197, 94, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y'
+                    },
+                    {
+                        label: 'Revenue (R)',
+                        data: revenuePerMonth,
+                        borderColor: '#8b5cf6',
+                        backgroundColor: 'rgba(139, 92, 246, 0.1)',
+                        fill: true,
+                        tension: 0.4,
+                        yAxisID: 'y1'
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { position: 'top' } },
+                scales: {
+                    y: { type: 'linear', position: 'left', beginAtZero: true },
+                    y1: { type: 'linear', position: 'right', beginAtZero: true, grid: { drawOnChartArea: false } }
+                }
             }
         });
     }
@@ -1964,36 +2101,43 @@ async function updateOrderStatusDropdown(orderId, newStatus) {
 
 async function updateRevenueStats() {
     try {
-        // Get confirmed leads for revenue
-        const { data: confirmedLeads } = await window.supabaseClient
+        // Get all converted leads for revenue calculation
+        const { data: allLeads } = await window.supabaseClient
             .from('leads')
-            .select('commission_amount')
-            .eq('commission_status', 'confirmed');
+            .select('commission_amount, commission_status, order_status, status')
+            .eq('status', 'converted');
         
-        const { data: pendingLeads } = await window.supabaseClient
-            .from('leads')
-            .select('commission_amount')
-            .eq('commission_status', 'pending');
+        const FIBRE_COMMISSION = 200;
+        let confirmedRevenue = 0, pendingRevenue = 0, rejectedRevenue = 0;
+        let confirmedCount = 0, pendingCount = 0, rejectedCount = 0;
         
-        const { data: rejectedLeads } = await window.supabaseClient
-            .from('leads')
-            .select('commission_amount')
-            .eq('commission_status', 'rejected');
-        
-        const confirmedRevenue = (confirmedLeads || []).reduce((sum, l) => sum + (l.commission_amount || 0), 0);
-        const pendingRevenue = (pendingLeads || []).reduce((sum, l) => sum + (l.commission_amount || 0), 0);
-        const rejectedRevenue = (rejectedLeads || []).reduce((sum, l) => sum + (l.commission_amount || 0), 0);
+        (allLeads || []).forEach(lead => {
+            const commission = lead.commission_amount || FIBRE_COMMISSION;
+            const isConfirmed = lead.commission_status === 'confirmed' || 
+                               lead.commission_status === 'paid' || 
+                               lead.order_status === 'completed';
+            
+            if (isConfirmed) {
+                confirmedRevenue += commission;
+                confirmedCount++;
+            } else if (lead.commission_status === 'rejected' || lead.order_status === 'cancelled') {
+                rejectedRevenue += commission;
+                rejectedCount++;
+            } else {
+                pendingRevenue += commission;
+                pendingCount++;
+            }
+        });
         
         document.getElementById('confirmedRevenue').textContent = `R${confirmedRevenue.toLocaleString()}`;
         document.getElementById('pendingRevenue').textContent = `R${pendingRevenue.toLocaleString()}`;
-        document.getElementById('confirmedCount').textContent = (confirmedLeads || []).length;
-        document.getElementById('pendingCount').textContent = (pendingLeads || []).length;
+        document.getElementById('confirmedCount').textContent = confirmedCount;
+        document.getElementById('pendingCount').textContent = pendingCount;
         
-        // Update rejected if element exists
         const rejectedEl = document.getElementById('rejectedRevenue');
         if (rejectedEl) rejectedEl.textContent = `R${rejectedRevenue.toLocaleString()}`;
         const rejectedCountEl = document.getElementById('rejectedCount');
-        if (rejectedCountEl) rejectedCountEl.textContent = (rejectedLeads || []).length;
+        if (rejectedCountEl) rejectedCountEl.textContent = rejectedCount;
         
     } catch (error) {
         console.error('Error updating revenue stats:', error);
@@ -2033,7 +2177,14 @@ function renderDealersGrid() {
         return;
     }
     
-    grid.innerHTML = dealers.map(dealer => `
+    grid.innerHTML = dealers.map(dealer => {
+        // Get agents assigned to this dealer
+        const dealerAgents = agents.filter(a => a.dealer_id === dealer.id);
+        const agentCount = dealerAgents.length;
+        const agentNames = dealerAgents.slice(0, 3).map(a => a.full_name).join(', ');
+        const moreAgents = agentCount > 3 ? ` +${agentCount - 3} more` : '';
+        
+        return `
         <div class="card p-6">
             <div class="flex items-start justify-between mb-4">
                 <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center overflow-hidden">
@@ -2052,6 +2203,10 @@ function renderDealersGrid() {
             ${dealer.code ? `<p class="text-sm text-gray-500 mb-2">Code: ${dealer.code}</p>` : ''}
             ${dealer.contact_email ? `<p class="text-sm text-gray-600">${dealer.contact_email}</p>` : ''}
             ${dealer.contact_phone ? `<p class="text-sm text-gray-600">${dealer.contact_phone}</p>` : ''}
+            <div class="mt-3 p-2 bg-blue-50 rounded-lg">
+                <p class="text-xs text-blue-600 font-medium mb-1">Agents (${agentCount})</p>
+                <p class="text-xs text-gray-600">${agentNames || 'No agents assigned'}${moreAgents}</p>
+            </div>
             <div class="mt-4 pt-4 border-t flex gap-2">
                 <button onclick="viewDealerDetails('${dealer.id}')" class="text-sm text-blue-600 hover:text-blue-800">Edit</button>
                 <button onclick="toggleDealerStatus('${dealer.id}', ${!dealer.is_active})" class="text-sm ${dealer.is_active ? 'text-orange-600 hover:text-orange-800' : 'text-green-600 hover:text-green-800'}">
@@ -2060,7 +2215,7 @@ function renderDealersGrid() {
                 <button onclick="deleteDealer('${dealer.id}')" class="text-sm text-red-600 hover:text-red-800">Delete</button>
             </div>
         </div>
-    `).join('');
+    `}).join('');
 }
 
 function populateDealerSelects() {
@@ -2842,4 +2997,491 @@ function downloadTemplate() {
     a.download = 'leads_import_template.csv';
     a.click();
     window.URL.revokeObjectURL(url);
+}
+
+// ==========================================
+// Admin Settings & Privileges Functions
+// ==========================================
+
+async function loadPrivilegesTable() {
+    const table = document.getElementById('privilegesTable');
+    if (!table) return;
+    
+    const allUsers = [...agents];
+    
+    // Add admins from profiles if not already in agents
+    try {
+        const { data: admins } = await window.supabaseClient
+            .from('profiles')
+            .select('*')
+            .in('role', ['admin', 'openserve', 'dealer'])
+            .range(0, 100);
+        
+        if (admins) {
+            admins.forEach(admin => {
+                if (!allUsers.find(u => u.id === admin.id)) {
+                    allUsers.push(admin);
+                }
+            });
+        }
+    } catch (e) {
+        console.error('Error loading admins:', e);
+    }
+    
+    if (allUsers.length === 0) {
+        table.innerHTML = '<tr><td colspan="5" class="py-4 text-center text-gray-500">No users found</td></tr>';
+        return;
+    }
+    
+    const roleColors = {
+        'admin': 'bg-purple-100 text-purple-700',
+        'agent': 'bg-blue-100 text-blue-700',
+        'dealer': 'bg-emerald-100 text-emerald-700',
+        'openserve': 'bg-green-100 text-green-700',
+        'external_agent': 'bg-orange-100 text-orange-700'
+    };
+    
+    const rolePrivileges = {
+        'admin': ['All Access', 'Manage Users', 'Edit Settings', 'View Reports', 'Export Data'],
+        'agent': ['View Leads', 'Edit Own Leads', 'Convert Clients'],
+        'dealer': ['View Team Leads', 'View Reports'],
+        'openserve': ['View Orders', 'Update Status', 'Return Items'],
+        'external_agent': ['View Assigned', 'Update Status']
+    };
+    
+    table.innerHTML = allUsers.slice(0, 20).map(user => {
+        const role = user.role || 'agent';
+        const privileges = rolePrivileges[role] || [];
+        const avatarUrl = getAgentAvatar(user);
+        
+        return `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4">
+                    <div class="flex items-center gap-3">
+                        <img src="${avatarUrl}" class="w-8 h-8 rounded-full">
+                        <div>
+                            <p class="font-medium text-gray-800">${user.full_name || 'Unknown'}</p>
+                            <p class="text-xs text-gray-500">${user.email || ''}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${roleColors[role] || 'bg-gray-100'}">${role}</span>
+                </td>
+                <td class="py-3 px-4">
+                    <div class="flex flex-wrap gap-1">
+                        ${privileges.slice(0, 3).map(p => `<span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">${p}</span>`).join('')}
+                        ${privileges.length > 3 ? `<span class="text-xs text-gray-400">+${privileges.length - 3}</span>` : ''}
+                    </div>
+                </td>
+                <td class="py-3 px-4">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${user.is_active !== false ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}">
+                        ${user.is_active !== false ? 'Active' : 'Inactive'}
+                    </span>
+                </td>
+                <td class="py-3 px-4">
+                    <button onclick="editUserPrivileges('${user.id}')" class="text-blue-600 hover:text-blue-800 text-sm mr-2">Edit</button>
+                    <button onclick="toggleUserActive('${user.id}', ${user.is_active === false})" class="text-orange-600 hover:text-orange-800 text-sm">
+                        ${user.is_active !== false ? 'Disable' : 'Enable'}
+                    </button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+async function editUserPrivileges(userId) {
+    const user = agents.find(a => a.id === userId);
+    if (!user) {
+        alert('User not found');
+        return;
+    }
+    
+    const newRole = prompt(`Edit role for ${user.full_name}\n\nCurrent role: ${user.role}\n\nAvailable roles:\n- admin\n- agent\n- dealer\n- openserve\n- external_agent\n\nEnter new role:`, user.role);
+    
+    if (newRole && ['admin', 'agent', 'dealer', 'openserve', 'external_agent'].includes(newRole)) {
+        try {
+            const { error } = await window.supabaseClient
+                .from('profiles')
+                .update({ role: newRole })
+                .eq('id', userId);
+            
+            if (error) throw error;
+            alert('Role updated successfully');
+            await loadAgents();
+            loadPrivilegesTable();
+        } catch (error) {
+            alert('Error updating role: ' + error.message);
+        }
+    } else if (newRole) {
+        alert('Invalid role. Please enter one of: admin, agent, dealer, openserve, external_agent');
+    }
+}
+
+async function toggleUserActive(userId, activate) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('profiles')
+            .update({ is_active: activate })
+            .eq('id', userId);
+        
+        if (error) throw error;
+        alert(activate ? 'User activated' : 'User deactivated');
+        await loadAgents();
+        loadPrivilegesTable();
+    } catch (error) {
+        alert('Error updating user: ' + error.message);
+    }
+}
+
+// Data Export Functions
+async function exportData(type) {
+    try {
+        let data, filename, headers;
+        
+        switch (type) {
+            case 'leads':
+                data = leads;
+                filename = 'leads_export';
+                headers = ['ID', 'Name', 'Email', 'Phone', 'Status', 'Order Status', 'Agent', 'Dealer', 'Package', 'Commission', 'Created'];
+                break;
+            case 'agents':
+                data = agents;
+                filename = 'agents_export';
+                headers = ['ID', 'Name', 'Email', 'Phone', 'Role', 'Dealer', 'Active', 'Created'];
+                break;
+            case 'dealers':
+                data = dealers;
+                filename = 'dealers_export';
+                headers = ['ID', 'Name', 'Code', 'Email', 'Phone', 'Active', 'Created'];
+                break;
+            case 'all':
+                await exportCompleteBackup();
+                return;
+        }
+        
+        const rows = data.map(item => {
+            switch (type) {
+                case 'leads':
+                    return [
+                        item.id,
+                        item.full_name || `${item.first_name || ''} ${item.last_name || ''}`,
+                        item.email || '',
+                        item.phone || '',
+                        item.status || '',
+                        item.order_status || '',
+                        item.agent?.full_name || '',
+                        item.dealer?.name || '',
+                        item.package?.name || '',
+                        item.commission_amount || 0,
+                        item.created_at ? new Date(item.created_at).toLocaleDateString() : ''
+                    ];
+                case 'agents':
+                    return [
+                        item.id,
+                        item.full_name || '',
+                        item.email || '',
+                        item.phone || '',
+                        item.role || 'agent',
+                        dealers.find(d => d.id === item.dealer_id)?.name || '',
+                        item.is_active !== false ? 'Yes' : 'No',
+                        item.created_at ? new Date(item.created_at).toLocaleDateString() : ''
+                    ];
+                case 'dealers':
+                    return [
+                        item.id,
+                        item.name || '',
+                        item.code || '',
+                        item.contact_email || '',
+                        item.contact_phone || '',
+                        item.is_active ? 'Yes' : 'No',
+                        item.created_at ? new Date(item.created_at).toLocaleDateString() : ''
+                    ];
+            }
+        });
+        
+        downloadCSV(headers, rows, filename);
+        
+    } catch (error) {
+        console.error('Export error:', error);
+        alert('Export failed: ' + error.message);
+    }
+}
+
+async function exportCompleteBackup() {
+    const timestamp = new Date().toISOString().split('T')[0];
+    
+    // Export leads
+    const leadsHeaders = ['ID', 'Name', 'Email', 'Phone', 'Address', 'Status', 'Order Status', 'Commission Status', 'Commission Amount', 'Agent ID', 'Dealer ID', 'Package ID', 'Created'];
+    const leadsRows = leads.map(l => [
+        l.id, l.full_name || '', l.email || '', l.phone || '', l.address || '',
+        l.status || '', l.order_status || '', l.commission_status || '', l.commission_amount || 0,
+        l.agent_id || '', l.dealer_id || '', l.package_id || '', l.created_at || ''
+    ]);
+    downloadCSV(leadsHeaders, leadsRows, `backup_leads_${timestamp}`);
+    
+    // Export agents
+    const agentsHeaders = ['ID', 'Name', 'Email', 'Phone', 'Role', 'Dealer ID', 'Active', 'Approved', 'Created'];
+    const agentsRows = agents.map(a => [
+        a.id, a.full_name || '', a.email || '', a.phone || '', a.role || '',
+        a.dealer_id || '', a.is_active !== false, a.is_approved !== false, a.created_at || ''
+    ]);
+    downloadCSV(agentsHeaders, agentsRows, `backup_agents_${timestamp}`);
+    
+    // Export dealers
+    const dealersHeaders = ['ID', 'Name', 'Code', 'Email', 'Phone', 'Active', 'Created'];
+    const dealersRows = dealers.map(d => [
+        d.id, d.name || '', d.code || '', d.contact_email || '', d.contact_phone || '',
+        d.is_active, d.created_at || ''
+    ]);
+    downloadCSV(dealersHeaders, dealersRows, `backup_dealers_${timestamp}`);
+    
+    alert('Complete backup exported! Check your downloads folder for 3 CSV files.');
+}
+
+function downloadCSV(headers, rows, filename) {
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}_${new Date().toISOString().split('T')[0]}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+}
+
+function confirmResetStats() {
+    if (confirm('Are you sure you want to reset dashboard statistics? This action cannot be undone.')) {
+        alert('Statistics reset functionality would clear cached stats. Database records remain intact.');
+    }
+}
+
+function confirmClearNotifications() {
+    if (confirm('Are you sure you want to clear all notifications? This action cannot be undone.')) {
+        notifications = [];
+        updateNotifications();
+        alert('All notifications cleared.');
+    }
+}
+
+// Load privileges table when settings section is shown
+document.addEventListener('DOMContentLoaded', () => {
+    const observer = new MutationObserver(() => {
+        const settingsSection = document.getElementById('section-settings');
+        if (settingsSection && !settingsSection.classList.contains('hidden')) {
+            loadPrivilegesTable();
+        }
+        const returnedSection = document.getElementById('section-returned');
+        if (returnedSection && !returnedSection.classList.contains('hidden')) {
+            loadReturnedItems();
+        }
+    });
+    
+    const main = document.querySelector('main');
+    if (main) {
+        observer.observe(main, { subtree: true, attributes: true, attributeFilter: ['class'] });
+    }
+});
+
+// ==========================================
+// Returned Items Functions
+// ==========================================
+
+let returnedItems = [];
+
+async function loadReturnedItems() {
+    try {
+        const { data, error } = await window.supabaseClient
+            .from('leads')
+            .select(`
+                *,
+                agent:profiles!leads_agent_id_fkey(id, full_name),
+                dealer:dealers(id, name),
+                package:packages(id, name)
+            `)
+            .eq('order_status', 'returned')
+            .order('updated_at', { ascending: false })
+            .range(0, 500);
+        
+        if (error) throw error;
+        returnedItems = data || [];
+        
+        updateReturnedStats();
+        renderReturnedItemsTable();
+        updateReturnedBadge();
+        
+    } catch (error) {
+        console.error('Error loading returned items:', error);
+    }
+}
+
+function updateReturnedStats() {
+    const total = returnedItems.length;
+    const pending = returnedItems.filter(r => !r.return_resolved).length;
+    const resolved = returnedItems.filter(r => r.return_resolved === 'resolved').length;
+    const rejected = returnedItems.filter(r => r.return_resolved === 'rejected').length;
+    
+    document.getElementById('totalReturned').textContent = total;
+    document.getElementById('pendingReturned').textContent = pending;
+    document.getElementById('resolvedReturned').textContent = resolved;
+    document.getElementById('rejectedReturned').textContent = rejected;
+}
+
+function updateReturnedBadge() {
+    const badge = document.getElementById('returnedItemsBadge');
+    const pending = returnedItems.filter(r => !r.return_resolved).length;
+    
+    if (pending > 0) {
+        badge.textContent = pending;
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+function renderReturnedItemsTable(filtered = null) {
+    const table = document.getElementById('returnedItemsTable');
+    if (!table) return;
+    
+    const items = filtered || returnedItems;
+    
+    if (items.length === 0) {
+        table.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-gray-500">No returned items found</td></tr>';
+        return;
+    }
+    
+    const statusColors = {
+        'pending': 'bg-yellow-100 text-yellow-700',
+        'acknowledged': 'bg-blue-100 text-blue-700',
+        'resolved': 'bg-green-100 text-green-700',
+        'rejected': 'bg-red-100 text-red-700'
+    };
+    
+    table.innerHTML = items.map(item => {
+        const clientName = item.full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim() || '-';
+        const status = item.return_resolved || 'pending';
+        
+        return `
+            <tr class="border-b hover:bg-gray-50">
+                <td class="py-3 px-4 text-sm font-medium text-gray-800">#${item.id?.slice(-8) || '-'}</td>
+                <td class="py-3 px-4 text-sm text-gray-600">${clientName}</td>
+                <td class="py-3 px-4 text-sm text-gray-600">${item.agent?.full_name || 'Openserve'}</td>
+                <td class="py-3 px-4 text-sm text-gray-600 max-w-xs truncate">${item.return_reason || '-'}</td>
+                <td class="py-3 px-4">
+                    <span class="px-2 py-1 rounded-full text-xs font-medium ${statusColors[status]}">${status}</span>
+                </td>
+                <td class="py-3 px-4 text-sm text-gray-500">${item.returned_at ? new Date(item.returned_at).toLocaleDateString() : new Date(item.updated_at).toLocaleDateString()}</td>
+                <td class="py-3 px-4">
+                    <button onclick="resolveReturnedItem('${item.id}')" class="text-green-600 hover:text-green-800 text-sm mr-2">Resolve</button>
+                    <button onclick="rejectReturnedItem('${item.id}')" class="text-red-600 hover:text-red-800 text-sm mr-2">Reject</button>
+                    <button onclick="viewReturnedDetails('${item.id}')" class="text-blue-600 hover:text-blue-800 text-sm">View</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function filterReturnedItems() {
+    const status = document.getElementById('returnedStatusFilter').value;
+    
+    if (!status) {
+        renderReturnedItemsTable();
+        return;
+    }
+    
+    const filtered = returnedItems.filter(item => {
+        const itemStatus = item.return_resolved || 'pending';
+        return itemStatus === status;
+    });
+    
+    renderReturnedItemsTable(filtered);
+}
+
+async function resolveReturnedItem(itemId) {
+    const notes = prompt('Enter resolution notes:');
+    if (notes === null) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                return_resolved: 'resolved',
+                resolution_notes: notes,
+                order_status: 'pending',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', itemId);
+        
+        if (error) throw error;
+        alert('Item resolved successfully');
+        await loadReturnedItems();
+        
+    } catch (error) {
+        alert('Error resolving item: ' + error.message);
+    }
+}
+
+async function rejectReturnedItem(itemId) {
+    const notes = prompt('Enter rejection reason:');
+    if (notes === null) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                return_resolved: 'rejected',
+                resolution_notes: notes,
+                order_status: 'cancelled',
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', itemId);
+        
+        if (error) throw error;
+        alert('Item rejected');
+        await loadReturnedItems();
+        
+    } catch (error) {
+        alert('Error rejecting item: ' + error.message);
+    }
+}
+
+function viewReturnedDetails(itemId) {
+    const item = returnedItems.find(r => r.id === itemId);
+    if (!item) return;
+    
+    const clientName = item.full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim();
+    alert(`Returned Item Details:
+    
+Order ID: #${item.id?.slice(-8)}
+Client: ${clientName}
+Phone: ${item.phone || '-'}
+Email: ${item.email || '-'}
+Package: ${item.package?.name || '-'}
+Agent: ${item.agent?.full_name || '-'}
+
+Return Reason: ${item.return_reason || 'Not specified'}
+Returned: ${item.returned_at ? new Date(item.returned_at).toLocaleString() : '-'}
+Status: ${item.return_resolved || 'pending'}
+Resolution Notes: ${item.resolution_notes || '-'}`);
+}
+
+function exportReturnedItems() {
+    const headers = ['Order ID', 'Client', 'Phone', 'Email', 'Agent', 'Return Reason', 'Status', 'Returned Date', 'Resolution Notes'];
+    const rows = returnedItems.map(item => [
+        item.id?.slice(-8) || '',
+        item.full_name || `${item.first_name || ''} ${item.last_name || ''}`.trim(),
+        item.phone || '',
+        item.email || '',
+        item.agent?.full_name || '',
+        item.return_reason || '',
+        item.return_resolved || 'pending',
+        item.returned_at ? new Date(item.returned_at).toLocaleDateString() : '',
+        item.resolution_notes || ''
+    ]);
+    
+    downloadCSV(headers, rows, 'returned_items_export');
 }

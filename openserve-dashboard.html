@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Openserve Dashboard - Fibre Installation Tracking</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        :root {
+            --openserve-green: #10b981;
+            --openserve-green-dark: #059669;
+            --openserve-green-light: #34d399;
+        }
+        .sidebar-bg { 
+            background: linear-gradient(180deg, #064e3b 0%, #065f46 100%);
+        }
+        .main-bg { background: #f1f5f9; }
+        .card { 
+            background: white; 
+            border-radius: 0.75rem; 
+            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+            border: 1px solid #e2e8f0;
+        }
+        .btn-primary { 
+            background: linear-gradient(135deg, var(--openserve-green) 0%, var(--openserve-green-dark) 100%);
+            transition: all 0.2s ease;
+        }
+        .btn-primary:hover { 
+            transform: translateY(-1px); 
+            box-shadow: 0 4px 14px rgba(16, 185, 129, 0.4);
+        }
+        .status-pending { background: #fef3c7; color: #92400e; }
+        .status-scheduled { background: #dbeafe; color: #1e40af; }
+        .status-in_progress { background: #e0e7ff; color: #3730a3; }
+        .status-completed { background: #d1fae5; color: #065f46; }
+        .status-cancelled { background: #fee2e2; color: #991b1b; }
+        .status-returned { background: #fce7f3; color: #9d174d; }
+        .nav-item { transition: all 0.2s ease; border-radius: 0.5rem; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+        .nav-item.active { background: rgba(255,255,255,0.2); border-left: 3px solid white; }
+        .table-row:hover { background: #f8fafc; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+            .sidebar-overlay.active { display: block; }
+            .main-content { margin-left: 0 !important; }
+            .mobile-header { display: flex !important; }
+        }
+        @media (min-width: 769px) {
+            .mobile-header { display: none !important; }
+            .sidebar-overlay { display: none !important; }
+        }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar sidebar-bg w-80 min-h-screen flex flex-col fixed left-0 top-0 z-50" id="sidebar">
+        <div class="p-6 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <img src="https://i.ibb.co/1JBh9sQp/AP1-Gcz-MU7-E0z-Ww-Bq4-NY-s-WWho-Hek-H0-Sxd-Ek-Yjbtwf-Hk-No-Ne2gs-Ir-KUjb17-LVs-P3vxi-YPMp-Hpq8-MAq-Hjfn8e.webp" alt="Openserve" class="h-12">
+                <div>
+                    <h1 class="text-white font-bold">Openserve</h1>
+                    <p class="text-white/50 text-xs">Installation Portal</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-4 space-y-2">
+            <a href="#dashboard" class="nav-item active flex items-center gap-3 text-white px-4 py-3 rounded-xl" onclick="showSection('dashboard')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                </svg>
+                Dashboard
+            </a>
+            <a href="#orders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('orders')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                </svg>
+                Installation Orders
+            </a>
+            <a href="#returned" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('returned')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
+                </svg>
+                Returned Items
+                <span id="returnedBadge" class="hidden ml-auto bg-red-500 text-white text-xs px-2 py-0.5 rounded-full">0</span>
+            </a>
+            <a href="#schedule" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('schedule')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Schedule
+            </a>
+        </nav>
+
+        <div class="p-4 border-t border-white/10">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="w-10 h-10 bg-emerald-500 rounded-full flex items-center justify-center text-white font-semibold" id="userInitials">OS</div>
+                <div>
+                    <p class="text-white font-medium text-sm" id="userName">Openserve User</p>
+                    <p class="text-white/50 text-xs">Installation Team</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white py-2 rounded-lg hover:bg-white/10 transition">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                </svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content main-bg flex-1 ml-80 min-h-screen">
+        <!-- Mobile Header -->
+        <div class="mobile-header hidden bg-white border-b px-4 py-3 sticky top-0 z-30 items-center justify-between">
+            <button onclick="toggleSidebar()" class="p-2 hover:bg-gray-100 rounded-lg">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+                </svg>
+            </button>
+            <span class="font-semibold text-gray-800">Openserve Portal</span>
+            <div class="w-10"></div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="p-6 lg:p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Installation Dashboard</h2>
+                    <p class="text-gray-500">Track fibre installation orders</p>
+                </div>
+            </div>
+
+            <!-- Stats Grid -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-blue-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Total Orders</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalOrders">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-yellow-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-yellow-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Pending</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="pendingOrders">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-purple-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Scheduled</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="scheduledOrders">0</h3>
+                        </div>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <p class="text-gray-500 text-sm">Completed</p>
+                            <h3 class="text-2xl font-bold text-gray-800" id="completedOrders">0</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Orders -->
+            <div class="card">
+                <div class="p-6 border-b">
+                    <h3 class="font-semibold text-gray-800">Recent Installation Orders</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Client</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Address</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Package</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="recentOrdersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Orders Section -->
+        <section id="section-orders" class="p-6 lg:p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Installation Orders</h2>
+                    <p class="text-gray-500" id="orderCount">All fibre installation orders</p>
+                </div>
+                <div class="flex gap-2">
+                    <select id="orderStatusFilter" onchange="filterOrders()" class="border rounded-lg px-3 py-2 text-sm">
+                        <option value="">All Status</option>
+                        <option value="pending">Pending</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                    <button onclick="exportOrders()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
+                        Export
+                    </button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Client</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Contact</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Address</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Package</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Status</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="ordersTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Returned Items Section -->
+        <section id="section-returned" class="p-6 lg:p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Returned Items</h2>
+                    <p class="text-gray-500">Orders requiring attention or follow-up</p>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Client</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Reason</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Returned By</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="returnedTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Schedule Section -->
+        <section id="section-schedule" class="p-6 lg:p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-2xl font-bold text-gray-800">Installation Schedule</h2>
+                    <p class="text-gray-500">Upcoming installations</p>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <div id="scheduleCalendar" class="grid grid-cols-7 gap-2">
+                    <!-- Calendar will be rendered here -->
+                </div>
+            </div>
+
+            <div class="card mt-6">
+                <div class="p-6 border-b">
+                    <h3 class="font-semibold text-gray-800">Scheduled Installations</h3>
+                </div>
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Date</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Time</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Order #</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Client</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Address</th>
+                                <th class="text-left py-3 px-6 text-xs font-medium text-gray-500 uppercase">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scheduleTable"></tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- Update Status Modal -->
+    <div id="updateStatusModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-xl font-bold text-gray-800 mb-4">Update Order Status</h3>
+            <input type="hidden" id="updateOrderId">
+            <div class="space-y-4">
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">New Status</label>
+                    <select id="newOrderStatus" class="w-full border rounded-lg px-3 py-2">
+                        <option value="pending">Pending</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="in_progress">In Progress</option>
+                        <option value="completed">Completed</option>
+                        <option value="returned">Return to Agent</option>
+                    </select>
+                </div>
+                <div id="returnReasonDiv" class="hidden">
+                    <label class="block text-sm text-gray-600 mb-1">Return Reason</label>
+                    <textarea id="returnReason" rows="3" class="w-full border rounded-lg px-3 py-2" placeholder="Explain why this order is being returned..."></textarea>
+                </div>
+                <div id="scheduleDateDiv" class="hidden">
+                    <label class="block text-sm text-gray-600 mb-1">Schedule Date</label>
+                    <input type="datetime-local" id="scheduleDate" class="w-full border rounded-lg px-3 py-2">
+                </div>
+                <div>
+                    <label class="block text-sm text-gray-600 mb-1">Notes</label>
+                    <textarea id="statusNotes" rows="2" class="w-full border rounded-lg px-3 py-2" placeholder="Optional notes..."></textarea>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3 mt-6">
+                <button onclick="closeModal('updateStatusModal')" class="px-4 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                <button onclick="saveStatusUpdate()" class="btn-primary text-white px-6 py-2 rounded-lg">Update Status</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/openserve-dashboard.js"></script>
+</body>
+</html>

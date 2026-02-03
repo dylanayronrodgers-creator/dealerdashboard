@@ -46,7 +46,7 @@ async function loadData() {
         // Wait for Supabase client to be ready
         const client = await waitForSupabase();
         
-        const leadsRes = await client.from('leads').select('*').order('created_at', { ascending: false });
+        const leadsRes = await client.from('leads').select('*', { count: 'exact' }).order('created_at', { ascending: false }).range(0, 9999);
         if (leadsRes.error) {
             console.error('Leads error:', leadsRes.error);
             showError('Leads: ' + leadsRes.error.message);
@@ -54,15 +54,15 @@ async function loadData() {
         leads = leadsRes.data || [];
         console.log('Leads loaded:', leads.length);
         
-        const ordersRes = await client.from('orders').select('*, lead:leads(*), package:packages(*), agent:profiles(*)');
+        const ordersRes = await client.from('orders').select('*, lead:leads(*), package:packages(*), agent:profiles(*)', { count: 'exact' }).range(0, 9999);
         if (ordersRes.error) console.error('Orders error:', ordersRes.error);
         orders = ordersRes.data || [];
         
-        const agentsRes = await client.from('profiles').select('*').eq('role', 'agent');
+        const agentsRes = await client.from('profiles').select('*', { count: 'exact' }).eq('role', 'agent').range(0, 9999);
         if (agentsRes.error) console.error('Agents error:', agentsRes.error);
         agents = agentsRes.data || [];
         
-        const dealersRes = await client.from('dealers').select('*');
+        const dealersRes = await client.from('dealers').select('*', { count: 'exact' }).range(0, 9999);
         if (dealersRes.error) console.error('Dealers error:', dealersRes.error);
         dealers = dealersRes.data || [];
 
