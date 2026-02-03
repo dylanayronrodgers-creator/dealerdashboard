@@ -318,35 +318,6 @@ function viewAgentDetails(agentId) {
     openModal('editAgentModal');
 }
 
-// Edit Agent Form Handler
-document.getElementById('editAgentForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const agentId = document.getElementById('editAgentId').value;
-    const formData = new FormData(e.target);
-    
-    try {
-        const { error } = await window.supabaseClient
-            .from('profiles')
-            .update({
-                full_name: formData.get('full_name'),
-                phone: formData.get('phone') || null,
-                dealer_id: formData.get('dealer_id') || null,
-                is_approved: formData.get('is_approved') === 'true'
-            })
-            .eq('id', agentId);
-        
-        if (error) throw error;
-        
-        alert('Agent updated successfully!');
-        closeModal('editAgentModal');
-        await loadAgents();
-    } catch (error) {
-        console.error('Error updating agent:', error);
-        alert('Error updating agent: ' + error.message);
-    }
-});
-
 // View/Edit Dealer Details
 function viewDealerDetails(dealerId) {
     const dealer = dealers.find(d => d.id === dealerId);
@@ -385,37 +356,6 @@ function previewDealerLogo(url) {
         preview.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>`;
     }
 }
-
-// Edit Dealer Form Handler
-document.getElementById('editDealerForm')?.addEventListener('submit', async function(e) {
-    e.preventDefault();
-    
-    const dealerId = document.getElementById('editDealerId').value;
-    const formData = new FormData(e.target);
-    
-    try {
-        const { error } = await window.supabaseClient
-            .from('dealers')
-            .update({
-                name: formData.get('name'),
-                code: formData.get('code') || null,
-                contact_email: formData.get('contact_email') || null,
-                contact_phone: formData.get('contact_phone') || null,
-                logo_url: formData.get('logo_url') || null,
-                is_active: formData.get('is_active') === 'true'
-            })
-            .eq('id', dealerId);
-        
-        if (error) throw error;
-        
-        alert('Dealer updated successfully!');
-        closeModal('editDealerModal');
-        await loadDealers();
-    } catch (error) {
-        console.error('Error updating dealer:', error);
-        alert('Error updating dealer: ' + error.message);
-    }
-});
 
 function populateAgentSelects() {
     const selects = ['leadAgentSelect', 'leadAgentFilter', 'orderAgentFilter'];
@@ -1011,6 +951,64 @@ function setupFormHandlers() {
             } else {
                 alert('Error approving agent: ' + error.message);
             }
+        }
+    });
+    
+    // Edit Agent Form
+    document.getElementById('editAgentForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const agentId = document.getElementById('editAgentId').value;
+        const formData = new FormData(e.target);
+        
+        try {
+            const { error } = await window.supabaseClient
+                .from('profiles')
+                .update({
+                    full_name: formData.get('full_name'),
+                    phone: formData.get('phone') || null,
+                    dealer_id: formData.get('dealer_id') || null,
+                    is_approved: formData.get('is_approved') === 'true'
+                })
+                .eq('id', agentId);
+            
+            if (error) throw error;
+            
+            alert('Agent updated successfully!');
+            closeModal('editAgentModal');
+            await loadAgents();
+        } catch (error) {
+            console.error('Error updating agent:', error);
+            alert('Error updating agent: ' + error.message);
+        }
+    });
+    
+    // Edit Dealer Form
+    document.getElementById('editDealerForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const dealerId = document.getElementById('editDealerId').value;
+        const formData = new FormData(e.target);
+        
+        try {
+            const { error } = await window.supabaseClient
+                .from('dealers')
+                .update({
+                    name: formData.get('name'),
+                    code: formData.get('code') || null,
+                    contact_email: formData.get('contact_email') || null,
+                    contact_phone: formData.get('contact_phone') || null,
+                    logo_url: formData.get('logo_url') || null,
+                    is_active: formData.get('is_active') === 'true'
+                })
+                .eq('id', dealerId);
+            
+            if (error) throw error;
+            
+            alert('Dealer updated successfully!');
+            closeModal('editDealerModal');
+            await loadDealers();
+        } catch (error) {
+            console.error('Error updating dealer:', error);
+            alert('Error updating dealer: ' + error.message);
         }
     });
 }
