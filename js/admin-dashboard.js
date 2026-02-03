@@ -40,6 +40,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     // Setup filters
     setupFilters();
     
+    // Update notifications
+    updateNotifications();
+    
     // Load Supabase settings for Settings page
     loadSupabaseSettings();
 });
@@ -47,6 +50,120 @@ document.addEventListener('DOMContentLoaded', async function() {
 function getInitials(name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 }
+
+// Global Search
+function globalSearchHandler(query) {
+    const searchTerm = query.toLowerCase().trim();
+    
+    if (!searchTerm) {
+        renderLeadsTable();
+        return;
+    }
+    
+    // Switch to leads section
+    showSection('leads');
+    
+    // Filter leads based on search
+    const filtered = leads.filter(lead => {
+        const searchFields = [
+            lead.full_name,
+            lead.first_name,
+            lead.last_name,
+            lead.email,
+            lead.phone,
+            lead.address,
+            lead.lead_id,
+            lead.agent?.full_name,
+            lead.agent_name,
+            lead.dealer?.name,
+            lead.dealer_name,
+            lead.package?.name,
+            lead.package_name
+        ];
+        
+        return searchFields.some(field => 
+            field && field.toLowerCase().includes(searchTerm)
+        );
+    });
+    
+    renderLeadsTable(filtered);
+}
+
+// Notifications
+let notifications = [];
+
+function toggleNotifications() {
+    const dropdown = document.getElementById('notificationsDropdown');
+    dropdown.classList.toggle('hidden');
+}
+
+function updateNotifications() {
+    const list = document.getElementById('notificationsList');
+    const badge = document.getElementById('notificationBadge');
+    
+    notifications = [];
+    
+    // Check for pending agents
+    if (pendingAgents.length > 0) {
+        notifications.push({
+            type: 'pending_agent',
+            message: `${pendingAgents.length} agent(s) awaiting approval`,
+            icon: '👤',
+            action: () => showSection('pending-agents')
+        });
+    }
+    
+    // Check for new leads today
+    const today = new Date().toDateString();
+    const newLeadsToday = leads.filter(l => new Date(l.created_at).toDateString() === today).length;
+    if (newLeadsToday > 0) {
+        notifications.push({
+            type: 'new_leads',
+            message: `${newLeadsToday} new lead(s) today`,
+            icon: '📋',
+            action: () => showSection('leads')
+        });
+    }
+    
+    // Update badge
+    if (notifications.length > 0) {
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+    
+    // Render notifications
+    if (notifications.length === 0) {
+        list.innerHTML = '<p class="p-4 text-gray-500 text-sm text-center">No new notifications</p>';
+    } else {
+        list.innerHTML = notifications.map(n => `
+            <div onclick="${n.action ? 'this.onclick()' : ''}" class="p-4 border-b hover:bg-gray-50 cursor-pointer flex items-start gap-3">
+                <span class="text-xl">${n.icon}</span>
+                <p class="text-sm text-gray-700">${n.message}</p>
+            </div>
+        `).join('');
+        
+        // Add click handlers
+        const items = list.querySelectorAll('div');
+        items.forEach((item, i) => {
+            item.onclick = () => {
+                if (notifications[i].action) {
+                    notifications[i].action();
+                    toggleNotifications();
+                }
+            };
+        });
+    }
+}
+
+// Close notifications when clicking outside
+document.addEventListener('click', (e) => {
+    const dropdown = document.getElementById('notificationsDropdown');
+    const btn = document.getElementById('notificationBtn');
+    if (dropdown && btn && !dropdown.contains(e.target) && !btn.contains(e.target)) {
+        dropdown.classList.add('hidden');
+    }
+});
 
 // Navigation
 function showSection(section) {
