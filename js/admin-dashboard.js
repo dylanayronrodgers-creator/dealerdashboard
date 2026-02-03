@@ -741,8 +741,8 @@ function setupFormHandlers() {
             
             if (authError) throw authError;
             
-            // Create profile with dealer assignment
-            const { error: profileError } = await window.supabaseClient.from('profiles').insert({
+            // Create or update profile with dealer assignment (use upsert in case trigger already created it)
+            const { error: profileError } = await window.supabaseClient.from('profiles').upsert({
                 id: authData.user.id,
                 email: formData.get('email'),
                 full_name: formData.get('full_name'),
@@ -750,7 +750,7 @@ function setupFormHandlers() {
                 dealer_id: formData.get('dealer_id') || null,
                 role: 'agent',
                 is_approved: true
-            });
+            }, { onConflict: 'id' });
             
             if (profileError) throw profileError;
             
