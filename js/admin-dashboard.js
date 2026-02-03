@@ -300,19 +300,31 @@ function renderLeadsTable(filteredLeads = null) {
         return;
     }
     
-    table.innerHTML = displayLeads.map(lead => `
+    table.innerHTML = displayLeads.map(lead => {
+        const clientName = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-';
+        const contact = lead.email || lead.phone || '-';
+        const phone = lead.phone || '-';
+        const address = lead.address || '-';
+        const packageName = lead.package?.name || lead.package_name || '-';
+        const agentName = lead.agent?.full_name || lead.agent_name || '-';
+        const dealerName = lead.dealer?.name || lead.dealer_name || '';
+        
+        return `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">${lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-'}</div>
+                <div class="font-medium text-gray-800">${clientName}</div>
                 <div class="text-xs text-gray-400">${lead.lead_id || ''}</div>
             </td>
             <td class="py-4">
-                <div class="text-sm text-gray-600">${lead.email || '-'}</div>
-                <div class="text-sm text-gray-500">${lead.phone || '-'}</div>
+                <div class="text-sm text-gray-600">${contact}</div>
+                <div class="text-sm text-gray-500">${phone !== contact ? phone : ''}</div>
             </td>
-            <td class="py-4 text-sm text-gray-600">${lead.address || '-'}</td>
-            <td class="py-4 text-sm text-gray-600">${lead.package?.name || lead.package_name || '-'}</td>
-            <td class="py-4 text-sm text-gray-600">${lead.agent?.full_name || lead.dealer?.name || '-'}</td>
+            <td class="py-4 text-sm text-gray-600">${address}</td>
+            <td class="py-4 text-sm text-gray-600">${packageName}</td>
+            <td class="py-4">
+                <div class="text-sm text-gray-600">${agentName}</div>
+                ${dealerName ? `<div class="text-xs text-gray-400">${dealerName}</div>` : ''}
+            </td>
             <td class="py-4">
                 <select onchange="updateLeadStatus('${lead.id}', this.value)" class="text-xs border rounded px-2 py-1 status-${lead.status}">
                     <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
@@ -329,7 +341,8 @@ function renderLeadsTable(filteredLeads = null) {
                 </div>
             </td>
         </tr>
-    `).join('');
+    `;
+    }).join('');
 }
 
 // Load Orders
@@ -1699,34 +1712,50 @@ async function confirmImport() {
             
             // Find agent by email or agent name, or CREATE pending agent
             let agentId = null;
-            const agentEmail = row.captured_by_email || row.agent_name;
-            if (agentEmail) {
-                // Try to find by email first
-                const { data: agentData } = await window.supabaseClient
-                    .from('profiles')
-                    .select('id')
-                    .or(`email.eq.${agentEmail},full_name.ilike.${row.agent_name || ''}`)
-                    .limit(1);
+            const agentName = row.agent_name || '';
+            const agentEmail = row.captured_by_email || '';
+            
+            if (agentName || agentEmail) {
+                // Try to find existing agent by email or name
+                let agentQuery = window.supabaseClient.from('profiles').select('id, full_name');
+                
+                if (agentEmail && agentEmail.includes('@')) {
+                    agentQuery = agentQuery.eq('email', agentEmail);
+                } else if (agentName) {
+                    agentQuery = agentQuery.ilike('full_name', agentName);
+                }
+                
+                const { data: agentData } = await agentQuery.limit(1);
                 
                 if (agentData && agentData.length > 0) {
                     agentId = agentData[0].id;
                 } else {
-                    // Add to pending agents if not exists
-                    const { data: pendingExists } = await window.supabaseClient
-                        .from('pending_agents')
-                        .select('id')
-                        .or(`email.eq.${agentEmail},full_name.ilike.${row.agent_name || ''}`)
-                        .limit(1);
+                    // Check if already in pending agents
+                    let pendingQuery = window.supabaseClient.from('pending_agents').select('id');
+                    if (agentEmail && agentEmail.includes('@')) {
+                        pendingQuery = pendingQuery.eq('email', agentEmail);
+                    } else if (agentName) {
+                        pendingQuery = pendingQuery.ilike('full_name', agentName);
+                    }
+                    
+                    const { data: pendingExists } = await pendingQuery.limit(1);
                     
                     if (!pendingExists || pendingExists.length === 0) {
-                        const agentEmailToUse = agentEmail.includes('@') ? agentEmail : `${agentEmail.toLowerCase().replace(/\s+/g, '.')}@pending.dealer`;
-                        await window.supabaseClient.from('pending_agents').insert({
-                            email: agentEmailToUse,
-                            full_name: row.agent_name || agentEmail,
+                        // Create pending agent with proper email
+                        const pendingAgentEmail = (agentEmail && agentEmail.includes('@')) 
+                            ? agentEmail 
+                            : `${(agentName || 'unknown').toLowerCase().replace(/\s+/g, '.')}@pending.dealer`;
+                        
+                        const { error: pendingError } = await window.supabaseClient.from('pending_agents').insert({
+                            email: pendingAgentEmail,
+                            full_name: agentName || agentEmail.split('@')[0] || 'Unknown Agent',
                             dealer_id: dealerId,
                             status: 'pending'
                         });
-                        importStats.newAgents.push(row.agent_name || agentEmail);
+                        
+                        if (!pendingError) {
+                            importStats.newAgents.push(agentName || agentEmail);
+                        }
                     }
                 }
             }
@@ -1750,7 +1779,7 @@ async function confirmImport() {
                 return isNaN(d.getTime()) ? null : d.toISOString();
             };
             
-            // Insert lead
+            // Insert lead with all available data
             const { error } = await window.supabaseClient.from('leads').insert({
                 lead_id: row.lead_id || null,
                 full_name: fullName || null,
@@ -1760,10 +1789,13 @@ async function confirmImport() {
                 phone: row.phone || null,
                 address: row.address || null,
                 package_id: packageId,
+                package_name: row.package_name || null,
                 agent_id: agentId,
+                agent_name: row.agent_name || null,
                 dealer_id: dealerId,
+                dealer_name: row.dealer_name || null,
                 notes: row.notes || null,
-                status: 'new',
+                status: row.status || 'new',
                 captured_by_email: row.captured_by_email || null,
                 order_number: row.order_number || null,
                 order_status: row.order_status || null,
