@@ -459,41 +459,32 @@ function populatePackageSelects() {
 // Load Leads
 async function loadLeads() {
     try {
-        // Supabase default limit is 1000, so we need to fetch in batches for large datasets
-        let allLeads = [];
-        let from = 0;
-        const batchSize = 1000;
-        let hasMore = true;
+        // Load last 500 leads for performance
+        const { data, error } = await window.supabaseClient
+            .from('leads')
+            .select(`
+                *,
+                agent:profiles!leads_agent_id_fkey(id, full_name),
+                package:packages(id, name, price),
+                dealer:dealers(id, name)
+            `)
+            .order('created_at', { ascending: false })
+            .limit(500);
         
-        while (hasMore) {
-            const { data, error } = await window.supabaseClient
-                .from('leads')
-                .select(`
-                    *,
-                    agent:profiles!leads_agent_id_fkey(id, full_name),
-                    package:packages(id, name, price),
-                    dealer:dealers(id, name)
-                `)
-                .order('created_at', { ascending: false })
-                .range(from, from + batchSize - 1);
-            
-            if (error) throw error;
-            
-            if (data && data.length > 0) {
-                allLeads = allLeads.concat(data);
-                from += batchSize;
-                hasMore = data.length === batchSize;
-            } else {
-                hasMore = false;
-            }
-        }
+        if (error) throw error;
         
-        leads = allLeads;
-        console.log('Loaded', leads.length, 'leads');
+        leads = data || [];
+        console.log('Loaded', leads.length, 'leads (limited to 500)');
         
         renderLeadsTable();
         renderRecentOrders();
-        document.getElementById('totalLeads').textContent = leads.length;
+        
+        // Get total count for display
+        const { count } = await window.supabaseClient
+            .from('leads')
+            .select('*', { count: 'exact', head: true });
+        
+        document.getElementById('totalLeads').textContent = count || leads.length;
     } catch (error) {
         console.error('Error loading leads:', error);
     }
@@ -549,8 +540,9 @@ function renderLeadsTable(filteredLeads = null) {
             <td class="py-4">
                 <div class="flex gap-1 flex-wrap">
                     <button onclick="viewLeadDetails('${lead.id}')" class="bg-blue-100 text-blue-700 hover:bg-blue-200 px-2 py-1 rounded text-xs font-medium">View</button>
+                    <button onclick="editLead('${lead.id}')" class="bg-purple-100 text-purple-700 hover:bg-purple-200 px-2 py-1 rounded text-xs font-medium">Edit</button>
                     <button onclick="openConvertModal('${lead.id}')" class="bg-green-100 text-green-700 hover:bg-green-200 px-2 py-1 rounded text-xs font-medium">Convert</button>
-                    <button onclick="returnToAgent('${lead.id}', 'lead')" class="bg-yellow-100 text-yellow-700 hover:bg-yellow-200 px-2 py-1 rounded text-xs font-medium">Return</button>
+                    <button onclick="deleteLead('${lead.id}')" class="bg-red-100 text-red-700 hover:bg-red-200 px-2 py-1 rounded text-xs font-medium">Delete</button>
                 </div>
             </td>
         </tr>
@@ -1110,25 +1102,83 @@ function returnToAgent(itemId, itemType) {
 function setupFilters() {
     document.getElementById('leadStatusFilter')?.addEventListener('change', filterLeads);
     document.getElementById('leadAgentFilter')?.addEventListener('change', filterLeads);
+    document.getElementById('leadDealerFilter')?.addEventListener('change', filterLeads);
     document.getElementById('orderStatusFilter')?.addEventListener('change', filterOrders);
     document.getElementById('orderAgentFilter')?.addEventListener('change', filterOrders);
+    
+    // Populate dealer filter
+    populateDealerFilters();
+}
+
+function populateDealerFilters() {
+    const dealerFilter = document.getElementById('leadDealerFilter');
+    if (dealerFilter && dealers.length > 0) {
+        dealerFilter.innerHTML = '<option value="">All Dealers</option>';
+        dealers.forEach(d => {
+            dealerFilter.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+        });
+    }
 }
 
 function filterLeads() {
-    const status = document.getElementById('leadStatusFilter').value;
-    const agentId = document.getElementById('leadAgentFilter').value;
+    const search = (document.getElementById('leadSearchFilter')?.value || '').toLowerCase().trim();
+    const status = document.getElementById('leadStatusFilter')?.value || '';
+    const agentId = document.getElementById('leadAgentFilter')?.value || '';
+    const dealerId = document.getElementById('leadDealerFilter')?.value || '';
     
     let filtered = leads;
     
+    // Text search
+    if (search) {
+        filtered = filtered.filter(l => {
+            const name = (l.full_name || `${l.first_name || ''} ${l.last_name || ''}`).toLowerCase();
+            const email = (l.email || '').toLowerCase();
+            const phone = (l.phone || '').toLowerCase();
+            const leadId = (l.lead_id || '').toLowerCase();
+            return name.includes(search) || email.includes(search) || phone.includes(search) || leadId.includes(search);
+        });
+    }
+    
+    // Status filter
     if (status) {
         filtered = filtered.filter(l => l.status === status);
     }
     
+    // Agent filter
     if (agentId) {
         filtered = filtered.filter(l => l.agent_id === agentId);
     }
     
+    // Dealer filter
+    if (dealerId) {
+        filtered = filtered.filter(l => l.dealer_id === dealerId);
+    }
+    
+    // Update filter count display
+    const countEl = document.getElementById('leadFilterCount');
+    if (countEl) {
+        if (search || status || agentId || dealerId) {
+            countEl.textContent = `Showing ${filtered.length} of ${leads.length} leads`;
+        } else {
+            countEl.textContent = `Showing ${leads.length} leads (last 500)`;
+        }
+    }
+    
     renderLeadsTable(filtered);
+}
+
+function clearLeadFilters() {
+    const searchEl = document.getElementById('leadSearchFilter');
+    const statusEl = document.getElementById('leadStatusFilter');
+    const agentEl = document.getElementById('leadAgentFilter');
+    const dealerEl = document.getElementById('leadDealerFilter');
+    
+    if (searchEl) searchEl.value = '';
+    if (statusEl) statusEl.value = '';
+    if (agentEl) agentEl.value = '';
+    if (dealerEl) dealerEl.value = '';
+    
+    filterLeads();
 }
 
 function filterOrders() {
@@ -1269,6 +1319,31 @@ async function updateLeadStatus(leadId, newStatus) {
         console.error('Error updating lead status:', error);
         alert('Error updating status: ' + error.message);
         await loadLeads();
+    }
+}
+
+// Edit Lead (opens view modal which allows editing)
+function editLead(leadId) {
+    viewLeadDetails(leadId);
+}
+
+// Delete Lead
+async function deleteLead(leadId) {
+    if (!confirm('Are you sure you want to delete this lead? This action cannot be undone.')) return;
+    
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .delete()
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        await loadLeads();
+        alert('Lead deleted successfully.');
+    } catch (error) {
+        console.error('Error deleting lead:', error);
+        alert('Error deleting lead: ' + error.message);
     }
 }
 

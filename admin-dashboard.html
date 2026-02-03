@@ -404,9 +404,21 @@
 
         <!-- Leads Section -->
         <section id="section-leads" class="p-8 hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div class="flex items-center gap-4">
-                    <select id="leadStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+            <div class="flex flex-col gap-4 mb-6">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold text-gray-800">Lead Management</h3>
+                    <button onclick="openModal('addLeadModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        Add Lead
+                    </button>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <input type="text" id="leadSearchFilter" placeholder="Search name, email, phone..." 
+                        class="border rounded-xl px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
+                        oninput="filterLeads()">
+                    <select id="leadStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">All Status</option>
                         <option value="new">New</option>
                         <option value="contacted">Contacted</option>
@@ -414,16 +426,15 @@
                         <option value="converted">Converted</option>
                         <option value="lost">Lost</option>
                     </select>
-                    <select id="leadAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <select id="leadAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">All Agents</option>
                     </select>
+                    <select id="leadDealerFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option value="">All Dealers</option>
+                    </select>
+                    <button onclick="clearLeadFilters()" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm">Clear Filters</button>
+                    <span id="leadFilterCount" class="text-sm text-gray-500 ml-auto"></span>
                 </div>
-                <button onclick="openModal('addLeadModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
-                    Add Lead
-                </button>
             </div>
 
             <div class="card p-6">
