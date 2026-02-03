@@ -1,14 +1,25 @@
 // Authentication Module
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', async function() {
     const loginForm = document.getElementById('loginForm');
     const errorMessage = document.getElementById('errorMessage');
 
     if (loginForm) {
         loginForm.addEventListener('submit', handleLogin);
+        
+        // Sign out any existing session when visiting login page
+        // This ensures users can login with different credentials
+        if (window.supabaseClient) {
+            try {
+                await window.supabaseClient.auth.signOut();
+                sessionStorage.clear();
+            } catch (e) {
+                console.log('No active session to clear');
+            }
+        }
     }
 
-    // Check if user is already logged in (only if Supabase is configured)
-    if (window.supabaseClient) {
+    // Check auth state for dashboard pages (not login page)
+    if (window.supabaseClient && !loginForm) {
         checkAuthState();
     }
 });
