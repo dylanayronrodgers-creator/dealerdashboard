@@ -237,13 +237,51 @@ function renderScheduleTable() {
 }
 
 function filterOrders() {
-    const status = document.getElementById('orderStatusFilter').value;
-    if (!status) {
-        renderOrdersTable();
-        return;
+    const search = (document.getElementById('orderSearchFilter')?.value || '').toLowerCase().trim();
+    const status = document.getElementById('orderStatusFilter')?.value || '';
+    
+    let filtered = orders;
+    
+    // Text search - includes Lead ID, Order #, Name, Phone, Address
+    if (search) {
+        filtered = filtered.filter(o => {
+            const name = (o.full_name || `${o.first_name || ''} ${o.last_name || ''}`).toLowerCase();
+            const leadId = (o.lead_id || '').toLowerCase();
+            const orderNum = (o.order_number || o.service_id || '').toLowerCase();
+            const phone = (o.phone || o.cell_number || '').toLowerCase();
+            const address = (o.address || '').toLowerCase();
+            const email = (o.email || '').toLowerCase();
+            return name.includes(search) || leadId.includes(search) || orderNum.includes(search) || 
+                   phone.includes(search) || address.includes(search) || email.includes(search);
+        });
     }
-    const filtered = orders.filter(o => (o.order_status || 'pending') === status);
+    
+    // Status filter
+    if (status) {
+        filtered = filtered.filter(o => (o.order_status || 'pending') === status);
+    }
+    
+    // Update count display
+    const countEl = document.getElementById('orderCount');
+    if (countEl) {
+        if (search || status) {
+            countEl.textContent = `Showing ${filtered.length} of ${orders.length} orders`;
+        } else {
+            countEl.textContent = `All fibre installation orders (${orders.length})`;
+        }
+    }
+    
     renderOrdersTable(filtered);
+}
+
+function clearOrderFilters() {
+    const searchEl = document.getElementById('orderSearchFilter');
+    const statusEl = document.getElementById('orderStatusFilter');
+    
+    if (searchEl) searchEl.value = '';
+    if (statusEl) statusEl.value = '';
+    
+    filterOrders();
 }
 
 function openUpdateModal(orderId) {

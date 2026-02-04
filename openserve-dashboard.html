@@ -223,12 +223,18 @@
 
         <!-- Orders Section -->
         <section id="section-orders" class="p-6 lg:p-8 hidden">
-            <div class="flex items-center justify-between mb-6">
+            <div class="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-6">
                 <div>
                     <h2 class="text-2xl font-bold text-gray-800">Installation Orders</h2>
                     <p class="text-gray-500" id="orderCount">All fibre installation orders</p>
                 </div>
-                <div class="flex gap-2">
+                <div class="flex flex-wrap gap-2">
+                    <div class="relative">
+                        <input type="text" id="orderSearchFilter" onkeyup="filterOrders()" placeholder="Search Lead ID, Order #, Name..." class="border rounded-lg pl-10 pr-4 py-2 text-sm w-64 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                        </svg>
+                    </div>
                     <select id="orderStatusFilter" onchange="filterOrders()" class="border rounded-lg px-3 py-2 text-sm">
                         <option value="">All Status</option>
                         <option value="pending">Pending</option>
@@ -237,6 +243,9 @@
                         <option value="completed">Completed</option>
                         <option value="cancelled">Cancelled</option>
                     </select>
+                    <button onclick="clearOrderFilters()" class="border rounded-lg px-3 py-2 text-sm text-gray-600 hover:bg-gray-50">
+                        Clear
+                    </button>
                     <button onclick="exportOrders()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">
                         Export
                     </button>
