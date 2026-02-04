@@ -593,7 +593,7 @@ function populatePackageSelects() {
 // Load Leads
 async function loadLeads() {
     try {
-        // Load last 500 leads for performance
+        // Load last 500 leads for performance - exclude converted leads
         const { data, error } = await window.supabaseClient
             .from('leads')
             .select(`
@@ -602,21 +602,23 @@ async function loadLeads() {
                 package:packages(id, name, price),
                 dealer:dealers(id, name)
             `)
+            .neq('status', 'converted')
             .order('created_at', { ascending: false })
             .limit(500);
         
         if (error) throw error;
         
         leads = data || [];
-        console.log('Loaded', leads.length, 'leads (limited to 500)');
+        console.log('Loaded', leads.length, 'leads (limited to 500, excluding converted)');
         
         renderLeadsTable();
         renderRecentOrders();
         
-        // Get total count for display
+        // Get total count for display (excluding converted)
         const { count } = await window.supabaseClient
             .from('leads')
-            .select('*', { count: 'exact', head: true });
+            .select('*', { count: 'exact', head: true })
+            .neq('status', 'converted');
         
         document.getElementById('totalLeads').textContent = count || leads.length;
     } catch (error) {
