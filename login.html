@@ -36,6 +36,29 @@
             outline: none;
             box-shadow: 0 0 0 3px rgba(34, 197, 94, 0.2);
         }
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            animation: float 20s infinite ease-in-out;
+        }
+        .shape:nth-child(1) { width: 300px; height: 300px; top: -100px; right: -100px; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 200px; height: 200px; bottom: -50px; left: -50px; animation-delay: -5s; }
+        .shape:nth-child(3) { width: 150px; height: 150px; top: 50%; left: 10%; animation-delay: -10s; }
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(0deg); }
+            50% { transform: translateY(-20px) rotate(10deg); }
+        }
         /* Responsive */
         @media (max-width: 640px) {
             .login-card { margin: 1rem; padding: 1.5rem; }
@@ -46,14 +69,21 @@
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen flex items-center justify-center p-4">
-    <div class="w-full max-w-md">
+<body class="gradient-bg min-h-screen flex items-center justify-center p-4 relative">
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <div class="w-full max-w-md relative z-10">
         <!-- Logo Section -->
         <div class="text-center mb-8">
             <div class="flex justify-center items-center gap-6 mb-6">
-                <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess Logo" class="h-14">
-                <img src="https://i.ibb.co/1JBh9sQp/AP1-Gcz-MU7-E0z-Ww-Bq4-NY-s-WWho-Hek-H0-Sxd-Ek-Yjbtwf-Hk-No-Ne2gs-Ir-KUjb17-LVs-P3vxi-YPMp-Hpq8-MAq-Hjfn8e.webp" alt="Openserve Logo" class="h-14">
-                </div>
+                <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess Logo" class="h-16 drop-shadow-lg">
+                <div class="w-px h-10 bg-white/30"></div>
+                <img src="https://i.ibb.co/1JBh9sQp/AP1-Gcz-MU7-E0z-Ww-Bq4-NY-s-WWho-Hek-H0-Sxd-Ek-Yjbtwf-Hk-No-Ne2gs-Ir-KUjb17-LVs-P3vxi-YPMp-Hpq8-MAq-Hjfn8e.webp" alt="Openserve Logo" class="h-16 drop-shadow-lg">
             </div>
             <h1 class="text-3xl font-bold text-white mb-2">Welcome Back</h1>
             <p class="text-white/60">Sign in to your dealer portal</p>
@@ -104,9 +134,9 @@
 
                 <div id="errorMessage" class="hidden bg-red-500/20 border border-red-500/50 text-red-300 px-4 py-3 rounded-xl text-sm"></div>
 
-                <button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-semibold text-lg flex items-center justify-center gap-2">
+                <button type="submit" class="btn-primary w-full py-4 rounded-xl text-white font-semibold text-lg flex items-center justify-center gap-3 group">
                     <span>Sign In</span>
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 transform group-hover:translate-x-1 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                         <path fill-rule="evenodd" d="M10.293 3.293a1 1 0 011.414 0l6 6a1 1 0 010 1.414l-6 6a1 1 0 01-1.414-1.414L14.586 11H3a1 1 0 110-2h11.586l-4.293-4.293a1 1 0 010-1.414z" clip-rule="evenodd" />
                     </svg>
                 </button>
