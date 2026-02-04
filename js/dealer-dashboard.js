@@ -34,15 +34,20 @@ async function loadDealerInfo() {
         dealerInfo = data;
         document.getElementById('dealerName').textContent = dealerInfo?.name || 'Dealership';
         
-        // Display dealer logo if available
-        if (dealerInfo?.logo_url) {
+        // Display dealer logo - check dealers table first, then profile
+        const logoUrl = dealerInfo?.logo_url || currentUser?.logo_url;
+        
+        if (logoUrl) {
             const logoSection = document.getElementById('dealerLogoSection');
             const logoImg = document.getElementById('dealerLogo');
             if (logoSection && logoImg) {
-                logoImg.src = dealerInfo.logo_url;
-                logoImg.alt = dealerInfo.name + ' Logo';
+                logoImg.src = logoUrl;
+                logoImg.alt = (dealerInfo?.name || 'Dealer') + ' Logo';
                 logoSection.classList.remove('hidden');
+                console.log('Dealer logo loaded:', logoUrl);
             }
+        } else {
+            console.log('No dealer logo found. Dealer info:', dealerInfo);
         }
     } catch (error) {
         console.error('Error loading dealer info:', error);
