@@ -32,6 +32,62 @@
             0%, 100% { transform: translateY(0px); }
             50% { transform: translateY(-20px); }
         }
+        .floating-shapes {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+        .shape {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.08);
+            animation: floatShape 25s infinite ease-in-out;
+        }
+        .shape:nth-child(1) { width: 400px; height: 400px; top: -150px; right: -100px; animation-delay: 0s; }
+        .shape:nth-child(2) { width: 300px; height: 300px; bottom: -100px; left: -80px; animation-delay: -5s; }
+        .shape:nth-child(3) { width: 200px; height: 200px; top: 40%; left: 5%; animation-delay: -10s; }
+        .shape:nth-child(4) { width: 250px; height: 250px; top: 20%; right: 15%; animation-delay: -15s; }
+        .shape:nth-child(5) { width: 180px; height: 180px; bottom: 20%; right: 10%; animation-delay: -8s; }
+        @keyframes floatShape {
+            0%, 100% { transform: translateY(0) rotate(0deg) scale(1); }
+            25% { transform: translateY(-30px) rotate(5deg) scale(1.02); }
+            50% { transform: translateY(-15px) rotate(-3deg) scale(0.98); }
+            75% { transform: translateY(-25px) rotate(3deg) scale(1.01); }
+        }
+        .feature-card {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .feature-card:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-4px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.2);
+        }
+        .btn-modern {
+            position: relative;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+        .btn-modern::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: left 0.5s;
+        }
+        .btn-modern:hover::before {
+            left: 100%;
+        }
         /* Responsive */
         @media (max-width: 768px) {
             .hero-text { font-size: 2.5rem !important; }
@@ -49,8 +105,17 @@
         }
     </style>
 </head>
-<body class="gradient-bg min-h-screen">
-    <div class="min-h-screen flex flex-col">
+<body class="gradient-bg min-h-screen relative">
+    <!-- Floating Background Shapes -->
+    <div class="floating-shapes">
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+        <div class="shape"></div>
+    </div>
+    
+    <div class="min-h-screen flex flex-col relative z-10">
         <!-- Header -->
         <header class="py-6 px-8">
             <div class="max-w-7xl mx-auto flex justify-between items-center">
@@ -79,26 +144,26 @@
                         Track leads, manage orders, and grow your business efficiently.
                     </p>
                     <div class="flex flex-wrap gap-4">
-                        <a href="login.html" class="btn-primary text-white px-8 py-4 rounded-xl font-semibold text-lg flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <a href="login.html" class="btn-primary btn-modern text-white px-8 py-4 rounded-2xl font-semibold text-lg flex items-center gap-3 shadow-lg shadow-emerald-500/25 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd" />
                             </svg>
                             Agent Login
                         </a>
-                        <a href="login.html?dealer=true" class="glass-card text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <a href="login.html?dealer=true" class="btn-modern glass-card text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center gap-3 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                                 <path d="M10.707 2.293a1 1 0 00-1.414 0l-7 7a1 1 0 001.414 1.414L4 10.414V17a1 1 0 001 1h2a1 1 0 001-1v-2a1 1 0 011-1h2a1 1 0 011 1v2a1 1 0 001 1h2a1 1 0 001-1v-6.586l.293.293a1 1 0 001.414-1.414l-7-7z" />
                             </svg>
                             Dealer Login
                         </a>
-                        <a href="login.html?admin=true" class="glass-card text-white px-8 py-4 rounded-xl font-semibold text-lg hover:bg-white/20 transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <a href="login.html?admin=true" class="btn-modern glass-card text-white px-8 py-4 rounded-2xl font-semibold text-lg hover:bg-white/20 transition-all flex items-center gap-3 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clip-rule="evenodd" />
                             </svg>
                             Admin Access
                         </a>
-                        <a href="login.html?openserve=true" class="bg-emerald-600 hover:bg-emerald-700 text-white px-8 py-4 rounded-xl font-semibold text-lg transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <a href="login.html?openserve=true" class="btn-modern bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white px-8 py-4 rounded-2xl font-semibold text-lg transition-all flex items-center gap-3 shadow-lg shadow-emerald-500/25 group">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 group-hover:scale-110 transition-transform" viewBox="0 0 20 20" fill="currentColor">
                                 <path fill-rule="evenodd" d="M11.3 1.046A1 1 0 0112 2v5h4a1 1 0 01.82 1.573l-7 10A1 1 0 018 18v-5H4a1 1 0 01-.82-1.573l7-10a1 1 0 011.12-.38z" clip-rule="evenodd" />
                             </svg>
                             Openserve Login
@@ -108,44 +173,44 @@
 
                 <!-- Feature Cards -->
                 <div class="grid gap-6">
-                    <div class="glass-card rounded-2xl p-6 floating" style="animation-delay: 0s;">
+                    <div class="feature-card rounded-2xl p-6 floating" style="animation-delay: 0s;">
                         <div class="flex items-start gap-4">
-                            <div class="bg-green-500/20 p-3 rounded-xl">
+                            <div class="bg-gradient-to-br from-green-400/30 to-emerald-600/30 p-4 rounded-2xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                                 </svg>
                             </div>
                             <div>
                                 <h3 class="text-white font-semibold text-lg mb-2">Lead Management</h3>
-                                <p class="text-white/60">Capture, track, and convert leads with ease. Mass import capabilities for efficient data entry.</p>
+                                <p class="text-white/60 text-sm leading-relaxed">Capture, track, and convert leads with ease. Mass import capabilities for efficient data entry.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="glass-card rounded-2xl p-6 floating" style="animation-delay: 0.5s;">
+                    <div class="feature-card rounded-2xl p-6 floating" style="animation-delay: 0.5s;">
                         <div class="flex items-start gap-4">
-                            <div class="bg-blue-500/20 p-3 rounded-xl">
+                            <div class="bg-gradient-to-br from-blue-400/30 to-indigo-600/30 p-4 rounded-2xl">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-blue-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
                                 </svg>
                             </div>
                             <div>
                                 <h3 class="text-white font-semibold text-lg mb-2">Order Tracking</h3>
-                                <p class="text-white/60">Monitor order status from lead to completion. Real-time updates and notifications.</p>
+                                <p class="text-white/60 text-sm leading-relaxed">Monitor order status from lead to completion. Real-time updates and notifications.</p>
                             </div>
                         </div>
                     </div>
 
-                    <div class="glass-card rounded-2xl p-6 floating" style="animation-delay: 1s;">
+                    <div class="feature-card rounded-2xl p-6 floating" style="animation-delay: 1s;">
                         <div class="flex items-start gap-4">
-                            <div class="bg-green-500/20 p-3 rounded-xl">
-                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <div class="bg-gradient-to-br from-purple-400/30 to-pink-600/30 p-4 rounded-2xl">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-purple-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
                                 </svg>
                             </div>
                             <div>
                                 <h3 class="text-white font-semibold text-lg mb-2">Performance Analytics</h3>
-                                <p class="text-white/60">Track agent performance, conversion rates, and revenue metrics at a glance.</p>
+                                <p class="text-white/60 text-sm leading-relaxed">Track agent performance, conversion rates, and revenue metrics at a glance.</p>
                             </div>
                         </div>
                     </div>
