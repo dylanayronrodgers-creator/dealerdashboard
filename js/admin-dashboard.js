@@ -294,6 +294,8 @@ function showSection(section) {
         'agents': { title: 'Agents', subtitle: 'Manage your sales agents' },
         'packages': { title: 'Packages', subtitle: 'Openserve fibre packages' },
         'reports': { title: 'Reports', subtitle: 'Analytics and performance metrics' },
+        'shipping': { title: 'Shipping', subtitle: 'Track free router deliveries' },
+        'returned': { title: 'Returned Items', subtitle: 'Manage returned orders' },
         'import': { title: 'Import Leads', subtitle: 'Upload CSV files to import leads' },
         'dealers': { title: 'Dealers', subtitle: 'Manage dealer organizations' },
         'pending-agents': { title: 'Pending Agents', subtitle: 'Review and approve new agents' },
@@ -314,6 +316,8 @@ function showSection(section) {
         loadPrivilegesTable();
     } else if (section === 'leads') {
         renderLeadsTable(leads);
+    } else if (section === 'shipping') {
+        loadShippingDeliveries();
     }
 }
 
@@ -1736,6 +1740,43 @@ function editPackage(packageId) {
     
     openModal('editPackageModal');
 }
+
+// Handle edit package form submission
+document.addEventListener('DOMContentLoaded', () => {
+    const editPackageForm = document.getElementById('editPackageForm');
+    if (editPackageForm) {
+        editPackageForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const packageId = document.getElementById('editPackageId').value;
+            const updateData = {
+                name: document.getElementById('editPackageName').value,
+                speed: parseInt(document.getElementById('editPackageSpeed').value),
+                price: parseFloat(document.getElementById('editPackagePrice').value),
+                data_cap: document.getElementById('editPackageDataCap').value || null,
+                commission_amount: parseFloat(document.getElementById('editPackageCommission').value) || 200,
+                description: document.getElementById('editPackageDescription').value || null,
+                updated_at: new Date().toISOString()
+            };
+            
+            try {
+                const { error } = await window.supabaseClient
+                    .from('packages')
+                    .update(updateData)
+                    .eq('id', packageId);
+                
+                if (error) throw error;
+                
+                alert('Package updated successfully!');
+                closeModal('editPackageModal');
+                await loadPackages();
+            } catch (error) {
+                console.error('Error updating package:', error);
+                alert('Error updating package: ' + error.message);
+            }
+        });
+    }
+});
 
 // ============================================
 // LEAD STATUS & ORDER CONVERSION
@@ -3654,5 +3695,172 @@ async function forwardToOpenserve(leadId) {
         await loadReturnedItems();
     } catch (error) {
         alert('Error forwarding: ' + error.message);
+    }
+}
+
+// ============================================
+// SHIPPING / DELIVERY TRACKING
+// ============================================
+
+let pendingDeliveries = [];
+let completedDeliveries = [];
+
+async function loadShippingDeliveries() {
+    try {
+        // Load converted leads that need router delivery (non-webconnect, non-prepaid)
+        const { data, error } = await window.supabaseClient
+            .from('leads')
+            .select(`
+                *,
+                package:packages(id, name, price, description),
+                agent:profiles!leads_agent_id_fkey(id, full_name)
+            `)
+            .eq('status', 'converted')
+            .not('account_number', 'is', null);
+        
+        if (error) throw error;
+        
+        // Filter for packages that require router delivery (exclude webconnect and prepaid)
+        const allDeliveries = (data || []).filter(lead => {
+            const packageName = (lead.package?.name || '').toLowerCase();
+            const packageDesc = (lead.package?.description || '').toLowerCase();
+            
+            // Exclude webconnect and prepaid packages
+            const isWebConnect = packageName.includes('webconnect') || packageDesc.includes('webconnect');
+            const isPrepaid = packageName.includes('prepaid') || packageDesc.includes('prepaid');
+            
+            return !isWebConnect && !isPrepaid;
+        });
+        
+        // Split into pending and completed
+        pendingDeliveries = allDeliveries.filter(d => !d.delivery_requested);
+        completedDeliveries = allDeliveries.filter(d => d.delivery_requested);
+        
+        renderShippingTables();
+        updateShippingBadge();
+        
+    } catch (error) {
+        console.error('Error loading shipping deliveries:', error);
+    }
+}
+
+function renderShippingTables() {
+    // Render pending deliveries
+    const pendingTable = document.getElementById('shippingTable');
+    if (pendingDeliveries.length === 0) {
+        pendingTable.innerHTML = '<tr><td colspan="7" class="py-8 text-center text-gray-500">No pending deliveries</td></tr>';
+    } else {
+        pendingTable.innerHTML = pendingDeliveries.map(delivery => {
+            const clientName = delivery.full_name || `${delivery.first_name || ''} ${delivery.last_name || ''}`.trim() || '-';
+            const orderDate = delivery.created_at ? new Date(delivery.created_at).toLocaleDateString() : '-';
+            
+            return `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4">
+                        <input type="checkbox" class="delivery-checkbox rounded" data-id="${delivery.id}">
+                    </td>
+                    <td class="py-3 px-4 font-medium text-gray-800">${delivery.account_number || '-'}</td>
+                    <td class="py-3 px-4 text-gray-600">${clientName}</td>
+                    <td class="py-3 px-4 text-gray-600">${delivery.package?.name || '-'}</td>
+                    <td class="py-3 px-4 text-gray-600 max-w-xs truncate">${delivery.address || '-'}</td>
+                    <td class="py-3 px-4 text-gray-500 text-sm">${orderDate}</td>
+                    <td class="py-3 px-4">
+                        <button onclick="markDeliveryRequested('${delivery.id}')" class="text-emerald-600 hover:text-emerald-800 text-sm font-medium">
+                            Mark Requested
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
+    }
+    
+    // Render completed deliveries
+    const completedTable = document.getElementById('completedShippingTable');
+    if (completedDeliveries.length === 0) {
+        completedTable.innerHTML = '<tr><td colspan="5" class="py-8 text-center text-gray-500">No completed deliveries</td></tr>';
+    } else {
+        completedTable.innerHTML = completedDeliveries.map(delivery => {
+            const clientName = delivery.full_name || `${delivery.first_name || ''} ${delivery.last_name || ''}`.trim() || '-';
+            const requestedDate = delivery.delivery_requested_at ? new Date(delivery.delivery_requested_at).toLocaleDateString() : '-';
+            
+            return `
+                <tr class="border-b hover:bg-gray-50">
+                    <td class="py-3 px-4 font-medium text-gray-800">${delivery.account_number || '-'}</td>
+                    <td class="py-3 px-4 text-gray-600">${clientName}</td>
+                    <td class="py-3 px-4 text-gray-600">${delivery.package?.name || '-'}</td>
+                    <td class="py-3 px-4 text-gray-500 text-sm">${requestedDate}</td>
+                    <td class="py-3 px-4 text-gray-500 text-sm">${delivery.agent?.full_name || 'System'}</td>
+                </tr>
+            `;
+        }).join('');
+    }
+}
+
+function updateShippingBadge() {
+    const badge = document.getElementById('shippingBadge');
+    if (pendingDeliveries.length > 0) {
+        badge.textContent = pendingDeliveries.length;
+        badge.classList.remove('hidden');
+    } else {
+        badge.classList.add('hidden');
+    }
+}
+
+function toggleAllDeliveries(checkbox) {
+    const checkboxes = document.querySelectorAll('.delivery-checkbox');
+    checkboxes.forEach(cb => cb.checked = checkbox.checked);
+}
+
+async function markDeliveryRequested(leadId) {
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                delivery_requested: true,
+                delivery_requested_at: new Date().toISOString(),
+                delivery_requested_by: currentUser.id
+            })
+            .eq('id', leadId);
+        
+        if (error) throw error;
+        
+        await loadShippingDeliveries();
+        
+    } catch (error) {
+        console.error('Error marking delivery:', error);
+        alert('Error marking delivery as requested: ' + error.message);
+    }
+}
+
+async function markAllDeliveriesRequested() {
+    const checkboxes = document.querySelectorAll('.delivery-checkbox:checked');
+    
+    if (checkboxes.length === 0) {
+        alert('Please select at least one delivery to mark as requested');
+        return;
+    }
+    
+    if (!confirm(`Mark ${checkboxes.length} deliveries as requested?`)) return;
+    
+    try {
+        const leadIds = Array.from(checkboxes).map(cb => cb.dataset.id);
+        
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update({
+                delivery_requested: true,
+                delivery_requested_at: new Date().toISOString(),
+                delivery_requested_by: currentUser.id
+            })
+            .in('id', leadIds);
+        
+        if (error) throw error;
+        
+        alert(`${checkboxes.length} deliveries marked as requested`);
+        await loadShippingDeliveries();
+        
+    } catch (error) {
+        console.error('Error marking deliveries:', error);
+        alert('Error marking deliveries: ' + error.message);
     }
 }
