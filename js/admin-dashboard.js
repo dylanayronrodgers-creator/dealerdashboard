@@ -1641,12 +1641,29 @@ function viewLead(leadId) {
     }
 }
 
-function viewOrder(orderId) {
+async function viewOrder(orderId) {
     const order = orders.find(o => o.id === orderId);
     if (!order) return;
     
-    // Get the lead data for this order
-    const lead = leads.find(l => l.id === order.lead_id) || order.lead || {};
+    // Get the lead data for this order - fetch from DB if not in local array (converted leads)
+    let lead = leads.find(l => l.id === order.lead_id) || order.lead || {};
+    
+    // If lead not found in local array, fetch from database (happens with converted leads)
+    if (order.lead_id && !lead.id) {
+        try {
+            const { data, error } = await window.supabaseClient
+                .from('leads')
+                .select('*')
+                .eq('id', order.lead_id)
+                .single();
+            
+            if (!error && data) {
+                lead = data;
+            }
+        } catch (error) {
+            console.error('Error fetching lead:', error);
+        }
+    }
     
     document.getElementById('editOrderLeadId').value = lead.id || '';
     document.getElementById('editOrderNumber').value = lead.order_number || order.order_number || '';
