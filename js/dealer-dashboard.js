@@ -34,16 +34,16 @@ async function loadDealerInfo() {
         dealerInfo = data;
         document.getElementById('dealerName').textContent = dealerInfo?.name || 'Dealership';
         
-        // Display dealer logo - check dealers table first, then profile
+        // Display dealer logo in header - check dealers table first, then profile
         const logoUrl = dealerInfo?.logo_url || currentUser?.logo_url;
         
         if (logoUrl) {
-            const logoSection = document.getElementById('dealerLogoSection');
-            const logoImg = document.getElementById('dealerLogo');
-            if (logoSection && logoImg) {
+            const logoHeader = document.getElementById('dealerLogoHeader');
+            const logoImg = document.getElementById('dealerLogoImg');
+            if (logoHeader && logoImg) {
                 logoImg.src = logoUrl;
                 logoImg.alt = (dealerInfo?.name || 'Dealer') + ' Logo';
-                logoSection.classList.remove('hidden');
+                logoHeader.classList.remove('hidden');
                 console.log('Dealer logo loaded:', logoUrl);
             }
         } else {
