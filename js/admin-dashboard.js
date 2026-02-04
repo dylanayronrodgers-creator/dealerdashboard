@@ -304,6 +304,15 @@ function showSection(section) {
         document.getElementById('pageTitle').textContent = titles[section].title;
         document.getElementById('pageSubtitle').textContent = titles[section].subtitle;
     }
+    
+    // Trigger section-specific data loading
+    if (section === 'reports') {
+        renderReportsCharts();
+    } else if (section === 'returned') {
+        loadReturnedItems();
+    } else if (section === 'settings') {
+        loadPrivilegesTable();
+    }
 }
 
 // Modal functions
@@ -1675,9 +1684,18 @@ async function updateOrderStatus(orderId) {
 
 function editPackage(packageId) {
     const pkg = packages.find(p => p.id === packageId);
-    if (pkg) {
-        alert('Edit functionality coming soon. Package: ' + pkg.name);
-    }
+    if (!pkg) return;
+    
+    // Populate edit form
+    document.getElementById('editPackageId').value = pkg.id;
+    document.getElementById('editPackageName').value = pkg.name || '';
+    document.getElementById('editPackageSpeed').value = pkg.speed || '';
+    document.getElementById('editPackagePrice').value = pkg.price || '';
+    document.getElementById('editPackageDescription').value = pkg.description || '';
+    document.getElementById('editPackageDataCap').value = pkg.data_cap || '';
+    document.getElementById('editPackageCommission').value = pkg.commission_amount || 200;
+    
+    openModal('editPackageModal');
 }
 
 // ============================================

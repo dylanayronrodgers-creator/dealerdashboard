@@ -117,16 +117,35 @@ function populateAgentFilter() {
 
 async function loadDealerLeads() {
     try {
-        const { data, error } = await window.supabaseClient
+        // Get agent IDs for this dealer
+        const agentIds = agents.map(a => a.id);
+        
+        // Fetch leads by dealer_id OR by agent_id (for agents belonging to this dealer)
+        let query = window.supabaseClient
             .from('leads')
             .select(`*, agent:profiles!leads_agent_id_fkey(id, full_name), package:packages(id, name, price)`, { count: 'exact' })
-            .eq('dealer_id', currentUser.dealer_id)
-            .order('created_at', { ascending: false })
-            .range(0, 9999);
+            .order('created_at', { ascending: false });
+        
+        // Use OR filter to get leads by dealer_id or by agent_id
+        if (agentIds.length > 0) {
+            query = query.or(`dealer_id.eq.${currentUser.dealer_id},agent_id.in.(${agentIds.join(',')})`);
+        } else {
+            query = query.eq('dealer_id', currentUser.dealer_id);
+        }
+        
+        const { data, error, count } = await query.range(0, 9999);
         
         if (error) throw error;
         leads = data || [];
-        document.getElementById('totalLeads').textContent = leads.length;
+        
+        // Update dealer_id on leads that only have agent_id (optional, for data consistency)
+        const leadsWithoutDealer = leads.filter(l => !l.dealer_id && l.agent_id);
+        if (leadsWithoutDealer.length > 0) {
+            console.log(`Found ${leadsWithoutDealer.length} leads without dealer_id that belong to dealer agents`);
+        }
+        
+        document.getElementById('totalLeads').textContent = count || leads.length;
+        console.log(`Loaded ${leads.length} leads for dealer (count: ${count})`);
         renderDealerLeadsTable();
     } catch (error) {
         console.error('Error loading leads:', error);
@@ -531,4 +550,63 @@ function getStatusColor(status) {
         cancelled: 'bg-red-100 text-red-800'
     };
     return colors[status] || 'bg-gray-100 text-gray-800';
+}
+
+// Export functions for dealer reports
+function exportDealerReport(type) {
+    const timestamp = new Date().toISOString().split('T')[0];
+    let headers, rows, filename;
+    
+    if (type === 'leads') {
+        headers = ['Name', 'Email', 'Phone', 'Agent', 'Package', 'Status', 'Order Status', 'Commission', 'Created'];
+        rows = leads.map(l => [
+            l.full_name || `${l.first_name || ''} ${l.last_name || ''}`.trim(),
+            l.email || '',
+            l.phone || '',
+            l.agent?.full_name || '',
+            l.package?.name || '',
+            l.status || '',
+            l.order_status || '',
+            l.commission_amount || 0,
+            l.created_at ? new Date(l.created_at).toLocaleDateString() : ''
+        ]);
+        filename = `dealer_leads_${timestamp}`;
+    } else if (type === 'performance') {
+        headers = ['Agent', 'Total Leads', 'Converted', 'Conversion Rate', 'Pending Commission', 'Paid Commission', 'Total Commission'];
+        rows = agents.map(agent => {
+            const agentLeads = leads.filter(l => l.agent_id === agent.id);
+            const agentOrders = orders.filter(o => o.agent_id === agent.id);
+            const pending = agentOrders.filter(o => o.commission_status !== 'paid').reduce((s, o) => s + (o.commission_amount || 0), 0);
+            const paid = agentOrders.filter(o => o.commission_status === 'paid').reduce((s, o) => s + (o.commission_amount || 0), 0);
+            const rate = agentLeads.length > 0 ? Math.round((agentOrders.length / agentLeads.length) * 100) : 0;
+            return [
+                agent.full_name || '',
+                agentLeads.length,
+                agentOrders.length,
+                rate + '%',
+                'R' + pending.toLocaleString(),
+                'R' + paid.toLocaleString(),
+                'R' + (pending + paid).toLocaleString()
+            ];
+        });
+        filename = `dealer_performance_${timestamp}`;
+    }
+    
+    downloadCSV(headers, rows, filename);
+    alert(`Report exported: ${filename}.csv`);
+}
+
+function downloadCSV(headers, rows, filename) {
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.map(cell => `"${String(cell).replace(/"/g, '""')}"`).join(','))
+    ].join('\n');
+    
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `${filename}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
 }

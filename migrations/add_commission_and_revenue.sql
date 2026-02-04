@@ -132,6 +132,7 @@ GRANT SELECT ON dashboard_stats TO authenticated;
 -- ============================================
 -- 7. ADD SAMPLE PREPAID PACKAGE (inactive until ready)
 -- ============================================
-INSERT INTO packages (name, speed, price, description, product_type, dealer_commission, is_active) VALUES
-    ('Prepaid Fibre - TBD', 0, 0, 'Prepaid fibre product (coming soon)', 'prepaid', 100.00, false)
-ON CONFLICT DO NOTHING;
+-- Note: Prepaid package disabled until fully implemented
+-- INSERT INTO packages (name, speed, price, description, product_type, dealer_commission, is_active) VALUES
+--     ('Prepaid Fibre - TBD', 0, 0, 'Prepaid fibre product (coming soon)', 'prepaid', 100.00, false)
+-- ON CONFLICT DO NOTHING;
