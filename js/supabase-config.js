@@ -2,8 +2,8 @@
 // UPDATE THESE VALUES ONCE - All dashboards will use them automatically
 
 const SUPABASE_CONFIG = {
-    url: 'https://your-project.supabase.co',
-    anonKey: 'your-anon-key-here'
+    url: 'https://xitiatikzlzcswakgevy.supabase.co',
+    anonKey: 'sb_publishable_o-2_PZ2xRLLPt7JfC2Stzw_knc5GHGE'
 };
 
 // ============================================
@@ -12,8 +12,8 @@ const SUPABASE_CONFIG = {
 
 function getSupabaseConfig() {
     // First check if centralized config is set
-    if (SUPABASE_CONFIG.url !== 'https://your-project.supabase.co' && 
-        SUPABASE_CONFIG.anonKey !== 'your-anon-key-here') {
+    if (SUPABASE_CONFIG.url !== 'https://xitiatikzlzcswakgevy.supabase.co' && 
+        SUPABASE_CONFIG.anonKey !== 'sb_publishable_o-2_PZ2xRLLPt7JfC2Stzw_knc5GHGE') {
         return SUPABASE_CONFIG;
     }
     
