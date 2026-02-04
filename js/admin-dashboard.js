@@ -2116,8 +2116,16 @@ async function convertToOrder() {
     }
     
     try {
-        const lead = leads.find(l => l.id === convertingLeadId);
-        if (!lead) throw new Error('Lead not found');
+        // Fetch lead from database to ensure we have latest data
+        const { data: leadData, error: fetchError } = await window.supabaseClient
+            .from('leads')
+            .select('*')
+            .eq('id', convertingLeadId)
+            .single();
+        
+        if (fetchError || !leadData) throw new Error('Lead not found in database');
+        
+        const lead = leadData;
         
         // Calculate commission based on product type
         const commissionAmount = productType === 'prepaid' ? 100 : 200;
@@ -2154,8 +2162,13 @@ async function convertToOrder() {
         closeModal('convertToOrderModal');
         convertingLeadId = null;
         
+        // Reload data to show the new order
         await Promise.all([loadLeads(), loadOrders(), updateRevenueStats()]);
-        alert(`Lead converted! Order #${orderNumber} created.\nCommission: R${commissionAmount} (${productType === 'prepaid' ? 'Prepaid' : 'Normal'})`);
+        
+        // Switch to orders section to show the newly created order
+        showSection('orders');
+        
+        alert(`Lead converted! Order #${orderNumber} created.\nCommission: R${commissionAmount} (${productType === 'prepaid' ? 'Prepaid' : 'Normal'})\n\nSwitched to Orders section.`);
         
     } catch (error) {
         console.error('Error converting lead:', error);
