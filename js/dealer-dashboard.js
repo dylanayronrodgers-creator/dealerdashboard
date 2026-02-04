@@ -33,6 +33,17 @@ async function loadDealerInfo() {
             .single();
         dealerInfo = data;
         document.getElementById('dealerName').textContent = dealerInfo?.name || 'Dealership';
+        
+        // Display dealer logo if available
+        if (dealerInfo?.logo_url) {
+            const logoSection = document.getElementById('dealerLogoSection');
+            const logoImg = document.getElementById('dealerLogo');
+            if (logoSection && logoImg) {
+                logoImg.src = dealerInfo.logo_url;
+                logoImg.alt = dealerInfo.name + ' Logo';
+                logoSection.classList.remove('hidden');
+            }
+        }
     } catch (error) {
         console.error('Error loading dealer info:', error);
     }
