@@ -3713,10 +3713,11 @@ async function loadShippingDeliveries() {
                 package:packages(id, name, price, description),
                 agent:profiles!leads_agent_id_fkey(id, full_name)
             `)
-            .eq('status', 'converted')
-            .not('account_number', 'is', null);
+            .eq('status', 'converted');
         
         if (error) throw error;
+        
+        console.log('Loaded converted leads for shipping:', data?.length || 0);
         
         // Filter for packages that require router delivery (exclude webconnect and prepaid)
         const allDeliveries = (data || []).filter(lead => {
@@ -3727,18 +3728,26 @@ async function loadShippingDeliveries() {
             const isWebConnect = packageName.includes('webconnect') || packageDesc.includes('webconnect');
             const isPrepaid = packageName.includes('prepaid') || packageDesc.includes('prepaid');
             
-            return !isWebConnect && !isPrepaid;
+            // Only include if has account number OR order number (for tracking)
+            const hasIdentifier = lead.account_number || lead.order_number;
+            
+            return !isWebConnect && !isPrepaid && hasIdentifier;
         });
+        
+        console.log('Filtered deliveries requiring router:', allDeliveries.length);
         
         // Split into pending and completed
         pendingDeliveries = allDeliveries.filter(d => !d.delivery_requested);
         completedDeliveries = allDeliveries.filter(d => d.delivery_requested);
+        
+        console.log('Pending deliveries:', pendingDeliveries.length, 'Completed:', completedDeliveries.length);
         
         renderShippingTables();
         updateShippingBadge();
         
     } catch (error) {
         console.error('Error loading shipping deliveries:', error);
+        alert('Error loading shipping deliveries: ' + error.message);
     }
 }
 
@@ -3757,7 +3766,7 @@ function renderShippingTables() {
                     <td class="py-3 px-4">
                         <input type="checkbox" class="delivery-checkbox rounded" data-id="${delivery.id}">
                     </td>
-                    <td class="py-3 px-4 font-medium text-gray-800">${delivery.account_number || '-'}</td>
+                    <td class="py-3 px-4 font-medium text-gray-800">${delivery.account_number || delivery.order_number || '-'}</td>
                     <td class="py-3 px-4 text-gray-600">${clientName}</td>
                     <td class="py-3 px-4 text-gray-600">${delivery.package?.name || '-'}</td>
                     <td class="py-3 px-4 text-gray-600 max-w-xs truncate">${delivery.address || '-'}</td>
@@ -3783,7 +3792,7 @@ function renderShippingTables() {
             
             return `
                 <tr class="border-b hover:bg-gray-50">
-                    <td class="py-3 px-4 font-medium text-gray-800">${delivery.account_number || '-'}</td>
+                    <td class="py-3 px-4 font-medium text-gray-800">${delivery.account_number || delivery.order_number || '-'}</td>
                     <td class="py-3 px-4 text-gray-600">${clientName}</td>
                     <td class="py-3 px-4 text-gray-600">${delivery.package?.name || '-'}</td>
                     <td class="py-3 px-4 text-gray-500 text-sm">${requestedDate}</td>
