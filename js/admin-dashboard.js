@@ -821,7 +821,12 @@ async function loadDashboardStats() {
         const totalLeads = leads.length;
         const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
         
-        document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+        // Update enhanced dashboard stats if function exists
+        if (typeof updateDashboardStats === 'function') {
+            updateDashboardStats();
+        } else {
+            document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+        }
         
         // Calculate revenue stats from leads (uses already loaded data)
         let confirmedRevenue = 0;
