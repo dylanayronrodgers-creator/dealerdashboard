@@ -122,7 +122,7 @@ function renderRecentOrders() {
     table.innerHTML = recent.map(order => {
         const clientName = order.full_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || '-';
         const status = order.order_status || 'pending';
-        const orderNum = order.lead_id || order.order_number || order.service_id || '-';
+        const orderNum = order.order_number || order.lead_id || order.service_id || '-';
         return `
             <tr class="table-row border-b">
                 <td class="py-3 px-6 text-sm font-medium text-gray-800">${orderNum}</td>
@@ -152,7 +152,7 @@ function renderOrdersTable(filteredOrders = null) {
     table.innerHTML = displayOrders.map(order => {
         const clientName = order.full_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || '-';
         const status = order.order_status || 'pending';
-        const orderNum = order.lead_id || order.order_number || order.service_id || '-';
+        const orderNum = order.order_number || order.lead_id || order.service_id || '-';
         return `
             <tr class="table-row border-b">
                 <td class="py-3 px-6">

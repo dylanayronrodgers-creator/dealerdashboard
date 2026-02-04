@@ -312,6 +312,8 @@ function showSection(section) {
         loadReturnedItems();
     } else if (section === 'settings') {
         loadPrivilegesTable();
+    } else if (section === 'leads') {
+        renderLeadsTable(leads);
     }
 }
 
@@ -1737,12 +1739,19 @@ async function updateLeadStatus(leadId, newStatus) {
         
         // Update local data
         const lead = leads.find(l => l.id === leadId);
-        if (lead) lead.status = newStatus;
+        if (lead) {
+            lead.status = newStatus;
+            if (newStatus === 'converted') {
+                lead.commission_status = 'pending';
+            }
+        }
+        
+        // Re-render the current filtered view without resetting filters
+        filterLeads();
         
     } catch (error) {
         console.error('Error updating lead status:', error);
         alert('Error updating status: ' + error.message);
-        await loadLeads();
     }
 }
 
@@ -2009,7 +2018,15 @@ async function saveLeadChanges(e) {
         
         alert('Lead updated successfully!');
         closeModal('viewLeadModal');
-        await loadLeads();
+        
+        // Update the lead in the local array instead of reloading everything
+        const leadIndex = leads.findIndex(l => l.id === editingLeadId);
+        if (leadIndex !== -1) {
+            leads[leadIndex] = { ...leads[leadIndex], ...updateData };
+        }
+        
+        // Re-render the current filtered view without resetting filters
+        filterLeads();
         
     } catch (error) {
         console.error('Error updating lead:', error);
