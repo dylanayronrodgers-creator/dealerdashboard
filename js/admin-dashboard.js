@@ -1783,12 +1783,13 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 async function updateLeadStatus(leadId, newStatus) {
     try {
-        const updateData = { status: newStatus, updated_at: new Date().toISOString() };
-        
-        // If converting, set commission status
+        // If converting to order, use the proper conversion modal
         if (newStatus === 'converted') {
-            updateData.commission_status = 'pending';
+            openConvertModal(leadId);
+            return;
         }
+        
+        const updateData = { status: newStatus, updated_at: new Date().toISOString() };
         
         const { error } = await window.supabaseClient
             .from('leads')
@@ -1801,9 +1802,6 @@ async function updateLeadStatus(leadId, newStatus) {
         const lead = leads.find(l => l.id === leadId);
         if (lead) {
             lead.status = newStatus;
-            if (newStatus === 'converted') {
-                lead.commission_status = 'pending';
-            }
         }
         
         // Re-render the current filtered view without resetting filters
