@@ -9,7 +9,8 @@ const { parse } = require('csv-parse/sync');
 const { createClient } = require('@supabase/supabase-js');
 
 // Configuration
-const OPENSERVE_URL = process.env.OPENSERVE_PORTAL_URL || 'https://openserve-portal-url.com';
+const OPENSERVE_URL = 'https://partners.openserve.co.za';
+const OPENSERVE_LOGIN_URL = 'https://openserveapp.b2clogin.com/efb1320a-d627-4304-b0ca-2e84b7039c2e/b2c_1_signin1_upp/oauth2/v2.0/authorize';
 const OPENSERVE_USERNAME = process.env.OPENSERVE_USERNAME;
 const OPENSERVE_PASSWORD = process.env.OPENSERVE_PASSWORD;
 const DOWNLOAD_PATH = path.join(__dirname, '../downloads');
@@ -46,51 +47,111 @@ async function downloadOpenserveCSV() {
             downloadPath: DOWNLOAD_PATH
         });
         
-        // 1. Navigate to login page
-        console.log('📝 Logging in to Openserve portal...');
-        await page.goto(`${OPENSERVE_URL}/login`, { waitUntil: 'networkidle2' });
+        // 1. Navigate to main portal (will redirect to Azure AD B2C login)
+        console.log('📝 Navigating to Openserve portal...');
+        await page.goto(OPENSERVE_URL, { waitUntil: 'networkidle2' });
         
-        // 2. Fill login form (adjust selectors based on actual portal)
-        await page.waitForSelector('input[name="username"], input[type="email"], #username', { timeout: 10000 });
-        await page.type('input[name="username"], input[type="email"], #username', OPENSERVE_USERNAME);
-        await page.type('input[name="password"], input[type="password"], #password', OPENSERVE_PASSWORD);
+        // Wait for redirect to Azure AD B2C login page
+        await page.waitForTimeout(2000);
         
-        // 3. Submit login
+        // 2. Handle Azure AD B2C login form
+        console.log('🔐 Filling Azure AD B2C login form...');
+        
+        // Wait for email input (Azure AD B2C uses specific IDs)
+        await page.waitForSelector('#signInName, #email, input[type="email"]', { timeout: 15000 });
+        await page.type('#signInName, #email, input[type="email"]', OPENSERVE_USERNAME);
+        
+        // Wait for password input
+        await page.waitForSelector('#password, input[type="password"]', { timeout: 5000 });
+        await page.type('#password, input[type="password"]', OPENSERVE_PASSWORD);
+        
+        // 3. Submit login and wait for redirect back to portal
+        console.log('🚀 Submitting login...');
         await Promise.all([
-            page.click('button[type="submit"], input[type="submit"], .login-button'),
-            page.waitForNavigation({ waitUntil: 'networkidle2' })
+            page.click('#next, button[type="submit"], .buttons button'),
+            page.waitForNavigation({ waitUntil: 'networkidle2', timeout: 30000 })
         ]);
         
         console.log('✅ Logged in successfully');
         
+        // Wait for portal to fully load after OAuth redirect
+        await page.waitForTimeout(3000);
+        
         // 4. Navigate to orders/reports page
         console.log('📊 Navigating to orders page...');
-        await page.goto(`${OPENSERVE_URL}/orders`, { waitUntil: 'networkidle2' });
+        // Try common paths for orders/reports
+        const ordersPaths = [
+            '/orders',
+            '/reports',
+            '/dashboard/orders',
+            '/partner/orders'
+        ];
+        
+        let ordersPageFound = false;
+        for (const path of ordersPaths) {
+            try {
+                await page.goto(`${OPENSERVE_URL}${path}`, { waitUntil: 'networkidle2', timeout: 10000 });
+                // Check if page loaded successfully (not 404)
+                const title = await page.title();
+                if (!title.toLowerCase().includes('not found') && !title.toLowerCase().includes('404')) {
+                    console.log(`✅ Found orders page at: ${path}`);
+                    ordersPageFound = true;
+                    break;
+                }
+            } catch (e) {
+                continue;
+            }
+        }
+        
+        if (!ordersPageFound) {
+            console.warn('⚠️ Could not find orders page automatically. Using main portal page.');
+            await page.goto(OPENSERVE_URL, { waitUntil: 'networkidle2' });
+        }
         
         // Wait a moment for page to load
         await page.waitForTimeout(2000);
         
         // 5. Click download/export button
-        console.log('⬇️ Downloading CSV...');
+        console.log('⬇️ Looking for download/export button...');
+        
+        // Wait for page to fully load
+        await page.waitForTimeout(2000);
         
         // Try multiple possible selectors for download button
         const downloadSelectors = [
-            'button:contains("Download")',
-            'button:contains("Export")',
-            'a:contains("Download CSV")',
-            'a:contains("Export to CSV")',
+            // Text-based selectors
+            'button:has-text("Download")',
+            'button:has-text("Export")',
+            'button:has-text("CSV")',
+            'button:has-text("Excel")',
+            'a:has-text("Download")',
+            'a:has-text("Export")',
+            // Class-based selectors
             '.download-button',
             '.export-button',
+            '.btn-download',
+            '.btn-export',
+            // ID-based selectors
             '#download-csv',
-            '#export-csv'
+            '#export-csv',
+            '#download',
+            '#export',
+            // Icon-based (common patterns)
+            'button[title*="Download"]',
+            'button[title*="Export"]',
+            'button[aria-label*="Download"]',
+            'button[aria-label*="Export"]'
         ];
         
         let downloaded = false;
+        
+        // First, try to find and click the button
         for (const selector of downloadSelectors) {
             try {
-                const button = await page.$(selector);
-                if (button) {
-                    await button.click();
+                const elements = await page.$$(selector);
+                if (elements.length > 0) {
+                    console.log(`✅ Found download button with selector: ${selector}`);
+                    await elements[0].click();
                     downloaded = true;
                     break;
                 }
@@ -100,7 +161,18 @@ async function downloadOpenserveCSV() {
         }
         
         if (!downloaded) {
-            throw new Error('Could not find download button. Please check selectors.');
+            // If no button found, take a screenshot for debugging
+            const screenshotPath = path.join(DOWNLOAD_PATH, 'debug-screenshot.png');
+            await page.screenshot({ path: screenshotPath, fullPage: true });
+            console.log(`📸 Screenshot saved to: ${screenshotPath}`);
+            
+            // Also save the page HTML for inspection
+            const html = await page.content();
+            const htmlPath = path.join(DOWNLOAD_PATH, 'debug-page.html');
+            fs.writeFileSync(htmlPath, html);
+            console.log(`📄 Page HTML saved to: ${htmlPath}`);
+            
+            throw new Error('Could not find download button. Check debug-screenshot.png and debug-page.html in downloads folder.');
         }
         
         // Wait for download to complete
