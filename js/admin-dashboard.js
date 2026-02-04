@@ -1825,8 +1825,8 @@ function viewLeadDetails(leadId) {
                     </select>
                 </div>
                 <div>
-                    <label class="${labelClass}">Lead Type</label>
-                    <input type="text" name="lead_type" value="${lead.lead_type || ''}" class="${inputClass}">
+                    <label class="${labelClass}">Service ID</label>
+                    <input type="text" name="service_id" value="${lead.service_id || ''}" class="${inputClass}">
                 </div>
             </div>
             
@@ -1920,8 +1920,8 @@ function viewLeadDetails(leadId) {
                             </select>
                         </div>
                         <div>
-                            <label class="${labelClass}">ISP</label>
-                            <input type="text" name="isp" value="${lead.isp || ''}" class="${inputClass}">
+                            <label class="${labelClass}">Account Number</label>
+                            <input type="text" name="account_number" value="${lead.account_number || ''}" class="${inputClass}">
                         </div>
                     </div>
                 </div>
@@ -1986,7 +1986,7 @@ async function saveLeadChanges(e) {
     const updateData = {
         lead_id: toNull(formData.get('lead_id')),
         status: formData.get('status'),
-        lead_type: toNull(formData.get('lead_type')),
+        service_id: toNull(formData.get('service_id')),
         full_name: toNull(formData.get('full_name')),
         first_name: toNull(formData.get('first_name')),
         last_name: toNull(formData.get('last_name')),
@@ -2001,7 +2001,7 @@ async function saveLeadChanges(e) {
         agent_id: toUUID(formData.get('agent_id')),
         dealer_id: toUUID(formData.get('dealer_id')),
         package_id: toUUID(formData.get('package_id')),
-        isp: toNull(formData.get('isp')),
+        account_number: toNull(formData.get('account_number')),
         order_number: toNull(formData.get('order_number')),
         order_status: toNull(formData.get('order_status')),
         order_date: toNull(formData.get('order_date')),
@@ -2657,9 +2657,10 @@ function normalizeHeader(header) {
         'agent': 'agent_name',
         'dealer': 'dealer_name',
         'deal': 'package_name',
-        'isp': 'isp',
-        'lead type': 'lead_type',
-        'lead_type': 'lead_type',
+        'service id': 'service_id',
+        'service_id': 'service_id',
+        'account number': 'account_number',
+        'account_number': 'account_number',
         'status': 'status',
         'region': 'address',
         'primary contact name': 'full_name',
@@ -3044,9 +3045,9 @@ function cancelImport() {
 }
 
 function downloadTemplate() {
-    const headers = 'LEAD ID,AGENT,DEALER,DEAL,ISP,LEAD TYPE,STATUS,REGION,PRIMARY CONTACT NAME,PRIMARY CONTACT NUMBER,PRIMARY CONTACT EMAIL,SECONDARY CONTACT NAME,SECONDARY CONTACT NUMBER,SECONDARY CONTACT SECONDARY,SECONDARY CONTACT EMAIL,ORDER NUMBER,ORDER STATUS,ORDER DATE,DATE CAPTURED,LAST UPDATED,CAPTURED BY,SECONDARY CONTACT';
-    const row1 = 'L12345,John Smith,Mailstech,20/10Mbps Uncapped Fibre,Openserve,New,new,Gauteng,Jane Doe,0821234567,jane@example.com,Bob Smith,0829876543,,bob@example.com,ORD001,pending,2024-01-15,2024-01-14,2024-01-15,agent@example.com,';
-    const row2 = 'L12346,Sarah Jones,Betty Holdings,50/25 Mbps Uncapped Fibre,Openserve,Upgrade,contacted,Limpopo,Mike Wilson,0831112222,mike@example.com,,,,,,,2024-01-16,2024-01-16,sales@dealer.com,';
+    const headers = 'LEAD ID,AGENT,DEALER,DEAL,SERVICE ID,ACCOUNT NUMBER,STATUS,REGION,PRIMARY CONTACT NAME,PRIMARY CONTACT NUMBER,PRIMARY CONTACT EMAIL,SECONDARY CONTACT NAME,SECONDARY CONTACT NUMBER,SECONDARY CONTACT SECONDARY,SECONDARY CONTACT EMAIL,ORDER NUMBER,ORDER STATUS,ORDER DATE,DATE CAPTURED,LAST UPDATED,CAPTURED BY,SECONDARY CONTACT';
+    const row1 = 'L12345,John Smith,Mailstech,20/10Mbps Uncapped Fibre,SVC001,ACC12345,new,Gauteng,Jane Doe,0821234567,jane@example.com,Bob Smith,0829876543,,bob@example.com,ORD001,pending,2024-01-15,2024-01-14,2024-01-15,agent@example.com,';
+    const row2 = 'L12346,Sarah Jones,Betty Holdings,50/25 Mbps Uncapped Fibre,SVC002,ACC67890,contacted,Limpopo,Mike Wilson,0831112222,mike@example.com,,,,,,,2024-01-16,2024-01-16,sales@dealer.com,';
     const template = `${headers}\n${row1}\n${row2}`;
     
     const blob = new Blob([template], { type: 'text/csv' });
