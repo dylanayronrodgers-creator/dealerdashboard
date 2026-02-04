@@ -122,9 +122,10 @@ function renderRecentOrders() {
     table.innerHTML = recent.map(order => {
         const clientName = order.full_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || '-';
         const status = order.order_status || 'pending';
+        const orderNum = order.lead_id || order.order_number || order.service_id || '-';
         return `
             <tr class="table-row border-b">
-                <td class="py-3 px-6 text-sm font-medium text-gray-800">#${order.id?.slice(-8) || '-'}</td>
+                <td class="py-3 px-6 text-sm font-medium text-gray-800">${orderNum}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${clientName}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${order.address || '-'}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${order.package?.name || '-'}</td>
@@ -151,12 +152,12 @@ function renderOrdersTable(filteredOrders = null) {
     table.innerHTML = displayOrders.map(order => {
         const clientName = order.full_name || `${order.first_name || ''} ${order.last_name || ''}`.trim() || '-';
         const status = order.order_status || 'pending';
+        const orderNum = order.lead_id || order.order_number || order.service_id || '-';
         return `
             <tr class="table-row border-b">
                 <td class="py-3 px-6">
-                    <div class="text-sm font-medium text-gray-800">${order.order_number || '-'}</div>
-                    <div class="text-xs text-gray-400">Service: ${order.service_id || '-'}</div>
-                    <div class="text-xs text-gray-400">Lead: ${order.id?.slice(0, 8) || '-'}</div>
+                    <div class="text-sm font-medium text-gray-800">${orderNum}</div>
+                    ${order.service_id ? `<div class="text-xs text-gray-400">Service: ${order.service_id}</div>` : ''}
                 </td>
                 <td class="py-3 px-6 text-sm text-gray-600">${clientName}</td>
                 <td class="py-3 px-6 text-sm text-gray-600">${order.phone || order.email || '-'}</td>
