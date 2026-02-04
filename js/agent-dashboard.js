@@ -10,11 +10,14 @@ let importData = [];
 let importStats = { duplicates: 0, newAgents: [] };
 
 document.addEventListener('DOMContentLoaded', async function() {
-    // Check authentication
-    const auth = await requireAuth('agent');
+    // Check authentication - allow both agent and external_agent roles
+    const auth = await requireAuth(['agent', 'external_agent']);
     if (!auth) return;
     
     currentUser = auth.profile;
+    
+    // Apply role-based permissions
+    applyRolePermissions();
     
     // Update UI with user info
     document.getElementById('userName').textContent = currentUser.full_name;
@@ -44,6 +47,47 @@ document.addEventListener('DOMContentLoaded', async function() {
 
 function getInitials(name) {
     return name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+}
+
+// Check if user is an internal agent (full permissions) or external agent (limited)
+function isInternalAgent() {
+    return currentUser && currentUser.role === 'agent' && currentUser.team_type === 'internal';
+}
+
+function isExternalAgent() {
+    return currentUser && (currentUser.role === 'external_agent' || 
+           (currentUser.role === 'agent' && currentUser.team_type !== 'internal'));
+}
+
+// Apply role-based permissions to UI
+function applyRolePermissions() {
+    const isExternal = isExternalAgent();
+    
+    // Hide "Add Lead" button for external agents
+    const addLeadBtn = document.getElementById('addLeadBtn');
+    if (addLeadBtn && isExternal) {
+        addLeadBtn.style.display = 'none';
+    }
+    
+    // Hide import section for external agents
+    const importNav = document.querySelector('[href="#import"]');
+    if (importNav && isExternal) {
+        importNav.style.display = 'none';
+    }
+    
+    // Show role badge
+    const roleBadge = document.getElementById('userRoleBadge');
+    if (roleBadge) {
+        if (isExternal) {
+            roleBadge.textContent = 'External Agent';
+            roleBadge.className = 'text-xs bg-orange-100 text-orange-700 px-2 py-0.5 rounded-full';
+        } else {
+            roleBadge.textContent = 'Internal Agent';
+            roleBadge.className = 'text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full';
+        }
+    }
+    
+    console.log(`Agent type: ${isExternal ? 'External' : 'Internal'}, Role: ${currentUser.role}`);
 }
 
 // Load agent's dealer info and display logo
@@ -262,8 +306,8 @@ function renderMyLeadsTable(filteredLeads = null) {
             <td class="py-4">
                 <div class="flex gap-2">
                     <button onclick="updateLeadStatus('${lead.id}')" class="text-blue-600 hover:text-blue-800 text-sm">Update</button>
-                    ${lead.status !== 'converted' ? `<button onclick="openConvertModal('${lead.id}')" class="text-green-600 hover:text-green-800 text-sm">Convert</button>` : ''}
-                    <button onclick="sendToAdmin('${lead.id}', 'lead')" class="text-purple-600 hover:text-purple-800 text-sm">Send to Admin</button>
+                    ${!isExternalAgent() && lead.status !== 'converted' ? `<button onclick="openConvertModal('${lead.id}')" class="text-green-600 hover:text-green-800 text-sm">Convert</button>` : ''}
+                    <button onclick="sendToAdmin('${lead.id}', 'lead')" class="text-purple-600 hover:text-purple-800 text-sm">${isExternalAgent() ? 'Return' : 'Send to Admin'}</button>
                 </div>
             </td>
         </tr>

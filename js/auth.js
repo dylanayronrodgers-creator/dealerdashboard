@@ -139,6 +139,7 @@ async function logout() {
 }
 
 // Protect dashboard pages
+// requiredRole can be a string or array of allowed roles
 async function requireAuth(requiredRole = null) {
     if (!window.supabaseClient) {
         window.location.href = 'login.html';
@@ -164,16 +165,24 @@ async function requireAuth(requiredRole = null) {
             return null;
         }
 
-        if (requiredRole && profile.role !== requiredRole) {
-            // Redirect to appropriate dashboard
-            if (profile.role === 'admin') {
-                window.location.href = 'admin-dashboard.html';
-            } else if (profile.role === 'dealer') {
-                window.location.href = 'dealer-dashboard.html';
-            } else {
-                window.location.href = 'agent-dashboard.html';
+        // Check role - support both string and array of roles
+        if (requiredRole) {
+            const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+            if (!allowedRoles.includes(profile.role)) {
+                // Redirect to appropriate dashboard
+                if (profile.role === 'admin') {
+                    window.location.href = 'admin-dashboard.html';
+                } else if (profile.role === 'dealer') {
+                    window.location.href = 'dealer-dashboard.html';
+                } else if (profile.role === 'openserve') {
+                    window.location.href = 'openserve-dashboard.html';
+                } else if (profile.role === 'agent' || profile.role === 'external_agent') {
+                    window.location.href = 'agent-dashboard.html';
+                } else {
+                    window.location.href = 'login.html';
+                }
+                return null;
             }
-            return null;
         }
 
         return { session, profile };
