@@ -40,11 +40,14 @@ A comprehensive dealer dashboard for managing Openserve fibre orders at Axxess. 
 ### 3. Configure Application
 
 1. Open `js/supabase-config.js`
-2. Replace the placeholder values:
+2. Update the SUPABASE_CONFIG object at the top of the file:
    ```javascript
-   const SUPABASE_URL = 'your-project-url';
-   const SUPABASE_ANON_KEY = 'your-anon-key';
+   const SUPABASE_CONFIG = {
+       url: 'https://your-project.supabase.co',
+       anonKey: 'your-anon-key-here'
+   };
    ```
+3. **That's it!** All dashboards will automatically use these credentials. No need to configure each dashboard separately.
 
 ### 4. Create Admin User
 

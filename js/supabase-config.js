@@ -1,15 +1,31 @@
-// Supabase Configuration
-// Credentials are loaded from localStorage (set via setup.html)
+// Centralized Supabase Configuration
+// UPDATE THESE VALUES ONCE - All dashboards will use them automatically
+
+const SUPABASE_CONFIG = {
+    url: 'https://your-project.supabase.co',
+    anonKey: 'your-anon-key-here'
+};
+
+// ============================================
+// NO NEED TO EDIT BELOW THIS LINE
+// ============================================
 
 function getSupabaseConfig() {
+    // First check if centralized config is set
+    if (SUPABASE_CONFIG.url !== 'https://your-project.supabase.co' && 
+        SUPABASE_CONFIG.anonKey !== 'your-anon-key-here') {
+        return SUPABASE_CONFIG;
+    }
+    
+    // Fallback to localStorage for backward compatibility
     const url = localStorage.getItem('SUPABASE_URL');
     const key = localStorage.getItem('SUPABASE_ANON_KEY');
     
-    if (!url || !key) {
-        return null;
+    if (url && key) {
+        return { url, key };
     }
     
-    return { url, key };
+    return null;
 }
 
 function isSupabaseConfigured() {
@@ -28,8 +44,11 @@ function initSupabase() {
     
     const config = getSupabaseConfig();
     if (config) {
+        console.log('Supabase initialized with centralized config');
         return window.supabase.createClient(config.url, config.key);
     }
+    
+    console.warn('Supabase not configured. Please update SUPABASE_CONFIG in js/supabase-config.js');
     return null;
 }
 
