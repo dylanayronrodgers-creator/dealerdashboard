@@ -660,9 +660,14 @@ function renderLeadsTable(filteredLeads = null) {
         return `
         <tr class="table-row border-b">
             <td class="py-4">
-                <div class="font-medium text-gray-800">${clientName}</div>
-                <div class="text-xs text-gray-400">${lead.order_number ? 'Order: ' + lead.order_number : ''}</div>
-                <div class="text-xs text-gray-400">${lead.service_id ? 'Service: ' + lead.service_id : ''}</div>
+                <div class="flex items-center gap-2">
+                    <div>
+                        <div class="font-medium text-gray-800">${clientName}</div>
+                        <div class="text-xs text-gray-400">${lead.order_number ? 'Order: ' + lead.order_number : ''}</div>
+                        <div class="text-xs text-gray-400">${lead.service_id ? 'Service: ' + lead.service_id : ''}</div>
+                    </div>
+                    ${lead.is_preorder ? '<span class="inline-flex items-center gap-1 px-2 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-medium"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>Preorder</span>' : ''}
+                </div>
             </td>
             <td class="py-4">
                 <div class="text-sm text-gray-600">${contact}</div>
