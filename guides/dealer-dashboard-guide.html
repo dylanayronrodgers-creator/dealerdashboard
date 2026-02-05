@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dealer Dashboard - User Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            .page-break { page-break-after: always; }
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .guide-section { margin-bottom: 2rem; }
+        .step-number { 
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2640 100%);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+        .feature-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        .dealer-logo-placeholder {
+            width: 120px;
+            height: 60px;
+            border: 2px dashed #cbd5e0;
+            border-radius: 0.5rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #a0aec0;
+            font-size: 0.75rem;
+            text-align: center;
+            padding: 0.5rem;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header with Logos -->
+    <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-8 no-print">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">Dealer Dashboard</h1>
+                <p class="text-blue-200">Complete User Guide</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="dealer-logo-placeholder bg-white text-gray-400">
+                    Your Dealer Logo
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-900">AXXESS</div>
+                    <div class="text-xs text-gray-600">Dealer Portal</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">OPENSERVE</div>
+                    <div class="text-xs text-gray-600">Fibre Network</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block text-center py-4 border-b-2 border-blue-900">
+        <div class="flex items-center justify-center gap-8 mb-2">
+            <div class="dealer-logo-placeholder">Your Logo</div>
+            <div class="text-2xl font-bold text-blue-900">AXXESS</div>
+            <div class="text-2xl font-bold text-green-600">OPENSERVE</div>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800">Dealer Dashboard - User Guide</h1>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-8">
+        <!-- Customization Note -->
+        <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-8 no-print">
+            <h3 class="font-bold text-blue-900 mb-2">📝 Customization Note:</h3>
+            <p class="text-gray-700">This guide includes placeholder spaces for your dealer logo. You can customize this guide by replacing the placeholder with your actual logo image before printing or distributing to your team.</p>
+        </div>
+
+        <!-- Table of Contents -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📑 Table of Contents</h2>
+            <div class="grid md:grid-cols-2 gap-3">
+                <a href="#overview" class="text-blue-600 hover:underline">1. Dashboard Overview</a>
+                <a href="#agents" class="text-blue-600 hover:underline">2. Managing Your Agents</a>
+                <a href="#leads" class="text-blue-600 hover:underline">3. Viewing All Leads</a>
+                <a href="#orders" class="text-blue-600 hover:underline">4. Tracking Orders</a>
+                <a href="#preorders" class="text-blue-600 hover:underline">5. Preorders Overview</a>
+                <a href="#reports" class="text-blue-600 hover:underline">6. Performance Reports</a>
+                <a href="#export" class="text-blue-600 hover:underline">7. Exporting Data</a>
+            </div>
+        </div>
+
+        <!-- Section 1: Dashboard Overview -->
+        <div id="overview" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📊</span> Dashboard Overview
+            </h2>
+            <p class="text-gray-600 mb-6">Your dealer dashboard provides a comprehensive view of your entire agent network, their leads, orders, and overall performance metrics.</p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <h3 class="font-bold text-blue-900 mb-2">Key Metrics Displayed:</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-1">
+                    <li><strong>Total Agents:</strong> Number of agents working under your dealership</li>
+                    <li><strong>Total Leads:</strong> All leads assigned to you and your agents</li>
+                    <li><strong>Total Orders:</strong> Successfully converted orders from your network</li>
+                    <li><strong>Conversion Rate:</strong> Overall success rate of your dealership</li>
+                    <li><strong>Total Revenue:</strong> Combined earnings from all orders</li>
+                </ul>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                <h3 class="font-bold text-green-900 mb-2">💡 Quick Tip:</h3>
+                <p class="text-gray-700">Monitor your dashboard daily to track agent performance and identify top performers. Regular oversight helps maintain high conversion rates across your network.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 2: Managing Your Agents -->
+        <div id="agents" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">👥</span> Managing Your Agents
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Viewing Your Agent Network</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Navigate to My Agents</p>
+                        <p class="text-gray-600">Click "My Agents" in the sidebar to see all agents in your network</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Review Agent Performance</p>
+                        <p class="text-gray-600">See each agent's lead count, conversion rate, and total sales</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Filter and Search</p>
+                        <p class="text-gray-600">Use search bar to quickly find specific agents</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Agent Performance Metrics</h3>
+            <div class="grid md:grid-cols-3 gap-4 mb-6">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-blue-600 mb-2">📊 Active Leads</h4>
+                    <p class="text-sm text-gray-600">Number of leads currently assigned to each agent</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-600 mb-2">✅ Conversions</h4>
+                    <p class="text-sm text-gray-600">Total orders successfully converted by agent</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-purple-600 mb-2">📈 Success Rate</h4>
+                    <p class="text-sm text-gray-600">Percentage of leads converted to orders</p>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4">
+                <h3 class="font-bold text-yellow-900 mb-2">⚠️ Important:</h3>
+                <p class="text-gray-700">Regularly review agent performance to identify training opportunities and recognize top performers. Consistent coaching improves overall dealership results.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 3: Viewing All Leads -->
+        <div id="leads" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📋</span> Viewing All Leads
+            </h2>
+            
+            <p class="text-gray-600 mb-6">Access all leads across your entire agent network in one centralized view.</p>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Accessing Leads</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Click "All Leads" Tab</p>
+                        <p class="text-gray-600">View complete list of leads from all your agents</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Filter by Agent</p>
+                        <p class="text-gray-600">Select specific agent to view their leads only</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Filter by Status</p>
+                        <p class="text-gray-600">View leads by status (New, Contacted, Qualified, etc.)</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Search Leads</p>
+                        <p class="text-gray-600">Find specific leads by client name or contact info</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Lead Information Displayed</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li><strong>Client Details:</strong> Name, contact information, address</li>
+                    <li><strong>Assigned Agent:</strong> Which agent is handling the lead</li>
+                    <li><strong>Package:</strong> Selected fibre package</li>
+                    <li><strong>Status:</strong> Current lead status and progress</li>
+                    <li><strong>Created Date:</strong> When the lead was added to the system</li>
+                    <li><strong>Preorder Badge:</strong> Visual indicator if lead is a preorder</li>
+                </ul>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-6">
+                <h3 class="font-bold text-blue-900 mb-2">💡 Pro Tip:</h3>
+                <p class="text-gray-700">Use the filter combinations to identify leads that need attention - for example, "New" leads that are more than 48 hours old may need agent follow-up.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 4: Tracking Orders -->
+        <div id="orders" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📦</span> Tracking Orders
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Viewing All Orders</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Navigate to Orders Section</p>
+                        <p class="text-gray-600">Click "Orders" to view all converted leads</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Review Order Details</p>
+                        <p class="text-gray-600">See client info, package, installation status, and agent</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Track Installation Progress</p>
+                        <p class="text-gray-600">Monitor order status from processing to completion</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Order Statuses</h3>
+            <div class="space-y-2 mb-6">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Processing</span>
+                    <span class="text-gray-600">Order submitted to Openserve, awaiting scheduling</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Scheduled</span>
+                    <span class="text-gray-600">Installation date confirmed with client</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Completed</span>
+                    <span class="text-gray-600">Installation successful, service activated</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Cancelled</span>
+                    <span class="text-gray-600">Order cancelled by client or system</span>
+                </div>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                <h3 class="font-bold text-green-900 mb-2">💰 Revenue Tracking:</h3>
+                <p class="text-gray-700">Each completed order contributes to your dealership's total revenue. Commission is calculated automatically based on package pricing and your commission rate.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 5: Preorders Overview -->
+        <div id="preorders" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">⏰</span> Preorders Overview
+                <span class="feature-badge ml-3">NEW</span>
+            </h2>
+            
+            <p class="text-gray-600 mb-6">Track all preorders from your agent network - leads where clients want to order but installation is scheduled for a future date.</p>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Viewing Preorders</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Click "Preorders" Tab</p>
+                        <p class="text-gray-600">See all preorders from your entire agent network</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Filter by Agent</p>
+                        <p class="text-gray-600">View preorders for specific agents</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Filter by Status</p>
+                        <p class="text-gray-600">See preorders at different stages</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Monitor Progress</p>
+                        <p class="text-gray-600">Ensure agents are following up on preorders</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-purple-50 border-l-4 border-purple-500 p-4">
+                <h3 class="font-bold text-purple-900 mb-2">💡 Visual Indicator:</h3>
+                <p class="text-gray-700">Preorder leads display a purple badge with clock icon in all lead tables, making them instantly recognizable across the dashboard.</p>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-4">
+                <h3 class="font-bold text-blue-900 mb-2">📋 Management Tip:</h3>
+                <p class="text-gray-700">Coach your agents to maintain regular contact with preorder clients. Consistent follow-up reduces cancellation rates and ensures smooth conversion when installation dates arrive.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 6: Performance Reports -->
+        <div id="reports" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📈</span> Performance Reports
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Accessing Reports</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Navigate to Reports Section</p>
+                        <p class="text-gray-600">Click "Reports" in the sidebar</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">View Performance Charts</p>
+                        <p class="text-gray-600">Visual representation of dealership performance over time</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Analyze Agent Metrics</p>
+                        <p class="text-gray-600">Compare agent performance side-by-side</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Identify Trends</p>
+                        <p class="text-gray-600">Spot patterns in sales, conversions, and revenue</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Key Performance Indicators</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-blue-600 mb-2">📊 Overall Conversion Rate</h4>
+                    <p class="text-sm text-gray-600">Dealership-wide percentage of leads converted to orders</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-600 mb-2">💰 Total Revenue</h4>
+                    <p class="text-sm text-gray-600">Combined earnings from all completed orders</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-purple-600 mb-2">👥 Agent Performance</h4>
+                    <p class="text-sm text-gray-600">Individual agent metrics and rankings</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-orange-600 mb-2">📈 Growth Trends</h4>
+                    <p class="text-sm text-gray-600">Month-over-month and year-over-year comparisons</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Section 7: Exporting Data -->
+        <div id="export" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📥</span> Exporting Data
+            </h2>
+            
+            <p class="text-gray-600 mb-6">Export your dealership data for external analysis, reporting, or record-keeping.</p>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">How to Export</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Navigate to Desired Section</p>
+                        <p class="text-gray-600">Go to Leads, Orders, or Preorders section</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Apply Filters (Optional)</p>
+                        <p class="text-gray-600">Filter data before exporting to get specific results</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Click "Export" Button</p>
+                        <p class="text-gray-600">Downloads data as CSV file</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Open in Spreadsheet Software</p>
+                        <p class="text-gray-600">Use Excel, Google Sheets, or similar for analysis</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Export Use Cases</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li><strong>Monthly Reporting:</strong> Export orders for monthly performance reports</li>
+                    <li><strong>Agent Reviews:</strong> Export agent-specific data for performance reviews</li>
+                    <li><strong>Financial Analysis:</strong> Export revenue data for accounting purposes</li>
+                    <li><strong>Marketing Insights:</strong> Export lead data to analyze conversion patterns</li>
+                    <li><strong>Backup Records:</strong> Regular exports for data backup and archiving</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Best Practices Section -->
+        <div class="guide-section bg-gradient-to-r from-blue-50 to-green-50 rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">⭐</span> Best Practices for Dealer Success
+            </h2>
+            
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="bg-white rounded-lg p-4">
+                    <h3 class="font-bold text-blue-600 mb-3">✅ Recommended Actions</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2 text-sm">
+                        <li>Review dashboard metrics daily</li>
+                        <li>Monitor agent performance weekly</li>
+                        <li>Provide regular training and coaching</li>
+                        <li>Recognize and reward top performers</li>
+                        <li>Track preorders to ensure follow-up</li>
+                        <li>Export monthly reports for analysis</li>
+                        <li>Maintain consistent communication with agents</li>
+                        <li>Set clear performance targets and KPIs</li>
+                    </ul>
+                </div>
+                <div class="bg-white rounded-lg p-4">
+                    <h3 class="font-bold text-green-600 mb-3">💡 Success Strategies</h3>
+                    <ul class="list-disc list-inside text-gray-700 space-y-2 text-sm">
+                        <li>Establish weekly agent check-ins</li>
+                        <li>Share best practices across your network</li>
+                        <li>Create friendly competition between agents</li>
+                        <li>Celebrate team wins and milestones</li>
+                        <li>Use data to identify training needs</li>
+                        <li>Implement lead response time standards</li>
+                        <li>Monitor conversion rates by agent</li>
+                        <li>Provide resources for agent development</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Troubleshooting Section -->
+        <div class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">🔧</span> Common Questions
+            </h2>
+            
+            <div class="space-y-4">
+                <div class="border-l-4 border-blue-500 pl-4">
+                    <h3 class="font-bold text-gray-800 mb-1">Q: Why don't I see all my leads?</h3>
+                    <p class="text-gray-600 text-sm">A: Check your filters - you may have status or agent filters applied. Clear all filters to see complete lead list.</p>
+                </div>
+                <div class="border-l-4 border-green-500 pl-4">
+                    <h3 class="font-bold text-gray-800 mb-1">Q: How do I add a new agent?</h3>
+                    <p class="text-gray-600 text-sm">A: New agents must register through the agent portal. Once registered, they'll appear in your "My Agents" section automatically.</p>
+                </div>
+                <div class="border-l-4 border-purple-500 pl-4">
+                    <h3 class="font-bold text-gray-800 mb-1">Q: Can I edit lead details?</h3>
+                    <p class="text-gray-600 text-sm">A: Dealers have view-only access to leads. Contact admin if lead information needs to be updated.</p>
+                </div>
+                <div class="border-l-4 border-orange-500 pl-4">
+                    <h3 class="font-bold text-gray-800 mb-1">Q: How is commission calculated?</h3>
+                    <p class="text-gray-600 text-sm">A: Commission is based on your dealership's commission rate multiplied by the package price. It's calculated automatically when a lead converts to an order.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-lg p-6 mt-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Need Help?</h3>
+                    <p class="text-blue-200">Contact admin support for additional assistance</p>
+                </div>
+                <div class="flex items-center gap-4">
+                    <div class="dealer-logo-placeholder bg-white text-gray-400">
+                        Your Logo
+                    </div>
+                    <div class="text-right">
+                        <div class="text-2xl font-bold">AXXESS</div>
+                        <div class="text-sm text-blue-200">Powered by Openserve</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="text-center mt-8 no-print">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg">
+                🖨️ Print or Save as PDF
+            </button>
+            <p class="text-sm text-gray-500 mt-2">Tip: Add your dealer logo before printing for a fully branded guide</p>
+        </div>
+    </div>
+</body>
+</html>

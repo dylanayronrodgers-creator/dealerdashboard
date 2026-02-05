@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard User Guides - Axxess Dealer Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .guide-card {
+            transition: all 0.3s ease;
+        }
+        .guide-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+    </style>
+</head>
+<body class="bg-gradient-to-br from-blue-50 via-white to-green-50 min-h-screen">
+    <!-- Header -->
+    <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-8 shadow-lg">
+        <div class="max-w-6xl mx-auto">
+            <div class="flex items-center justify-between mb-4">
+                <div>
+                    <h1 class="text-4xl font-bold mb-2">Dashboard User Guides</h1>
+                    <p class="text-blue-200">Complete documentation for all portal users</p>
+                </div>
+                <div class="flex items-center gap-6">
+                    <div class="bg-white p-3 rounded-lg">
+                        <div class="text-2xl font-bold text-blue-900">AXXESS</div>
+                        <div class="text-xs text-gray-600">Dealer Portal</div>
+                    </div>
+                    <div class="bg-white p-3 rounded-lg">
+                        <div class="text-2xl font-bold text-green-600">OPENSERVE</div>
+                        <div class="text-xs text-gray-600">Fibre Network</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-8">
+        <!-- Welcome Section -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4">📚 Welcome to the User Guide Library</h2>
+            <p class="text-gray-600 mb-4">
+                Select your role below to access the comprehensive user guide for your dashboard. Each guide includes step-by-step instructions, 
+                best practices, and troubleshooting tips to help you make the most of your portal.
+            </p>
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+                <p class="text-gray-700">
+                    <strong>💡 Tip:</strong> All guides can be printed or saved as PDF using the print button at the bottom of each guide page.
+                </p>
+            </div>
+        </div>
+
+        <!-- Guide Cards -->
+        <div class="grid md:grid-cols-3 gap-8 mb-8">
+            <!-- Admin Guide -->
+            <a href="admin-dashboard-guide.html" class="guide-card bg-white rounded-lg shadow-lg overflow-hidden block">
+                <div class="bg-gradient-to-r from-blue-600 to-blue-700 p-6 text-white">
+                    <div class="text-5xl mb-3">👨‍💼</div>
+                    <h3 class="text-2xl font-bold">Admin Dashboard</h3>
+                    <p class="text-blue-100 text-sm mt-2">Complete system management</p>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-gray-800 mb-3">What's Covered:</h4>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span>Managing leads, orders, and conversions</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span>Agent and dealer management</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span>Preorders feature (NEW)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span>Shipping and delivery tracking</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-blue-600 mr-2">✓</span>
+                            <span>Reports and analytics</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <span class="inline-flex items-center gap-2 text-blue-600 font-semibold">
+                            View Guide
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Agent Guide -->
+            <a href="agent-dashboard-guide.html" class="guide-card bg-white rounded-lg shadow-lg overflow-hidden block">
+                <div class="bg-gradient-to-r from-purple-600 to-purple-700 p-6 text-white">
+                    <div class="text-5xl mb-3">👤</div>
+                    <h3 class="text-2xl font-bold">Agent Dashboard</h3>
+                    <p class="text-purple-100 text-sm mt-2">Sales and performance tracking</p>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-gray-800 mb-3">What's Covered:</h4>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start">
+                            <span class="text-purple-600 mr-2">✓</span>
+                            <span>Managing your leads and orders</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-600 mr-2">✓</span>
+                            <span>Lead status updates and tracking</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-600 mr-2">✓</span>
+                            <span>Your preorders (NEW)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-600 mr-2">✓</span>
+                            <span>Commission tracking and earnings</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-purple-600 mr-2">✓</span>
+                            <span>Performance reports and metrics</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <span class="inline-flex items-center gap-2 text-purple-600 font-semibold">
+                            View Guide
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </a>
+
+            <!-- Dealer Guide -->
+            <a href="dealer-dashboard-guide.html" class="guide-card bg-white rounded-lg shadow-lg overflow-hidden block">
+                <div class="bg-gradient-to-r from-orange-600 to-orange-700 p-6 text-white">
+                    <div class="text-5xl mb-3">🏢</div>
+                    <h3 class="text-2xl font-bold">Dealer Dashboard</h3>
+                    <p class="text-orange-100 text-sm mt-2">Network oversight and management</p>
+                </div>
+                <div class="p-6">
+                    <h4 class="font-bold text-gray-800 mb-3">What's Covered:</h4>
+                    <ul class="text-sm text-gray-600 space-y-2">
+                        <li class="flex items-start">
+                            <span class="text-orange-600 mr-2">✓</span>
+                            <span>Managing your agent network</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 mr-2">✓</span>
+                            <span>Viewing all leads and orders</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 mr-2">✓</span>
+                            <span>Preorders overview (NEW)</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 mr-2">✓</span>
+                            <span>Performance reports and analytics</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="text-orange-600 mr-2">✓</span>
+                            <span>Data export and reporting</span>
+                        </li>
+                    </ul>
+                    <div class="mt-6 pt-4 border-t border-gray-200">
+                        <span class="inline-flex items-center gap-2 text-orange-600 font-semibold">
+                            View Guide
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </span>
+                    </div>
+                </div>
+            </a>
+        </div>
+
+        <!-- Features Overview -->
+        <div class="bg-white rounded-lg shadow-lg p-8 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">✨ New Features Highlighted</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div class="bg-purple-50 border-l-4 border-purple-500 p-4 rounded">
+                    <h3 class="font-bold text-purple-900 mb-2">⏰ Preorders Feature</h3>
+                    <p class="text-gray-700 text-sm">Track leads scheduled for future installation dates. Available across all dashboards with visual indicators and dedicated sections.</p>
+                </div>
+                <div class="bg-green-50 border-l-4 border-green-500 p-4 rounded">
+                    <h3 class="font-bold text-green-900 mb-2">📊 Enhanced Analytics</h3>
+                    <p class="text-gray-700 text-sm">Complete data visibility with accurate stats, conversion tracking, and comprehensive revenue reporting.</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Additional Resources -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-lg shadow-lg p-8">
+            <h2 class="text-2xl font-bold mb-4">📞 Additional Resources</h2>
+            <div class="grid md:grid-cols-2 gap-6">
+                <div>
+                    <h3 class="font-bold mb-2">Need Technical Support?</h3>
+                    <p class="text-blue-200 text-sm">Contact your system administrator for technical assistance, account issues, or feature requests.</p>
+                </div>
+                <div>
+                    <h3 class="font-bold mb-2">Training Sessions</h3>
+                    <p class="text-blue-200 text-sm">Regular training sessions are available for new users and feature updates. Contact admin for scheduling.</p>
+                </div>
+            </div>
+            <div class="mt-6 pt-6 border-t border-blue-700 flex items-center justify-between">
+                <div>
+                    <p class="text-sm text-blue-200">Powered by</p>
+                    <div class="flex items-center gap-4 mt-2">
+                        <span class="text-xl font-bold">AXXESS</span>
+                        <span class="text-blue-300">×</span>
+                        <span class="text-xl font-bold text-green-400">OPENSERVE</span>
+                    </div>
+                </div>
+                <div class="text-right text-sm text-blue-200">
+                    <p>Last Updated: February 2026</p>
+                    <p>Version 2.0</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

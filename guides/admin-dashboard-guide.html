@@ -1,0 +1,495 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - User Guide</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        @media print {
+            .no-print { display: none; }
+            .page-break { page-break-after: always; }
+        }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; }
+        .guide-section { margin-bottom: 2rem; }
+        .step-number { 
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f2640 100%);
+            color: white;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            margin-right: 0.75rem;
+        }
+        .feature-badge {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <!-- Header with Logos -->
+    <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white p-8 no-print">
+        <div class="max-w-6xl mx-auto flex items-center justify-between">
+            <div>
+                <h1 class="text-4xl font-bold mb-2">Admin Dashboard</h1>
+                <p class="text-blue-200">Complete User Guide</p>
+            </div>
+            <div class="flex items-center gap-6">
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-blue-900">AXXESS</div>
+                    <div class="text-xs text-gray-600">Dealer Portal</div>
+                </div>
+                <div class="bg-white p-3 rounded-lg">
+                    <div class="text-2xl font-bold text-green-600">OPENSERVE</div>
+                    <div class="text-xs text-gray-600">Fibre Network</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Print Header -->
+    <div class="hidden print:block text-center py-4 border-b-2 border-blue-900">
+        <div class="flex items-center justify-center gap-8 mb-2">
+            <div class="text-2xl font-bold text-blue-900">AXXESS</div>
+            <div class="text-2xl font-bold text-green-600">OPENSERVE</div>
+        </div>
+        <h1 class="text-3xl font-bold text-gray-800">Admin Dashboard - User Guide</h1>
+    </div>
+
+    <div class="max-w-6xl mx-auto p-8">
+        <!-- Table of Contents -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-8">
+            <h2 class="text-2xl font-bold text-gray-800 mb-4">📑 Table of Contents</h2>
+            <div class="grid md:grid-cols-2 gap-3">
+                <a href="#overview" class="text-blue-600 hover:underline">1. Dashboard Overview</a>
+                <a href="#leads" class="text-blue-600 hover:underline">2. Managing Leads</a>
+                <a href="#orders" class="text-blue-600 hover:underline">3. Managing Orders</a>
+                <a href="#preorders" class="text-blue-600 hover:underline">4. Preorders Feature</a>
+                <a href="#agents" class="text-blue-600 hover:underline">5. Managing Agents</a>
+                <a href="#dealers" class="text-blue-600 hover:underline">6. Managing Dealers</a>
+                <a href="#shipping" class="text-blue-600 hover:underline">7. Shipping & Deliveries</a>
+                <a href="#reports" class="text-blue-600 hover:underline">8. Reports & Analytics</a>
+            </div>
+        </div>
+
+        <!-- Section 1: Dashboard Overview -->
+        <div id="overview" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📊</span> Dashboard Overview
+            </h2>
+            <p class="text-gray-600 mb-6">The admin dashboard provides a comprehensive view of your entire dealer network, leads, orders, and performance metrics.</p>
+            
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mb-6">
+                <h3 class="font-bold text-blue-900 mb-2">Key Metrics Displayed:</h3>
+                <ul class="list-disc list-inside text-gray-700 space-y-1">
+                    <li><strong>Total Leads:</strong> All leads in the system (excluding converted)</li>
+                    <li><strong>Total Orders:</strong> Active orders being processed</li>
+                    <li><strong>Active Agents:</strong> Number of registered agents</li>
+                    <li><strong>Dealers:</strong> Total dealer count</li>
+                    <li><strong>Conversion Rate:</strong> Percentage of leads converted to orders</li>
+                    <li><strong>Total Commission:</strong> Sum of all commissions from orders</li>
+                </ul>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                <h3 class="font-bold text-green-900 mb-2">💡 Quick Tip:</h3>
+                <p class="text-gray-700">Use the global search bar at the top to quickly find any lead by name, email, or phone number.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 2: Managing Leads -->
+        <div id="leads" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">👥</span> Managing Leads
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Creating a New Lead</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Navigate to Leads Section</p>
+                        <p class="text-gray-600">Click "Leads" in the sidebar navigation</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Click "Add New Lead"</p>
+                        <p class="text-gray-600">Fill in client details: name, email, phone, address</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Assign Agent & Dealer</p>
+                        <p class="text-gray-600">Select the agent and dealer from dropdowns</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Select Package</p>
+                        <p class="text-gray-600">Choose the fibre package for the client</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">5</span>
+                    <div>
+                        <p class="font-semibold">Save Lead</p>
+                        <p class="text-gray-600">Click "Create Lead" to save</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Lead Actions</h3>
+            <div class="grid md:grid-cols-2 gap-4">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-blue-600 mb-2">👁️ View</h4>
+                    <p class="text-sm text-gray-600">View complete lead details and history</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-purple-600 mb-2">✏️ Edit</h4>
+                    <p class="text-sm text-gray-600">Update lead information and assignment</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-600 mb-2">✅ Convert</h4>
+                    <p class="text-sm text-gray-600">Convert lead to order with commission calculation</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-red-600 mb-2">🗑️ Delete</h4>
+                    <p class="text-sm text-gray-600">Remove lead from system (use with caution)</p>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 mt-6">
+                <h3 class="font-bold text-yellow-900 mb-2">⚠️ Important:</h3>
+                <p class="text-gray-700">Always verify South African ID numbers - the system validates them automatically. Invalid IDs will be flagged.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 3: Managing Orders -->
+        <div id="orders" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📦</span> Managing Orders
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Converting Leads to Orders</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Click "Convert" on a Lead</p>
+                        <p class="text-gray-600">Opens the conversion modal with lead details</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Enter Order Details</p>
+                        <p class="text-gray-600">Service ID, Account Number, Order Number</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Commission Auto-Calculated</p>
+                        <p class="text-gray-600">Based on package pricing and dealer commission rate</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Confirm Conversion</p>
+                        <p class="text-gray-600">Lead status changes to "converted" and order is created</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Order Statuses</h3>
+            <div class="space-y-2">
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-medium">Processing</span>
+                    <span class="text-gray-600">Order received, awaiting installation</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-sm font-medium">Scheduled</span>
+                    <span class="text-gray-600">Installation date confirmed</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-medium">Completed</span>
+                    <span class="text-gray-600">Installation successful, service active</span>
+                </div>
+                <div class="flex items-center gap-3">
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-medium">Cancelled</span>
+                    <span class="text-gray-600">Order cancelled by client or admin</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 4: Preorders Feature -->
+        <div id="preorders" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">⏰</span> Preorders Feature
+                <span class="feature-badge ml-3">NEW</span>
+            </h2>
+            
+            <p class="text-gray-600 mb-6">Track leads that are preorders - clients who want to order but installation is scheduled for a future date.</p>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Marking a Lead as Preorder</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Open Lead Details</p>
+                        <p class="text-gray-600">Click "View" or "Edit" on any lead</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Toggle Preorder Switch</p>
+                        <p class="text-gray-600">Purple toggle at bottom of modal - turn ON</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Save Changes</p>
+                        <p class="text-gray-600">Lead now appears with purple "Preorder" badge</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Viewing All Preorders</h3>
+            <div class="bg-purple-50 border-l-4 border-purple-500 p-4">
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li>Click <strong>"Preorders"</strong> tab in sidebar</li>
+                    <li>View all leads marked as preorders in one place</li>
+                    <li>Filter by status (New, Contacted, Qualified, Converted)</li>
+                    <li>Export preorders to CSV for reporting</li>
+                    <li>Remove preorder flag when ready to process normally</li>
+                </ul>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4 mt-4">
+                <h3 class="font-bold text-blue-900 mb-2">💡 Visual Indicator:</h3>
+                <p class="text-gray-700">Preorder leads show a purple badge with clock icon in the leads table, making them easy to spot at a glance.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 5: Managing Agents -->
+        <div id="agents" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">👤</span> Managing Agents
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Approving Pending Agents</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Check Pending Agents Badge</p>
+                        <p class="text-gray-600">Orange badge shows count of pending approvals</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Navigate to Pending Agents</p>
+                        <p class="text-gray-600">Click "Pending Agents" in sidebar</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Review Agent Details</p>
+                        <p class="text-gray-600">Check name, email, phone, and dealer assignment</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Approve or Reject</p>
+                        <p class="text-gray-600">Click "Approve" to activate or "Reject" to deny</p>
+                    </div>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Managing Active Agents</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li><strong>View Performance:</strong> See leads and conversions per agent</li>
+                    <li><strong>Edit Details:</strong> Update agent information and dealer assignment</li>
+                    <li><strong>Deactivate:</strong> Temporarily disable agent access</li>
+                    <li><strong>Delete:</strong> Permanently remove agent (transfers leads to admin)</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Section 6: Managing Dealers -->
+        <div id="dealers" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">🏢</span> Managing Dealers
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Adding a New Dealer</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Click "Add New Dealer"</p>
+                        <p class="text-gray-600">Opens dealer creation modal</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">Enter Dealer Details</p>
+                        <p class="text-gray-600">Name, contact info, commission rate</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Set Commission Rate</p>
+                        <p class="text-gray-600">Default commission percentage for all packages</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Save Dealer</p>
+                        <p class="text-gray-600">Dealer now available for agent assignment</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-green-50 border-l-4 border-green-500 p-4">
+                <h3 class="font-bold text-green-900 mb-2">💡 Tip:</h3>
+                <p class="text-gray-700">Each dealer can have multiple agents. Agents inherit the dealer's commission structure unless overridden at the package level.</p>
+            </div>
+        </div>
+
+        <div class="page-break"></div>
+
+        <!-- Section 7: Shipping & Deliveries -->
+        <div id="shipping" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">🚚</span> Shipping & Deliveries
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Managing Router Deliveries</h3>
+            <div class="space-y-3 mb-6">
+                <div class="flex items-start">
+                    <span class="step-number">1</span>
+                    <div>
+                        <p class="font-semibold">Navigate to Shipping Section</p>
+                        <p class="text-gray-600">Click "Shipping" in sidebar</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">2</span>
+                    <div>
+                        <p class="font-semibold">View Pending Deliveries</p>
+                        <p class="text-gray-600">See all orders awaiting router delivery</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">3</span>
+                    <div>
+                        <p class="font-semibold">Select Orders for Delivery</p>
+                        <p class="text-gray-600">Check boxes for orders ready to ship</p>
+                    </div>
+                </div>
+                <div class="flex items-start">
+                    <span class="step-number">4</span>
+                    <div>
+                        <p class="font-semibold">Mark as Requested</p>
+                        <p class="text-gray-600">Bulk action to request delivery from Openserve</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-blue-50 border-l-4 border-blue-500 p-4">
+                <h3 class="font-bold text-blue-900 mb-2">📋 Delivery Tracking:</h3>
+                <p class="text-gray-700">Each delivery request is timestamped and tracked. You can see who requested delivery and when.</p>
+            </div>
+        </div>
+
+        <!-- Section 8: Reports & Analytics -->
+        <div id="reports" class="guide-section bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-3xl font-bold text-gray-800 mb-4 flex items-center">
+                <span class="text-4xl mr-3">📈</span> Reports & Analytics
+            </h2>
+            
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Available Reports</h3>
+            <div class="grid md:grid-cols-2 gap-4 mb-6">
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-blue-600 mb-2">📊 Performance Charts</h4>
+                    <p class="text-sm text-gray-600">Visual representation of leads, conversions, and revenue over time</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-green-600 mb-2">💰 Commission Reports</h4>
+                    <p class="text-sm text-gray-600">Confirmed, pending, and rejected commission breakdown</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-purple-600 mb-2">👥 Agent Performance</h4>
+                    <p class="text-sm text-gray-600">Compare agent metrics and conversion rates</p>
+                </div>
+                <div class="border border-gray-200 rounded-lg p-4">
+                    <h4 class="font-bold text-orange-600 mb-2">📥 Export Data</h4>
+                    <p class="text-sm text-gray-600">Download leads, orders, and preorders as CSV</p>
+                </div>
+            </div>
+
+            <h3 class="text-xl font-semibold text-gray-800 mb-3">Exporting Data</h3>
+            <div class="bg-gray-50 rounded-lg p-4">
+                <ul class="list-disc list-inside text-gray-700 space-y-2">
+                    <li>Click "Export" button in any section (Leads, Orders, Preorders)</li>
+                    <li>Data downloads as CSV file with all visible columns</li>
+                    <li>Open in Excel or Google Sheets for further analysis</li>
+                    <li>Filtered data exports only the filtered results</li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="bg-gradient-to-r from-blue-900 to-blue-800 text-white rounded-lg p-6 mt-8">
+            <div class="flex items-center justify-between">
+                <div>
+                    <h3 class="text-xl font-bold mb-2">Need Help?</h3>
+                    <p class="text-blue-200">Contact your system administrator for additional support</p>
+                </div>
+                <div class="text-right">
+                    <div class="text-2xl font-bold">AXXESS</div>
+                    <div class="text-sm text-blue-200">Powered by Openserve</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Print Button -->
+        <div class="text-center mt-8 no-print">
+            <button onclick="window.print()" class="bg-blue-600 hover:bg-blue-700 text-white px-8 py-3 rounded-lg font-semibold shadow-lg">
+                🖨️ Print or Save as PDF
+            </button>
+        </div>
+    </div>
+</body>
+</html>
