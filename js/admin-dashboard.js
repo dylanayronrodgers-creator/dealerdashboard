@@ -294,6 +294,7 @@ function showSection(section) {
         'agents': { title: 'Agents', subtitle: 'Manage your sales agents' },
         'packages': { title: 'Packages', subtitle: 'Openserve fibre packages' },
         'reports': { title: 'Reports', subtitle: 'Analytics and performance metrics' },
+        'preorders': { title: 'Preorders', subtitle: 'Manage and track preorder leads' },
         'shipping': { title: 'Shipping', subtitle: 'Track free router deliveries' },
         'returned': { title: 'Returned Items', subtitle: 'Manage returned orders' },
         'import': { title: 'Import Leads', subtitle: 'Upload CSV files to import leads' },
@@ -310,6 +311,8 @@ function showSection(section) {
     // Trigger section-specific data loading
     if (section === 'reports') {
         renderReportsCharts();
+    } else if (section === 'preorders') {
+        if (typeof loadPreorders === 'function') loadPreorders();
     } else if (section === 'returned') {
         loadReturnedItems();
     } else if (section === 'settings') {
@@ -2020,6 +2023,17 @@ function viewLeadDetails(leadId) {
                 <textarea name="notes" rows="3" class="${inputClass}">${lead.notes || ''}</textarea>
             </div>
             
+            <div class="bg-purple-50 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                    <label class="font-semibold text-gray-700">Preorder</label>
+                    <p class="text-xs text-gray-500">Mark this lead as a preorder for tracking</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_preorder" ${lead.is_preorder ? 'checked' : ''} class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+            </div>
+            
             <div class="flex justify-between pt-2 border-t">
                 <button type="button" onclick="closeModal('viewLeadModal'); openConvertModal('${leadId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-medium">
                     Convert to Order
@@ -2080,7 +2094,8 @@ async function saveLeadChanges(e) {
         order_number: toNull(formData.get('order_number')),
         order_status: toNull(formData.get('order_status')),
         order_date: toNull(formData.get('order_date')),
-        notes: toNull(formData.get('notes'))
+        notes: toNull(formData.get('notes')),
+        is_preorder: formData.get('is_preorder') === 'on'
     };
     
     try {

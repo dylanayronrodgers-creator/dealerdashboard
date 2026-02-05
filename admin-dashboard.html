@@ -189,6 +189,13 @@
                 </svg>
                 Reports
             </a>
+            <a href="#preorders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('preorders')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Preorders
+                <span id="preordersBadge" class="hidden bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
             <a href="#shipping" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('shipping')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
@@ -705,6 +712,52 @@
                         <tbody id="completedShippingTable">
                             <tr>
                                 <td colspan="5" class="py-8 text-center text-gray-500">No completed deliveries</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preorders Section -->
+        <section id="section-preorders" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Preorders</h2>
+                    <p class="text-gray-500 text-sm">Manage and track preorder leads</p>
+                </div>
+                <div class="flex gap-2">
+                    <select id="preorderStatusFilter" onchange="filterPreorders()" class="border rounded-xl px-4 py-2 focus:outline-none">
+                        <option value="">All Statuses</option>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="converted">Converted</option>
+                    </select>
+                    <button onclick="exportPreorders()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">
+                        Export Preorders
+                    </button>
+                </div>
+            </div>
+
+            <div class="card p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Client</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Package</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Agent</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Dealer</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Created</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preordersTable">
+                            <tr>
+                                <td colspan="8" class="py-8 text-center text-gray-500">No preorders found</td>
                             </tr>
                         </tbody>
                     </table>
@@ -1699,6 +1752,7 @@
     <script src="js/auth.js"></script>
     <script src="js/admin-dashboard.js"></script>
     <script src="js/admin-dashboard-stats.js"></script>
+    <script src="js/preorders.js"></script>
     
     <!-- Debug: Fix Missing Orders -->
     <script>
