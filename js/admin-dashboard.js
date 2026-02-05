@@ -2013,9 +2013,14 @@ function viewLeadDetails(leadId) {
                 <textarea name="notes" rows="3" class="${inputClass}">${lead.notes || ''}</textarea>
             </div>
             
-            <div class="flex justify-end gap-3 pt-2 border-t">
-                <button type="button" onclick="closeModal('viewLeadModal')" class="px-4 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-medium">Save Changes</button>
+            <div class="flex justify-between pt-2 border-t">
+                <button type="button" onclick="closeModal('viewLeadModal'); openConvertModal('${leadId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-medium">
+                    Convert to Order
+                </button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeModal('viewLeadModal')" class="px-4 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-medium">Save Changes</button>
+                </div>
             </div>
         </form>
     `;
