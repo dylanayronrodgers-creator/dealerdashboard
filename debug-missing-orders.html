@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Debug Missing Orders</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Debug Missing Orders</h1>
+    <button onclick="checkOrders()">Check Orders in Database</button>
+    <button onclick="checkConvertedLeads()">Check Converted Leads</button>
+    <pre id="output"></pre>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+        const output = document.getElementById('output');
+
+        async function checkOrders() {
+            output.textContent = 'Checking orders table...\n\n';
+            
+            const { data: orders, error } = await window.supabaseClient
+                .from('orders')
+                .select(`
+                    *,
+                    lead:leads(id, full_name, first_name, last_name, order_number, status)
+                `)
+                .order('created_at', { ascending: false })
+                .limit(20);
+            
+            if (error) {
+                output.textContent += 'Error: ' + error.message;
+                return;
+            }
+            
+            output.textContent += `Found ${orders.length} orders:\n\n`;
+            orders.forEach((order, i) => {
+                output.textContent += `${i + 1}. Order ID: ${order.id}\n`;
+                output.textContent += `   Order Number: ${order.order_number}\n`;
+                output.textContent += `   Lead ID: ${order.lead_id}\n`;
+                output.textContent += `   Lead Name: ${order.lead?.full_name || order.lead?.first_name + ' ' + order.lead?.last_name || 'N/A'}\n`;
+                output.textContent += `   Lead Status: ${order.lead?.status || 'N/A'}\n`;
+                output.textContent += `   Order Status: ${order.status}\n`;
+                output.textContent += `   Created: ${new Date(order.created_at).toLocaleString()}\n\n`;
+            });
+        }
+
+        async function checkConvertedLeads() {
+            output.textContent = 'Checking converted leads...\n\n';
+            
+            const { data: leads, error } = await window.supabaseClient
+                .from('leads')
+                .select('*')
+                .eq('status', 'converted')
+                .order('updated_at', { ascending: false })
+                .limit(20);
+            
+            if (error) {
+                output.textContent += 'Error: ' + error.message;
+                return;
+            }
+            
+            output.textContent += `Found ${leads.length} converted leads:\n\n`;
+            leads.forEach((lead, i) => {
+                output.textContent += `${i + 1}. Lead ID: ${lead.id}\n`;
+                output.textContent += `   Name: ${lead.full_name || lead.first_name + ' ' + lead.last_name}\n`;
+                output.textContent += `   Order Number: ${lead.order_number || 'N/A'}\n`;
+                output.textContent += `   Order Status: ${lead.order_status || 'N/A'}\n`;
+                output.textContent += `   Commission: R${lead.commission_amount || 0}\n`;
+                output.textContent += `   Updated: ${new Date(lead.updated_at).toLocaleString()}\n\n`;
+            });
+            
+            // Now check if these leads have corresponding orders
+            output.textContent += '\n--- Checking for corresponding orders ---\n\n';
+            
+            for (const lead of leads) {
+                const { data: orders, error: orderError } = await window.supabaseClient
+                    .from('orders')
+                    .select('*')
+                    .eq('lead_id', lead.id);
+                
+                if (orders && orders.length > 0) {
+                    output.textContent += `✅ Lead ${lead.id.slice(0, 8)} HAS ${orders.length} order(s)\n`;
+                } else {
+                    output.textContent += `❌ Lead ${lead.id.slice(0, 8)} (${lead.full_name}) has NO orders!\n`;
+                    output.textContent += `   Order Number in lead: ${lead.order_number || 'N/A'}\n`;
+                }
+            }
+        }
+    </script>
+</body>
+</html>

@@ -2077,6 +2077,11 @@ async function saveLeadChanges(e) {
     };
     
     try {
+        // Get the original lead to check if status is changing to 'converted'
+        const originalLead = leads.find(l => l.id === editingLeadId);
+        const statusChangedToConverted = originalLead && originalLead.status !== 'converted' && updateData.status === 'converted';
+        
+        // Update the lead
         const { error } = await window.supabaseClient
             .from('leads')
             .update(updateData)
@@ -2084,7 +2089,47 @@ async function saveLeadChanges(e) {
         
         if (error) throw error;
         
-        alert('Lead updated successfully!');
+        // If status changed to 'converted', check if order exists and create if not
+        if (statusChangedToConverted && updateData.order_number) {
+            console.log('Status changed to converted, checking for existing order...');
+            
+            // Check if order already exists
+            const { data: existingOrders } = await window.supabaseClient
+                .from('orders')
+                .select('id')
+                .eq('lead_id', editingLeadId);
+            
+            if (!existingOrders || existingOrders.length === 0) {
+                console.log('No order found, creating one...');
+                
+                // Create the order
+                const { error: orderError } = await window.supabaseClient
+                    .from('orders')
+                    .insert({
+                        lead_id: editingLeadId,
+                        package_id: updateData.package_id,
+                        agent_id: updateData.agent_id,
+                        order_number: updateData.order_number,
+                        status: updateData.order_status || 'pending',
+                        notes: `Order created from lead edit - Commission: R${originalLead.commission_amount || 200}`
+                    });
+                
+                if (orderError) {
+                    console.error('Failed to create order:', orderError);
+                    alert('Lead updated but failed to create order: ' + orderError.message);
+                } else {
+                    console.log('Order created successfully');
+                    alert('Lead updated and order created successfully!');
+                    await loadOrders(); // Reload orders to show the new one
+                }
+            } else {
+                console.log('Order already exists');
+                alert('Lead updated successfully!');
+            }
+        } else {
+            alert('Lead updated successfully!');
+        }
+        
         closeModal('viewLeadModal');
         
         // Update the lead in the local array instead of reloading everything

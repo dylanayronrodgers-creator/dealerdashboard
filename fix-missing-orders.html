@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Missing Orders</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; background: #10b981; color: white; border: none; border-radius: 8px; }
+        button:hover { background: #059669; }
+        pre { background: #f3f4f6; padding: 15px; border-radius: 8px; overflow-x: auto; }
+        .error { color: #ef4444; }
+        .success { color: #10b981; }
+        .warning { color: #f59e0b; }
+    </style>
+</head>
+<body>
+    <h1>Fix Missing Orders</h1>
+    <p>This tool will create order records for converted leads that don't have orders.</p>
+    
+    <button onclick="findMissingOrders()">1. Find Missing Orders</button>
+    <button onclick="createMissingOrders()" id="createBtn" disabled>2. Create Missing Orders</button>
+    
+    <pre id="output"></pre>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        const createBtn = document.getElementById('createBtn');
+        let missingOrders = [];
+
+        async function findMissingOrders() {
+            output.textContent = 'Finding converted leads without orders...\n\n';
+            missingOrders = [];
+            
+            // Get all converted leads
+            const { data: leads, error: leadsError } = await window.supabaseClient
+                .from('leads')
+                .select('*')
+                .eq('status', 'converted')
+                .order('updated_at', { ascending: false });
+            
+            if (leadsError) {
+                output.textContent += `❌ Error: ${leadsError.message}\n`;
+                return;
+            }
+            
+            output.textContent += `Found ${leads.length} converted leads. Checking for orders...\n\n`;
+            
+            // Check each lead for corresponding order
+            for (const lead of leads) {
+                const { data: orders, error: orderError } = await window.supabaseClient
+                    .from('orders')
+                    .select('id')
+                    .eq('lead_id', lead.id);
+                
+                if (!orders || orders.length === 0) {
+                    missingOrders.push(lead);
+                    output.textContent += `❌ Missing: ${lead.full_name || lead.first_name + ' ' + lead.last_name}\n`;
+                    output.textContent += `   Lead ID: ${lead.id}\n`;
+                    output.textContent += `   Order Number: ${lead.order_number || 'N/A'}\n`;
+                    output.textContent += `   Commission: R${lead.commission_amount || 200}\n\n`;
+                }
+            }
+            
+            if (missingOrders.length === 0) {
+                output.textContent += '\n✅ No missing orders found! All converted leads have orders.\n';
+                createBtn.disabled = true;
+            } else {
+                output.textContent += `\n⚠️ Found ${missingOrders.length} leads without orders.\n`;
+                output.textContent += `Click "Create Missing Orders" to fix this.\n`;
+                createBtn.disabled = false;
+            }
+        }
+
+        async function createMissingOrders() {
+            if (missingOrders.length === 0) {
+                output.textContent += '\n❌ No missing orders to create. Run "Find Missing Orders" first.\n';
+                return;
+            }
+            
+            output.textContent += '\n\n--- Creating Missing Orders ---\n\n';
+            createBtn.disabled = true;
+            
+            let created = 0;
+            let failed = 0;
+            
+            for (const lead of missingOrders) {
+                try {
+                    output.textContent += `Creating order for ${lead.full_name || lead.first_name + ' ' + lead.last_name}...\n`;
+                    
+                    // Create order record
+                    const { data: newOrder, error: insertError } = await window.supabaseClient
+                        .from('orders')
+                        .insert({
+                            lead_id: lead.id,
+                            package_id: lead.package_id,
+                            agent_id: lead.agent_id,
+                            order_number: lead.order_number || `ORD-${Date.now()}`,
+                            status: lead.order_status || 'pending',
+                            notes: `Recovered order - Commission: R${lead.commission_amount || 200}`
+                        })
+                        .select()
+                        .single();
+                    
+                    if (insertError) {
+                        output.textContent += `  ❌ Failed: ${insertError.message}\n\n`;
+                        failed++;
+                    } else {
+                        output.textContent += `  ✅ Created order ID: ${newOrder.id}\n`;
+                        output.textContent += `     Order Number: ${newOrder.order_number}\n\n`;
+                        created++;
+                    }
+                    
+                } catch (error) {
+                    output.textContent += `  ❌ Error: ${error.message}\n\n`;
+                    failed++;
+                }
+            }
+            
+            output.textContent += `\n--- Summary ---\n`;
+            output.textContent += `✅ Created: ${created}\n`;
+            output.textContent += `❌ Failed: ${failed}\n`;
+            output.textContent += `\n✅ Done! Refresh your admin dashboard to see the orders.\n`;
+            
+            missingOrders = [];
+        }
+    </script>
+</body>
+</html>
