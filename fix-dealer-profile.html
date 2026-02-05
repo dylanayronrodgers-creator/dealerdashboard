@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Fix Dealer Profile</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; max-width: 800px; margin: 0 auto; }
+        button { padding: 10px 20px; margin: 10px 5px; cursor: pointer; background: #10b981; color: white; border: none; border-radius: 8px; }
+        button:hover { background: #059669; }
+        pre { background: #f3f4f6; padding: 15px; border-radius: 8px; overflow-x: auto; white-space: pre-wrap; }
+        .error { color: #ef4444; }
+        .success { color: #10b981; }
+        input, select { padding: 8px; margin: 5px 0; border: 1px solid #ccc; border-radius: 4px; width: 100%; }
+    </style>
+</head>
+<body>
+    <h1>Fix Dealer Profile - Assign Dealer ID</h1>
+    <p>This tool will fix dealer user profiles that have null or invalid dealer_id values.</p>
+    
+    <div style="margin: 20px 0;">
+        <label><strong>Select Dealer:</strong></label>
+        <select id="dealerSelect">
+            <option value="">Loading dealers...</option>
+        </select>
+    </div>
+    
+    <div style="margin: 20px 0;">
+        <label><strong>Dealer User Email:</strong></label>
+        <input type="email" id="userEmail" placeholder="Enter dealer user email">
+    </div>
+    
+    <button onclick="findAndFixDealerProfile()">Find & Fix Dealer Profile</button>
+    <button onclick="listAllDealerUsers()">List All Dealer Users</button>
+    
+    <pre id="output"></pre>
+
+    <script src="js/supabase-config.js"></script>
+    <script>
+        const output = document.getElementById('output');
+        let dealers = [];
+
+        async function loadDealers() {
+            try {
+                const { data, error } = await window.supabaseClient
+                    .from('dealers')
+                    .select('*')
+                    .order('name');
+                
+                if (error) throw error;
+                
+                dealers = data || [];
+                const select = document.getElementById('dealerSelect');
+                select.innerHTML = '<option value="">Select a dealer...</option>';
+                dealers.forEach(d => {
+                    select.innerHTML += `<option value="${d.id}">${d.name}</option>`;
+                });
+                
+                output.textContent = `Loaded ${dealers.length} dealers\n`;
+            } catch (error) {
+                output.textContent = `Error loading dealers: ${error.message}\n`;
+            }
+        }
+
+        async function listAllDealerUsers() {
+            output.textContent = 'Finding all dealer users...\n\n';
+            
+            try {
+                const { data: users, error } = await window.supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('role', 'dealer')
+                    .order('full_name');
+                
+                if (error) throw error;
+                
+                output.textContent += `Found ${users.length} dealer users:\n\n`;
+                
+                users.forEach((user, i) => {
+                    output.textContent += `${i + 1}. ${user.full_name || 'No name'}\n`;
+                    output.textContent += `   Email: ${user.email}\n`;
+                    output.textContent += `   User ID: ${user.id}\n`;
+                    output.textContent += `   Dealer ID: ${user.dealer_id || 'NULL ❌'}\n`;
+                    output.textContent += `   Status: ${user.dealer_id ? '✅ OK' : '❌ NEEDS FIX'}\n\n`;
+                });
+            } catch (error) {
+                output.textContent += `Error: ${error.message}\n`;
+            }
+        }
+
+        async function findAndFixDealerProfile() {
+            const dealerId = document.getElementById('dealerSelect').value;
+            const email = document.getElementById('userEmail').value.trim();
+            
+            if (!dealerId) {
+                alert('Please select a dealer');
+                return;
+            }
+            
+            if (!email) {
+                alert('Please enter dealer user email');
+                return;
+            }
+            
+            output.textContent = `Searching for user: ${email}\n\n`;
+            
+            try {
+                // Find the user
+                const { data: users, error: findError } = await window.supabaseClient
+                    .from('profiles')
+                    .select('*')
+                    .eq('email', email)
+                    .eq('role', 'dealer');
+                
+                if (findError) throw findError;
+                
+                if (!users || users.length === 0) {
+                    output.textContent += `❌ No dealer user found with email: ${email}\n`;
+                    return;
+                }
+                
+                const user = users[0];
+                output.textContent += `✅ Found user: ${user.full_name || email}\n`;
+                output.textContent += `   Current dealer_id: ${user.dealer_id || 'NULL'}\n\n`;
+                
+                // Get dealer info
+                const dealer = dealers.find(d => d.id === dealerId);
+                output.textContent += `Assigning to dealer: ${dealer.name}\n`;
+                output.textContent += `Dealer ID: ${dealerId}\n\n`;
+                
+                // Update the user profile
+                const { error: updateError } = await window.supabaseClient
+                    .from('profiles')
+                    .update({ dealer_id: dealerId })
+                    .eq('id', user.id);
+                
+                if (updateError) throw updateError;
+                
+                output.textContent += `✅ SUCCESS! Updated dealer_id for ${user.full_name || email}\n`;
+                output.textContent += `\nThe user can now login to the dealer dashboard and see their data.\n`;
+                
+            } catch (error) {
+                output.textContent += `❌ Error: ${error.message}\n`;
+            }
+        }
+
+        // Load dealers on page load
+        loadDealers();
+    </script>
+</body>
+</html>
