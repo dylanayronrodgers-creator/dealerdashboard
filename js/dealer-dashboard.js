@@ -133,38 +133,49 @@ function populateAgentFilter() {
 
 async function loadDealerLeads() {
     try {
+        console.log('Loading leads for dealer:', currentUser.dealer_id, dealerInfo?.name);
+        
         // Get agent IDs for this dealer
         const agentIds = agents.map(a => a.id);
+        console.log('Dealer has', agentIds.length, 'agents:', agentIds);
         
-        // Fetch leads by dealer_id OR by agent_id (for agents belonging to this dealer)
-        let query = window.supabaseClient
+        // Fetch ALL leads first to debug
+        const { data: allLeads, error: allError } = await window.supabaseClient
             .from('leads')
             .select(`*, agent:profiles!leads_agent_id_fkey(id, full_name), package:packages(id, name, price)`, { count: 'exact' })
             .order('created_at', { ascending: false });
         
-        // Use OR filter to get leads by dealer_id or by agent_id
-        if (agentIds.length > 0) {
-            query = query.or(`dealer_id.eq.${currentUser.dealer_id},agent_id.in.(${agentIds.join(',')})`);
-        } else {
-            query = query.eq('dealer_id', currentUser.dealer_id);
+        if (allError) throw allError;
+        
+        console.log('Total leads in database:', allLeads?.length || 0);
+        console.log('Leads with dealer_id matching:', allLeads?.filter(l => l.dealer_id === currentUser.dealer_id).length || 0);
+        console.log('Leads with agent_id in dealer agents:', allLeads?.filter(l => agentIds.includes(l.agent_id)).length || 0);
+        
+        // Filter leads that belong to this dealer (either by dealer_id OR agent_id)
+        leads = (allLeads || []).filter(l => {
+            const matchesDealer = l.dealer_id === currentUser.dealer_id;
+            const matchesAgent = agentIds.includes(l.agent_id);
+            return matchesDealer || matchesAgent;
+        });
+        
+        console.log('Filtered leads for dealer:', leads.length);
+        
+        // Show sample of leads for debugging
+        if (leads.length > 0) {
+            console.log('Sample lead:', {
+                id: leads[0].id,
+                dealer_id: leads[0].dealer_id,
+                agent_id: leads[0].agent_id,
+                client: leads[0].full_name || leads[0].first_name,
+                status: leads[0].status
+            });
         }
         
-        const { data, error, count } = await query.range(0, 9999);
-        
-        if (error) throw error;
-        leads = data || [];
-        
-        // Update dealer_id on leads that only have agent_id (optional, for data consistency)
-        const leadsWithoutDealer = leads.filter(l => !l.dealer_id && l.agent_id);
-        if (leadsWithoutDealer.length > 0) {
-            console.log(`Found ${leadsWithoutDealer.length} leads without dealer_id that belong to dealer agents`);
-        }
-        
-        document.getElementById('totalLeads').textContent = count || leads.length;
-        console.log(`Loaded ${leads.length} leads for dealer (count: ${count})`);
+        document.getElementById('totalLeads').textContent = leads.length;
         renderDealerLeadsTable();
     } catch (error) {
         console.error('Error loading leads:', error);
+        alert('Error loading leads: ' + error.message);
     }
 }
 
