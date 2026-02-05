@@ -1682,6 +1682,96 @@
     <script src="js/auth.js"></script>
     <script src="js/admin-dashboard.js"></script>
     <script src="js/admin-dashboard-stats.js"></script>
+    
+    <!-- Debug: Fix Missing Orders -->
+    <script>
+        async function fixMissingOrders() {
+            if (!confirm('This will create order records for converted leads that are missing orders. Continue?')) {
+                return;
+            }
+            
+            console.log('Finding converted leads without orders...');
+            
+            // Get all converted leads
+            const { data: leads, error: leadsError } = await window.supabaseClient
+                .from('leads')
+                .select('*')
+                .eq('status', 'converted')
+                .order('updated_at', { ascending: false });
+            
+            if (leadsError) {
+                console.error('Error loading leads:', leadsError);
+                alert('Error loading leads: ' + leadsError.message);
+                return;
+            }
+            
+            console.log(`Found ${leads.length} converted leads`);
+            const missingOrders = [];
+            
+            // Check each lead for corresponding order
+            for (const lead of leads) {
+                const { data: orders } = await window.supabaseClient
+                    .from('orders')
+                    .select('id')
+                    .eq('lead_id', lead.id);
+                
+                if (!orders || orders.length === 0) {
+                    missingOrders.push(lead);
+                }
+            }
+            
+            console.log(`Found ${missingOrders.length} leads without orders`);
+            
+            if (missingOrders.length === 0) {
+                alert('No missing orders found! All converted leads have orders.');
+                return;
+            }
+            
+            // Create missing orders
+            let created = 0;
+            let failed = 0;
+            
+            for (const lead of missingOrders) {
+                try {
+                    console.log(`Creating order for ${lead.full_name || lead.first_name + ' ' + lead.last_name}...`);
+                    
+                    const { error: insertError } = await window.supabaseClient
+                        .from('orders')
+                        .insert({
+                            lead_id: lead.id,
+                            package_id: lead.package_id,
+                            agent_id: lead.agent_id,
+                            order_number: lead.order_number || `ORD-${Date.now()}`,
+                            status: lead.order_status || 'pending',
+                            notes: `Recovered order - Commission: R${lead.commission_amount || 200}`
+                        });
+                    
+                    if (insertError) {
+                        console.error(`Failed to create order:`, insertError);
+                        failed++;
+                    } else {
+                        console.log(`✅ Created order for ${lead.order_number}`);
+                        created++;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    failed++;
+                }
+            }
+            
+            alert(`Orders Recovery Complete!\n\n✅ Created: ${created}\n❌ Failed: ${failed}\n\nRefresh the page to see the orders.`);
+            
+            if (created > 0) {
+                await loadOrders();
+                showSection('orders');
+            }
+        }
+        
+        // Add to window for console access
+        window.fixMissingOrders = fixMissingOrders;
+        console.log('💡 To fix missing orders, run: fixMissingOrders()');
+    </script>
     <script>
         function toggleSidebar() {
             const sidebar = document.getElementById('sidebar');
