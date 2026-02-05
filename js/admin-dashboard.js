@@ -821,22 +821,39 @@ function renderRecentOrders() {
     `).join('');
 }
 
-// Dashboard Stats - optimized single query approach
+// Dashboard Stats - fetch ALL data for accurate overview
 async function loadDashboardStats() {
     try {
-        // Calculate stats from already loaded data to minimize requests
-        const convertedLeads = leads.filter(l => l.status === 'converted').length;
-        const totalLeads = leads.length;
-        const conversionRate = totalLeads > 0 ? Math.round((convertedLeads / totalLeads) * 100) : 0;
+        // Fetch ALL leads for accurate stats (not limited like the leads table)
+        const { data: allLeads, error: leadsError } = await window.supabaseClient
+            .from('leads')
+            .select('*, package:packages(id, name, price, dealer_commission)');
         
-        // Update enhanced dashboard stats if function exists
-        if (typeof updateDashboardStats === 'function') {
-            updateDashboardStats();
-        } else {
-            document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+        if (leadsError) throw leadsError;
+        
+        const totalLeadsCount = allLeads?.length || 0;
+        const convertedLeads = allLeads?.filter(l => l.status === 'converted').length || 0;
+        const conversionRate = totalLeadsCount > 0 ? Math.round((convertedLeads / totalLeadsCount) * 100) : 0;
+        
+        // Update total dealers count
+        const totalDealersEl = document.getElementById('totalDealers');
+        if (totalDealersEl) totalDealersEl.textContent = dealers.length;
+        
+        // Update conversion rate
+        document.getElementById('conversionRate').textContent = `${conversionRate}%`;
+        
+        // Calculate total commission from all orders
+        const { data: allOrders, error: ordersError } = await window.supabaseClient
+            .from('orders')
+            .select('commission_amount');
+        
+        if (!ordersError && allOrders) {
+            const totalCommission = allOrders.reduce((sum, order) => sum + (order.commission_amount || 0), 0);
+            const totalCommissionEl = document.getElementById('totalCommission');
+            if (totalCommissionEl) totalCommissionEl.textContent = `R${totalCommission.toLocaleString()}`;
         }
         
-        // Calculate revenue stats from leads (uses already loaded data)
+        // Calculate revenue stats from ALL leads
         let confirmedRevenue = 0;
         let pendingRevenue = 0;
         let rejectedRevenue = 0;
@@ -846,7 +863,7 @@ async function loadDashboardStats() {
         
         const FIBRE_COMMISSION = 200; // R200 per fibre install
         
-        leads.forEach(lead => {
+        (allLeads || []).forEach(lead => {
             const commission = lead.commission_amount || (lead.package?.dealer_commission) || FIBRE_COMMISSION;
             
             // Check both commission_status and order_status for completed sales
@@ -883,6 +900,8 @@ async function loadDashboardStats() {
         if (confirmedCountEl) confirmedCountEl.textContent = confirmedCount;
         if (pendingCountEl) pendingCountEl.textContent = pendingCount;
         if (rejectedCountEl) rejectedCountEl.textContent = rejectedCount;
+        
+        console.log('Dashboard stats loaded:', { totalLeadsCount, convertedLeads, conversionRate, confirmedRevenue, pendingRevenue });
         
     } catch (error) {
         console.error('Error loading stats:', error);
