@@ -2151,7 +2151,15 @@ async function convertToOrder() {
         if (leadError) throw leadError;
         
         // Create order record with order_number
-        const { error: orderError } = await window.supabaseClient
+        console.log('Creating order with data:', {
+            lead_id: convertingLeadId,
+            package_id: lead.package_id,
+            agent_id: lead.agent_id,
+            order_number: orderNumber,
+            status: 'pending'
+        });
+        
+        const { data: newOrder, error: orderError } = await window.supabaseClient
             .from('orders')
             .insert({
                 lead_id: convertingLeadId,
@@ -2160,18 +2168,30 @@ async function convertToOrder() {
                 order_number: orderNumber,
                 status: 'pending',
                 notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
-            });
+            })
+            .select();
         
-        if (orderError) throw orderError;
+        if (orderError) {
+            console.error('Order creation error:', orderError);
+            throw orderError;
+        }
+        
+        console.log('Order created successfully:', newOrder);
         
         closeModal('convertToOrderModal');
         convertingLeadId = null;
         
         // Reload data to show the new order
+        console.log('Reloading leads and orders...');
         await Promise.all([loadLeads(), loadOrders(), updateRevenueStats()]);
+        console.log('Data reloaded. Orders count:', orders.length);
         
         // Switch to orders section to show the newly created order
         showSection('orders');
+        
+        // Verify order appears in the list
+        const orderExists = orders.find(o => o.order_number === orderNumber);
+        console.log('Order in list:', orderExists);
         
         alert(`Lead converted! Order #${orderNumber} created.\nCommission: R${commissionAmount} (${productType === 'prepaid' ? 'Prepaid' : 'Normal'})\n\nSwitched to Orders section.`);
         
