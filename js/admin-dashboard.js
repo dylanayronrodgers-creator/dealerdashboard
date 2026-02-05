@@ -1677,6 +1677,12 @@ async function viewOrder(orderId) {
     document.getElementById('editOrderLeadId').value = lead.id || '';
     document.getElementById('editOrderNumber').value = lead.order_number || order.order_number || '';
     document.getElementById('editOrderStatus').value = lead.order_status || order.status || 'pending';
+    
+    // Populate new order detail fields
+    document.getElementById('editOrderServiceId').value = lead.service_id || 'N/A';
+    document.getElementById('editOrderAccountNumber').value = lead.account_number || 'N/A';
+    document.getElementById('editOrderLeadIdDisplay').value = lead.lead_id || 'N/A';
+    
     document.getElementById('editOrderClientName').value = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '';
     document.getElementById('editOrderIdNumber').value = lead.id_number || '';
     document.getElementById('editOrderPassport').value = lead.passport_number || '';
@@ -1694,11 +1700,12 @@ async function viewOrder(orderId) {
         agentSelect.innerHTML += `<option value="${a.id}" ${(lead.agent_id || order.agent_id) === a.id ? 'selected' : ''}>${a.full_name}</option>`;
     });
     
-    // Populate dealer select
+    // Populate dealer select - check both order.dealer_id and lead.dealer_id
     const dealerSelect = document.getElementById('editOrderDealer');
     dealerSelect.innerHTML = '<option value="">Select Dealer</option>';
+    const selectedDealerId = order.dealer_id || lead.dealer_id;
     dealers.forEach(d => {
-        dealerSelect.innerHTML += `<option value="${d.id}" ${lead.dealer_id === d.id ? 'selected' : ''}>${d.name}</option>`;
+        dealerSelect.innerHTML += `<option value="${d.id}" ${selectedDealerId === d.id ? 'selected' : ''}>${d.name}</option>`;
     });
     
     openModal('viewOrderModal');
@@ -2112,7 +2119,7 @@ async function saveLeadChanges(e) {
                         dealer_id: updateData.dealer_id,
                         order_number: updateData.order_number,
                         status: updateData.order_status || 'pending',
-                        notes: `Order created from lead edit - Commission: R${originalLead.commission_amount || 200}\nService ID: ${originalLead.service_id || 'N/A'}\nAccount: ${originalLead.account_number || 'N/A'}\nLead ID: ${originalLead.lead_id || 'N/A'}\nID Number: ${originalLead.id_number || 'N/A'}`
+                        notes: `Order created from lead edit - Commission: R${originalLead.commission_amount || 200}`
                     });
                 
                 if (orderError) {
@@ -2220,7 +2227,7 @@ async function convertToOrder() {
                 dealer_id: lead.dealer_id,
                 order_number: orderNumber,
                 status: 'pending',
-                notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}\nService ID: ${lead.service_id || 'N/A'}\nAccount: ${lead.account_number || 'N/A'}\nLead ID: ${lead.lead_id || 'N/A'}\nID Number: ${lead.id_number || 'N/A'}`
+                notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
             })
             .select();
         
