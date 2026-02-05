@@ -362,6 +362,7 @@ function showSection(section) {
         'agents': { title: 'My Agents', subtitle: 'Manage your sales team' },
         'leads': { title: 'All Leads', subtitle: 'View all dealership leads' },
         'orders': { title: 'All Orders', subtitle: 'Track all orders' },
+        'preorders': { title: 'Preorders', subtitle: 'Track preorder leads from your agents' },
         'performance': { title: 'Agent Performance', subtitle: 'Compare agent metrics' },
         'commissions': { title: 'Dealer Commission', subtitle: 'Commission due from Openserve' },
         'reports': { title: 'Reports', subtitle: 'Dealership analytics' }
@@ -376,6 +377,9 @@ function showSection(section) {
     else if (section === 'performance') loadPerformanceSection();
     else if (section === 'commissions') loadCommissionSection();
     else if (section === 'reports') loadReportsSection();
+    else if (section === 'preorders') {
+        if (typeof loadDealerPreorders === 'function') loadDealerPreorders();
+    }
 }
 
 function loadPerformanceSection() {

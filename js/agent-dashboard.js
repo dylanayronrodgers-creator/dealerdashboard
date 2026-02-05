@@ -165,6 +165,7 @@ function showSection(section) {
         'dashboard': { title: 'Dashboard', subtitle: 'Your sales overview' },
         'my-leads': { title: 'My Leads', subtitle: 'Manage your leads' },
         'my-orders': { title: 'My Orders', subtitle: 'Track your orders' },
+        'preorders': { title: 'My Preorders', subtitle: 'Track your preorder leads' },
         'returned': { title: 'Returned Items', subtitle: 'Items returned by admin for review' },
         'commissions': { title: 'Commissions', subtitle: 'Track your earnings' },
         'reports': { title: 'Reports', subtitle: 'Your performance analytics' }
@@ -180,6 +181,8 @@ function showSection(section) {
         loadCommissions();
     } else if (section === 'reports') {
         loadReports();
+    } else if (section === 'preorders') {
+        if (typeof loadAgentPreorders === 'function') loadAgentPreorders();
     }
 }
 

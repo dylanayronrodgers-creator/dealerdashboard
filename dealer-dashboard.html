@@ -82,6 +82,13 @@
                 </svg>
                 All Orders
             </a>
+            <a href="#preorders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('preorders')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Preorders
+                <span id="dealerPreordersBadge" class="ml-auto bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full hidden">0</span>
+            </a>
             <a href="#performance" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('performance')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
@@ -273,6 +280,45 @@
                         </thead>
                         <tbody id="dealerOrdersTable">
                             <tr><td colspan="7" class="py-4 text-center text-gray-500">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Preorders Section -->
+        <section id="section-preorders" class="p-8 hidden">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-800">Preorders</h2>
+                    <p class="text-gray-500 text-sm">Track preorder leads from your agents</p>
+                </div>
+                <select id="dealerPreorderStatusFilter" onchange="filterDealerPreorders()" class="border rounded-xl px-4 py-2 focus:outline-none">
+                    <option value="">All Statuses</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="qualified">Qualified</option>
+                    <option value="converted">Converted</option>
+                </select>
+            </div>
+
+            <div class="card p-6">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50 border-b">
+                            <tr>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Client</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Contact</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Package</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Agent</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Status</th>
+                                <th class="text-left py-3 px-4 text-sm font-semibold text-gray-700">Created</th>
+                            </tr>
+                        </thead>
+                        <tbody id="dealerPreordersTable">
+                            <tr>
+                                <td colspan="6" class="py-8 text-center text-gray-500">No preorders found</td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -541,5 +587,6 @@
     <script src="js/supabase-config.js"></script>
     <script src="js/auth.js"></script>
     <script src="js/dealer-dashboard.js"></script>
+    <script src="js/dealer-preorders.js"></script>
 </body>
 </html>
