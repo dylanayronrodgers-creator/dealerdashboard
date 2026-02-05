@@ -1741,9 +1741,10 @@
                             lead_id: lead.id,
                             package_id: lead.package_id,
                             agent_id: lead.agent_id,
+                            dealer_id: lead.dealer_id,
                             order_number: lead.order_number || `ORD-${Date.now()}`,
                             status: lead.order_status || 'pending',
-                            notes: `Recovered order - Commission: R${lead.commission_amount || 200}`
+                            notes: `Recovered order - Commission: R${lead.commission_amount || 200}\nService ID: ${lead.service_id || 'N/A'}\nAccount: ${lead.account_number || 'N/A'}\nLead ID: ${lead.lead_id || 'N/A'}\nID Number: ${lead.id_number || 'N/A'}`
                         });
                     
                     if (insertError) {

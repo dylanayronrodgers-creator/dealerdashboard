@@ -2102,16 +2102,17 @@ async function saveLeadChanges(e) {
             if (!existingOrders || existingOrders.length === 0) {
                 console.log('No order found, creating one...');
                 
-                // Create the order
+                // Create the order with all lead data
                 const { error: orderError } = await window.supabaseClient
                     .from('orders')
                     .insert({
                         lead_id: editingLeadId,
                         package_id: updateData.package_id,
                         agent_id: updateData.agent_id,
+                        dealer_id: updateData.dealer_id,
                         order_number: updateData.order_number,
                         status: updateData.order_status || 'pending',
-                        notes: `Order created from lead edit - Commission: R${originalLead.commission_amount || 200}`
+                        notes: `Order created from lead edit - Commission: R${originalLead.commission_amount || 200}\nService ID: ${originalLead.service_id || 'N/A'}\nAccount: ${originalLead.account_number || 'N/A'}\nLead ID: ${originalLead.lead_id || 'N/A'}\nID Number: ${originalLead.id_number || 'N/A'}`
                     });
                 
                 if (orderError) {
@@ -2200,11 +2201,12 @@ async function convertToOrder() {
         
         if (leadError) throw leadError;
         
-        // Create order record with order_number
+        // Create order record with ALL lead data
         console.log('Creating order with data:', {
             lead_id: convertingLeadId,
             package_id: lead.package_id,
             agent_id: lead.agent_id,
+            dealer_id: lead.dealer_id,
             order_number: orderNumber,
             status: 'pending'
         });
@@ -2215,9 +2217,10 @@ async function convertToOrder() {
                 lead_id: convertingLeadId,
                 package_id: lead.package_id,
                 agent_id: lead.agent_id,
+                dealer_id: lead.dealer_id,
                 order_number: orderNumber,
                 status: 'pending',
-                notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
+                notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}\nService ID: ${lead.service_id || 'N/A'}\nAccount: ${lead.account_number || 'N/A'}\nLead ID: ${lead.lead_id || 'N/A'}\nID Number: ${lead.id_number || 'N/A'}`
             })
             .select();
         
