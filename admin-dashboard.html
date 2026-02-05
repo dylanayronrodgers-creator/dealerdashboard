@@ -1771,7 +1771,96 @@
         
         // Add to window for console access
         window.fixMissingOrders = fixMissingOrders;
+        
+        // Function to update existing orders with missing dealer and lead data
+        async function updateIncompleteOrders() {
+            if (!confirm('This will update existing orders to include dealer assignments and lead data. Continue?')) {
+                return;
+            }
+            
+            console.log('Finding orders with missing dealer or lead data...');
+            
+            // Get all orders
+            const { data: allOrders, error: ordersError } = await window.supabaseClient
+                .from('orders')
+                .select(`
+                    *,
+                    lead:leads(*)
+                `)
+                .order('created_at', { ascending: false });
+            
+            if (ordersError) {
+                console.error('Error loading orders:', ordersError);
+                alert('Error loading orders: ' + ordersError.message);
+                return;
+            }
+            
+            console.log(`Found ${allOrders.length} total orders`);
+            
+            // Find orders that need updating (missing dealer or incomplete notes)
+            const ordersToUpdate = allOrders.filter(order => {
+                const hasLead = order.lead;
+                const missingDealer = !order.dealer_id && hasLead && hasLead.dealer_id;
+                const incompleteNotes = order.notes && !order.notes.includes('Service ID:');
+                return hasLead && (missingDealer || incompleteNotes);
+            });
+            
+            console.log(`Found ${ordersToUpdate.length} orders to update`);
+            
+            if (ordersToUpdate.length === 0) {
+                alert('No incomplete orders found! All orders have complete data.');
+                return;
+            }
+            
+            // Update orders
+            let updated = 0;
+            let failed = 0;
+            
+            for (const order of ordersToUpdate) {
+                try {
+                    const lead = order.lead;
+                    console.log(`Updating order ${order.order_number}...`);
+                    
+                    // Build complete notes
+                    const baseNotes = order.notes || '';
+                    const commissionMatch = baseNotes.match(/Commission: R(\d+)/);
+                    const commission = commissionMatch ? commissionMatch[1] : (lead.commission_amount || 200);
+                    
+                    const updatedNotes = `${baseNotes.split('\n')[0] || 'Order'} - Commission: R${commission}\nService ID: ${lead.service_id || 'N/A'}\nAccount: ${lead.account_number || 'N/A'}\nLead ID: ${lead.lead_id || 'N/A'}\nID Number: ${lead.id_number || 'N/A'}`;
+                    
+                    const { error: updateError } = await window.supabaseClient
+                        .from('orders')
+                        .update({
+                            dealer_id: lead.dealer_id || order.dealer_id,
+                            notes: updatedNotes
+                        })
+                        .eq('id', order.id);
+                    
+                    if (updateError) {
+                        console.error(`Failed to update order:`, updateError);
+                        failed++;
+                    } else {
+                        console.log(`✅ Updated order ${order.order_number}`);
+                        updated++;
+                    }
+                    
+                } catch (error) {
+                    console.error('Error:', error);
+                    failed++;
+                }
+            }
+            
+            alert(`Orders Update Complete!\n\n✅ Updated: ${updated}\n❌ Failed: ${failed}\n\nRefresh the page to see the changes.`);
+            
+            if (updated > 0) {
+                await loadOrders();
+                showSection('orders');
+            }
+        }
+        
+        window.updateIncompleteOrders = updateIncompleteOrders;
         console.log('💡 To fix missing orders, run: fixMissingOrders()');
+        console.log('💡 To update incomplete orders, run: updateIncompleteOrders()');
     </script>
     <script>
         function toggleSidebar() {
