@@ -19,7 +19,7 @@ Dear {{contact_name}},
 
 I hope this message finds you well. My name is Dylan Rodgers and I'm reaching out on behalf of **Axxess**, one of South Africa's leading fibre internet service providers, powered by the **Openserve** fibre network.
 
-We're expanding our dealer network and would like to invite **{{dealer_name}}** to explore a partnership that's designed to make selling fibre simple, transparent, and profitable for your team.
+We've built a streamlined service that makes it easier for dealers to **submit and track orders**, with full **revenue projection** based on what Openserve will pay you. We're expanding our dealer network and would like to invite **{{dealer_name}}** to explore how we can simplify your fibre sales operation.
 
 ### Why Partner with Axxess?
 
@@ -30,7 +30,7 @@ Every client order includes free router delivery directly to the installation ad
 No more chasing updates. Our dedicated **Dealer Dashboard** gives you and your agents live visibility into every lead and order - from submission through to installation completion.
 
 **Revenue Projection**
-Track your earnings in real time. The dashboard provides commission tracking, revenue breakdowns (confirmed, pending, projected), and performance analytics so you always know where you stand.
+See exactly what Openserve will pay you. Track confirmed, pending, and projected revenue in real time through our dashboard so you always know where you stand.
 
 **National Coverage**
 Axxess fibre is available wherever Openserve has coverage - that's nationwide. Your agents can sell across South Africa without geographic limitations.
@@ -44,7 +44,7 @@ We've built a purpose-built **Dealer Dashboard** that gives you:
 
 - **Full visibility** into all leads submitted by your agents
 - **Order status tracking** from submission to installation
-- **Commission tracking** with confirmed and projected earnings
+- **Revenue projection** based on what Openserve will pay you
 - **Agent performance metrics** to manage your team effectively
 - **Preorder management** for future-dated installations
 - **Data export** for your own reporting and analysis
@@ -58,7 +58,7 @@ I'd welcome the opportunity to:
 
 1. **Give you a live demo** of the Dealer Dashboard
 2. **Set up a test account** for {{dealer_name}} to explore the platform
-3. **Discuss commission structures** and how we can grow together
+3. **Get you started** submitting and tracking orders immediately
 
 Would you be available for a brief 15-minute call this week? Simply reply to this email or reach out to me directly and I'll arrange everything.
 
@@ -89,7 +89,7 @@ Dear {{contact_name}},
 
 I hope this message finds you well. My name is Dylan Rodgers and I'm reaching out on behalf of Axxess, one of South Africa's leading fibre internet service providers, powered by the Openserve fibre network.
 
-We're expanding our dealer network and would like to invite {{dealer_name}} to explore a partnership that's designed to make selling fibre simple, transparent, and profitable for your team.
+We've built a streamlined service that makes it easier for dealers to submit and track orders, with full revenue projection based on what Openserve will pay you. We're expanding our dealer network and would like to invite {{dealer_name}} to explore how we can simplify your fibre sales operation.
 
 WHY PARTNER WITH AXXESS?
 
@@ -97,7 +97,7 @@ WHY PARTNER WITH AXXESS?
 
 * Real-Time Order Feedback - Our Dealer Dashboard gives you and your agents live visibility into every lead and order.
 
-* Revenue Projection - Track your earnings in real time with commission tracking and performance analytics.
+* Revenue Projection - See exactly what Openserve will pay you. Track confirmed, pending, and projected revenue in real time.
 
 * National Coverage - Available wherever Openserve has coverage - that's nationwide.
 
@@ -108,7 +108,7 @@ WHAT WE'RE OFFERING YOU
 We've built a purpose-built Dealer Dashboard that gives you:
 - Full visibility into all leads submitted by your agents
 - Order status tracking from submission to installation
-- Commission tracking with confirmed and projected earnings
+- Revenue projection based on what Openserve will pay you
 - Agent performance metrics to manage your team
 - Preorder management for future-dated installations
 - Data export for your own reporting
@@ -121,7 +121,7 @@ NEXT STEPS
 I'd welcome the opportunity to:
 1. Give you a live demo of the Dealer Dashboard
 2. Set up a test account for {{dealer_name}}
-3. Discuss commission structures and how we can grow together
+3. Get you started submitting and tracking orders immediately
 
 Would you be available for a brief 15-minute call this week? Simply reply to this email and I'll arrange everything.
 
