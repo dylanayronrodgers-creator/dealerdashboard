@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Axxess Dealer Invitation</title>
+    <style>
+        /* Email-safe inline styles used throughout, this style block is for preview only */
+        body { margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6; }
+        @media print { .no-print { display: none; } }
+    </style>
+</head>
+<body style="margin: 0; padding: 0; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: #f3f4f6;">
+
+    <!-- Preview Controls (not part of email) -->
+    <div class="no-print" style="background: #1e3a5f; color: white; padding: 16px 24px; text-align: center; font-size: 14px;">
+        <strong>Mail Merge Preview</strong> - Replace <code style="background: rgba(255,255,255,0.2); padding: 2px 6px; border-radius: 4px;">{{placeholders}}</code> with your mail merge fields
+        <br><br>
+        <button onclick="window.print()" style="background: white; color: #1e3a5f; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer;">Print / Save as PDF</button>
+        <button onclick="copyHTML()" style="background: #10b981; color: white; border: none; padding: 8px 20px; border-radius: 6px; font-weight: bold; cursor: pointer; margin-left: 8px;">Copy HTML</button>
+    </div>
+
+    <!-- Email Container -->
+    <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="background-color: #f3f4f6;">
+        <tr>
+            <td align="center" style="padding: 24px 16px;">
+                <table role="presentation" cellpadding="0" cellspacing="0" width="640" style="max-width: 640px; width: 100%;">
+
+                    <!-- Header with Logos -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f2640 100%); padding: 32px 40px; border-radius: 12px 12px 0 0;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 28px; font-weight: 800; color: #ffffff; letter-spacing: 1px;">AXXESS</div>
+                                        <div style="font-size: 12px; color: #93c5fd; margin-top: 2px;">Fibre Internet Service Provider</div>
+                                    </td>
+                                    <td align="right">
+                                        <div style="font-size: 20px; font-weight: 700; color: #34d399; letter-spacing: 0.5px;">OPENSERVE</div>
+                                        <div style="font-size: 11px; color: #93c5fd; margin-top: 2px;">National Fibre Network</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Hero Section -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 40px 40px 24px 40px;">
+                            <h1 style="margin: 0 0 8px 0; font-size: 24px; color: #1e3a5f; font-weight: 700;">You're Invited to Partner with Axxess Fibre</h1>
+                            <p style="margin: 0; font-size: 15px; color: #6b7280; line-height: 1.5;">Sell fibre nationwide with full visibility, zero contracts, and free router delivery.</p>
+                        </td>
+                    </tr>
+
+                    <!-- Personal Greeting -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 0 40px 24px 40px;">
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #374151; line-height: 1.7;">
+                                Dear <strong>{{contact_name}}</strong>,
+                            </p>
+                            <p style="margin: 0 0 16px 0; font-size: 15px; color: #374151; line-height: 1.7;">
+                                I'm reaching out on behalf of <strong>Axxess</strong>, one of South Africa's leading fibre internet service providers on the <strong>Openserve</strong> network. We're expanding our dealer network and would like to invite <strong>{{dealer_name}}</strong> to explore a partnership designed to make selling fibre simple, transparent, and profitable.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Value Props -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 0 40px 32px 40px;">
+                            <h2 style="margin: 0 0 20px 0; font-size: 18px; color: #1e3a5f; font-weight: 700;">Why Dealers Choose Axxess</h2>
+
+                            <!-- Free Router Delivery -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+                                <tr>
+                                    <td width="48" valign="top">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669); border-radius: 10px; text-align: center; line-height: 40px; font-size: 18px;">
+                                            &#x1F69A;
+                                        </div>
+                                    </td>
+                                    <td style="padding-left: 12px;">
+                                        <div style="font-size: 15px; font-weight: 700; color: #1e3a5f; margin-bottom: 2px;">Free Router Delivery</div>
+                                        <div style="font-size: 14px; color: #6b7280; line-height: 1.5;">Every order includes free router delivery to the client's door. No upfront costs, no logistics headaches.</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Order Feedback -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+                                <tr>
+                                    <td width="48" valign="top">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #3b82f6, #2563eb); border-radius: 10px; text-align: center; line-height: 40px; font-size: 18px;">
+                                            &#x1F4CA;
+                                        </div>
+                                    </td>
+                                    <td style="padding-left: 12px;">
+                                        <div style="font-size: 15px; font-weight: 700; color: #1e3a5f; margin-bottom: 2px;">Real-Time Order Feedback</div>
+                                        <div style="font-size: 14px; color: #6b7280; line-height: 1.5;">No more chasing updates. Our Dealer Dashboard gives you live visibility into every lead and order from submission to installation.</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- Revenue Projection -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+                                <tr>
+                                    <td width="48" valign="top">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #8b5cf6, #7c3aed); border-radius: 10px; text-align: center; line-height: 40px; font-size: 18px;">
+                                            &#x1F4B0;
+                                        </div>
+                                    </td>
+                                    <td style="padding-left: 12px;">
+                                        <div style="font-size: 15px; font-weight: 700; color: #1e3a5f; margin-bottom: 2px;">Revenue Projection</div>
+                                        <div style="font-size: 14px; color: #6b7280; line-height: 1.5;">Track confirmed, pending, and projected earnings in real time. Full commission transparency with performance analytics.</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- National Coverage -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 16px;">
+                                <tr>
+                                    <td width="48" valign="top">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #f59e0b, #d97706); border-radius: 10px; text-align: center; line-height: 40px; font-size: 18px;">
+                                            &#x1F30D;
+                                        </div>
+                                    </td>
+                                    <td style="padding-left: 12px;">
+                                        <div style="font-size: 15px; font-weight: 700; color: #1e3a5f; margin-bottom: 2px;">National Coverage</div>
+                                        <div style="font-size: 14px; color: #6b7280; line-height: 1.5;">Sell fibre anywhere Openserve has coverage - that's nationwide across South Africa. No geographic limitations.</div>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <!-- No Contracts -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%" style="margin-bottom: 8px;">
+                                <tr>
+                                    <td width="48" valign="top">
+                                        <div style="width: 40px; height: 40px; background: linear-gradient(135deg, #ef4444, #dc2626); border-radius: 10px; text-align: center; line-height: 40px; font-size: 18px;">
+                                            &#x2705;
+                                        </div>
+                                    </td>
+                                    <td style="padding-left: 12px;">
+                                        <div style="font-size: 15px; font-weight: 700; color: #1e3a5f; margin-bottom: 2px;">No Contracts</div>
+                                        <div style="font-size: 14px; color: #6b7280; line-height: 1.5;">No lock-in contracts for dealers or clients. We believe in earning your business every month through service and results.</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Dashboard Preview Section -->
+                    <tr>
+                        <td style="background-color: #f0f9ff; padding: 32px 40px; border-top: 2px solid #e0f2fe; border-bottom: 2px solid #e0f2fe;">
+                            <h2 style="margin: 0 0 16px 0; font-size: 18px; color: #1e3a5f; font-weight: 700;">Your Dedicated Dealer Dashboard</h2>
+                            <p style="margin: 0 0 20px 0; font-size: 14px; color: #374151; line-height: 1.6;">
+                                We've built a purpose-built portal to give you complete control and visibility over your fibre sales operation:
+                            </p>
+
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td width="50%" valign="top" style="padding-right: 8px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Full lead visibility</td></tr>
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Order status tracking</td></tr>
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Commission tracking</td></tr>
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Agent performance metrics</td></tr>
+                                        </table>
+                                    </td>
+                                    <td width="50%" valign="top" style="padding-left: 8px;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Preorder management</td></tr>
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Router delivery tracking</td></tr>
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Data export &amp; reports</td></tr>
+                                            <tr><td style="padding: 6px 0; font-size: 14px; color: #374151;">&#x2714;&#xFE0F; Revenue projections</td></tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- CTA Section -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 32px 40px; text-align: center;">
+                            <h2 style="margin: 0 0 12px 0; font-size: 18px; color: #1e3a5f; font-weight: 700;">Ready to See It in Action?</h2>
+                            <p style="margin: 0 0 24px 0; font-size: 14px; color: #6b7280; line-height: 1.6;">
+                                I'd love to give <strong>{{dealer_name}}</strong> a live demo and set up a test account so you can explore the platform yourself.
+                            </p>
+
+                            <!-- CTA Button -->
+                            <table role="presentation" cellpadding="0" cellspacing="0" align="center">
+                                <tr>
+                                    <td style="background: linear-gradient(135deg, #1e3a5f, #0f2640); border-radius: 8px; padding: 14px 32px;">
+                                        <a href="mailto:dylan@axxess.co.za?subject=Dealer%20Dashboard%20Demo%20Request%20-%20{{dealer_name}}&body=Hi%20Dylan%2C%0A%0AI%27d%20like%20to%20schedule%20a%20demo%20of%20the%20Axxess%20Dealer%20Dashboard.%0A%0ARegards%2C%0A{{contact_name}}" style="color: #ffffff; text-decoration: none; font-size: 15px; font-weight: 700; letter-spacing: 0.5px;">
+                                            Schedule a 15-Minute Demo
+                                        </a>
+                                    </td>
+                                </tr>
+                            </table>
+
+                            <p style="margin: 20px 0 0 0; font-size: 13px; color: #9ca3af;">
+                                Or simply reply to this email and I'll arrange everything.
+                            </p>
+                        </td>
+                    </tr>
+
+                    <!-- Next Steps -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 0 40px 32px 40px; border-top: 1px solid #f3f4f6;">
+                            <h3 style="margin: 24px 0 16px 0; font-size: 16px; color: #1e3a5f; font-weight: 700;">What Happens Next</h3>
+
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td style="padding: 8px 0;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="32" valign="top">
+                                                    <div style="width: 24px; height: 24px; background: #1e3a5f; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: bold;">1</div>
+                                                </td>
+                                                <td style="padding-left: 8px; font-size: 14px; color: #374151;"><strong>Live demo</strong> - I walk you through the Dealer Dashboard</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="32" valign="top">
+                                                    <div style="width: 24px; height: 24px; background: #1e3a5f; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: bold;">2</div>
+                                                </td>
+                                                <td style="padding-left: 8px; font-size: 14px; color: #374151;"><strong>Test account</strong> - Set up {{dealer_name}} on the platform</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td style="padding: 8px 0;">
+                                        <table role="presentation" cellpadding="0" cellspacing="0">
+                                            <tr>
+                                                <td width="32" valign="top">
+                                                    <div style="width: 24px; height: 24px; background: #1e3a5f; border-radius: 50%; color: white; text-align: center; line-height: 24px; font-size: 12px; font-weight: bold;">3</div>
+                                                </td>
+                                                <td style="padding-left: 8px; font-size: 14px; color: #374151;"><strong>Go live</strong> - Discuss commission structures and start selling</td>
+                                            </tr>
+                                        </table>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Signature -->
+                    <tr>
+                        <td style="background-color: #ffffff; padding: 0 40px 32px 40px; border-top: 1px solid #f3f4f6;">
+                            <p style="margin: 24px 0 4px 0; font-size: 14px; color: #374151;">Kind regards,</p>
+                            <p style="margin: 0 0 4px 0; font-size: 15px; color: #1e3a5f; font-weight: 700;">Dylan Rodgers</p>
+                            <p style="margin: 0 0 2px 0; font-size: 13px; color: #6b7280;">Axxess Dealer Partnerships</p>
+                            <p style="margin: 0; font-size: 13px; color: #6b7280;">[Your Phone Number] | [Your Email]</p>
+                        </td>
+                    </tr>
+
+                    <!-- Footer -->
+                    <tr>
+                        <td style="background: linear-gradient(135deg, #1e3a5f 0%, #0f2640 100%); padding: 24px 40px; border-radius: 0 0 12px 12px;">
+                            <table role="presentation" cellpadding="0" cellspacing="0" width="100%">
+                                <tr>
+                                    <td>
+                                        <div style="font-size: 18px; font-weight: 800; color: #ffffff; letter-spacing: 1px;">AXXESS</div>
+                                        <div style="font-size: 11px; color: #93c5fd; margin-top: 4px;">Powered by Openserve | South Africa's Fibre Network</div>
+                                    </td>
+                                    <td align="right">
+                                        <div style="font-size: 14px; font-weight: 600; color: #34d399;">OPENSERVE</div>
+                                    </td>
+                                </tr>
+                            </table>
+                        </td>
+                    </tr>
+
+                    <!-- Unsubscribe -->
+                    <tr>
+                        <td style="padding: 16px 40px; text-align: center;">
+                            <p style="margin: 0; font-size: 11px; color: #9ca3af;">
+                                You're receiving this because we believe {{dealer_name}} would benefit from the Axxess dealer programme.
+                                <br>If this isn't relevant, please disregard this email.
+                            </p>
+                        </td>
+                    </tr>
+
+                </table>
+            </td>
+        </tr>
+    </table>
+
+    <script>
+    function copyHTML() {
+        // Get email content without preview controls
+        const emailTable = document.querySelector('table[role="presentation"]');
+        const html = emailTable.outerHTML;
+        navigator.clipboard.writeText(html).then(() => {
+            alert('HTML copied to clipboard!');
+        }).catch(() => {
+            // Fallback
+            const textarea = document.createElement('textarea');
+            textarea.value = html;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert('HTML copied to clipboard!');
+        });
+    }
+    </script>
+</body>
+</html>
