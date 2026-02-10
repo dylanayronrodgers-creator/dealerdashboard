@@ -10,6 +10,32 @@ let axxessManagers = [];
 let axxessPricing = [];
 let axxessReminders = [];
 let axxessStatusChecks = [];
+
+// Pagination helper — fetches ALL rows from a table (bypasses Supabase 1000-row default)
+async function fetchAllRows(table, query = {}) {
+    const PAGE_SIZE = 1000;
+    let allData = [];
+    let from = 0;
+    let hasMore = true;
+
+    while (hasMore) {
+        let q = window.supabaseClient.from(table).select(query.select || '*');
+        if (query.eq) query.eq.forEach(e => { q = q.eq(e[0], e[1]); });
+        if (query.order) q = q.order(query.order[0], query.order[1] || {});
+        q = q.range(from, from + PAGE_SIZE - 1);
+
+        const { data, error } = await q;
+        if (error) throw error;
+
+        allData = allData.concat(data || []);
+        if (!data || data.length < PAGE_SIZE) {
+            hasMore = false;
+        } else {
+            from += PAGE_SIZE;
+        }
+    }
+    return allData;
+}
 let axxessCurrentAgent = null; // The linked agents table row for logged-in user
 let axxessCurrentTab = 'ax-overview';
 let axxessEditingSale = null;
@@ -66,21 +92,27 @@ function axHasPermission(perm) {
 // ─── Data Loading ───
 async function loadAxxessSalesData() {
     try {
-        const [agentsRes, salesRes, teamsRes, pricingRes, remindersRes, checksRes] = await Promise.all([
+        // Small tables: normal queries (well under 1000 rows)
+        const [agentsRes, teamsRes, pricingRes, checksRes] = await Promise.all([
             window.supabaseClient.from('agents').select('*').order('name'),
-            window.supabaseClient.from('sales_log').select('*').order('created_at', { ascending: false }),
             window.supabaseClient.from('teams').select('*'),
             window.supabaseClient.from('axxess_pricing').select('*').eq('is_active', true),
-            window.supabaseClient.from('agent_reminders').select('*').order('reminder_datetime', { ascending: false }),
             window.supabaseClient.from('service_status_checks').select('*').order('checked_at', { ascending: false }).limit(100)
         ]);
 
         axxessAgents = agentsRes.data || [];
-        axxessSales = salesRes.data || [];
         axxessTeams = teamsRes.data || [];
         axxessPricing = pricingRes.data || [];
-        axxessReminders = remindersRes.data || [];
         axxessStatusChecks = checksRes.data || [];
+
+        // Large tables: paginated fetch (bypasses 1000-row cap)
+        const [allSales, allReminders] = await Promise.all([
+            fetchAllRows('sales_log', { order: ['created_at', { ascending: false }] }),
+            fetchAllRows('agent_reminders', { order: ['reminder_datetime', { ascending: false }] })
+        ]);
+
+        axxessSales = allSales;
+        axxessReminders = allReminders;
 
         // Find the current user's linked agent record
         if (currentUser && currentUser.agent_table_id) {
