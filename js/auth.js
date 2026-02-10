@@ -168,9 +168,13 @@ async function requireAuth(requiredRole = null) {
         // Check role - support both string and array of roles
         if (requiredRole) {
             const allowedRoles = Array.isArray(requiredRole) ? requiredRole : [requiredRole];
+            // super_admin has access to everything admin can access
+            if (profile.role === 'super_admin' && allowedRoles.includes('admin')) {
+                allowedRoles.push('super_admin');
+            }
             if (!allowedRoles.includes(profile.role)) {
                 // Redirect to appropriate dashboard
-                if (profile.role === 'admin') {
+                if (profile.role === 'admin' || profile.role === 'super_admin') {
                     window.location.href = 'admin-dashboard.html';
                 } else if (profile.role === 'dealer') {
                     window.location.href = 'dealer-dashboard.html';
