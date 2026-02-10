@@ -1165,11 +1165,39 @@ function setupFormHandlers() {
     document.getElementById('addAgentForm')?.addEventListener('submit', async (e) => {
         e.preventDefault();
         const formData = new FormData(e.target);
+        const email = formData.get('email');
         
         try {
+            // Check if email already exists in profiles
+            const { data: existing } = await window.supabaseClient
+                .from('profiles')
+                .select('id, email, full_name, role')
+                .eq('email', email)
+                .maybeSingle();
+            
+            if (existing) {
+                // Profile already exists — just update it to agent role if needed
+                const { error: updateError } = await window.supabaseClient
+                    .from('profiles')
+                    .update({
+                        full_name: formData.get('full_name'),
+                        phone: formData.get('phone'),
+                        role: 'agent'
+                    })
+                    .eq('id', existing.id);
+                
+                if (updateError) throw updateError;
+                
+                closeModal('addAgentModal');
+                e.target.reset();
+                await loadAgents();
+                alert(`Agent "${formData.get('full_name')}" updated successfully! (Email already existed in system)`);
+                return;
+            }
+            
             // Create user in Supabase Auth
             const { data: authData, error: authError } = await window.supabaseClient.auth.signUp({
-                email: formData.get('email'),
+                email: email,
                 password: formData.get('password'),
                 options: {
                     data: {
@@ -1181,14 +1209,14 @@ function setupFormHandlers() {
             
             if (authError) throw authError;
             
-            // Create profile
-            const { error: profileError } = await window.supabaseClient.from('profiles').insert({
+            // Create or update profile (upsert in case auth trigger already created it)
+            const { error: profileError } = await window.supabaseClient.from('profiles').upsert({
                 id: authData.user.id,
-                email: formData.get('email'),
+                email: email,
                 full_name: formData.get('full_name'),
                 phone: formData.get('phone'),
                 role: 'agent'
-            });
+            }, { onConflict: 'id' });
             
             if (profileError) throw profileError;
             
