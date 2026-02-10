@@ -4008,3 +4008,193 @@ async function markAllDeliveriesRequested() {
         alert('Error marking deliveries: ' + error.message);
     }
 }
+
+// ============================================
+// OPENSERVE EMAIL PARSER
+// ============================================
+
+async function pasteFromClipboard() {
+    try {
+        const text = await navigator.clipboard.readText();
+        document.getElementById('openserveEmailText').value = text;
+    } catch (err) {
+        alert('Unable to read clipboard. Please paste manually with Ctrl+V.');
+    }
+}
+
+function parseOpenserveEmail() {
+    const text = document.getElementById('openserveEmailText').value.trim();
+    if (!text) {
+        alert('Please paste the Openserve email content first.');
+        return;
+    }
+
+    // Extract fields using regex patterns matching the Openserve email format
+    const extract = (pattern) => {
+        const match = text.match(pattern);
+        return match ? match[1].trim() : '';
+    };
+
+    const parsed = {
+        leadId: extract(/Lead\s*ID[:\s]+([^\n]+)/i),
+        dealerCode: extract(/Dealer\s*code[:\s]+([^\n]+)/i),
+        fullName: extract(/Full\s*names?[:\s]+([^\n]+)/i),
+        email: extract(/Email\s*address[:\s]+([^\n]+)/i),
+        primaryPhone: extract(/Primary\s*contact\s*number[:\s]+([^\n]+)/i),
+        altPhone: extract(/Alternative\s*contact\s*number[:\s]+([^\n]+)/i),
+        address: extract(/Physical\s*address[:\s]+([^\n]+)/i),
+        building: extract(/Building[:\s]+([^\n]+)/i),
+        floor: extract(/Floor[:\s]+([^\n]+)/i),
+        unit: extract(/Unit[:\s]+([^\n]+)/i),
+        contactTime: extract(/Preferred\s*contact\s*time[:\s]+([^\n]+)/i)
+    };
+
+    // Validate we got at least a name or lead ID
+    if (!parsed.fullName && !parsed.leadId) {
+        alert('Could not parse the email. Please make sure you pasted the full Openserve lead notification email.');
+        return;
+    }
+
+    // Populate the review form
+    document.getElementById('osLeadId').value = parsed.leadId;
+    document.getElementById('osDealerCode').value = parsed.dealerCode;
+    document.getElementById('osFullName').value = parsed.fullName;
+    document.getElementById('osEmail').value = parsed.email;
+    document.getElementById('osPrimaryPhone').value = parsed.primaryPhone;
+    document.getElementById('osAltPhone').value = parsed.altPhone;
+    document.getElementById('osAddress').value = parsed.address;
+    document.getElementById('osBuilding').value = parsed.building;
+    document.getElementById('osFloor').value = parsed.floor;
+    document.getElementById('osUnit').value = parsed.unit;
+    document.getElementById('osContactTime').value = parsed.contactTime;
+
+    // Populate dealer dropdown and try to auto-match by dealer code
+    const dealerSelect = document.getElementById('osDealerSelect');
+    dealerSelect.innerHTML = '<option value="">Auto-match by dealer code</option>';
+    dealers.forEach(d => {
+        dealerSelect.innerHTML += `<option value="${d.id}">${d.name}${d.code ? ' (' + d.code + ')' : ''}</option>`;
+    });
+
+    // Auto-match dealer by code
+    const dealerMatchDiv = document.getElementById('osDealerMatch');
+    if (parsed.dealerCode) {
+        const matchedDealer = dealers.find(d => 
+            d.code && d.code.toLowerCase() === parsed.dealerCode.toLowerCase()
+        );
+        if (matchedDealer) {
+            dealerSelect.value = matchedDealer.id;
+            dealerMatchDiv.innerHTML = `<div class="bg-blue-50 border border-blue-200 rounded-lg p-3 text-sm text-blue-700 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+                Auto-matched dealer: <strong>${matchedDealer.name}</strong> (code: ${matchedDealer.code})
+            </div>`;
+            dealerMatchDiv.classList.remove('hidden');
+        } else {
+            dealerMatchDiv.innerHTML = `<div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 text-sm text-yellow-700 flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L4.082 16.5c-.77.833.192 2.5 1.732 2.5z" /></svg>
+                No dealer found with code "<strong>${parsed.dealerCode}</strong>". Please select manually.
+            </div>`;
+            dealerMatchDiv.classList.remove('hidden');
+        }
+    } else {
+        dealerMatchDiv.classList.add('hidden');
+    }
+
+    // Populate agent dropdown
+    const agentSelect = document.getElementById('osAgentSelect');
+    agentSelect.innerHTML = '<option value="">Select Agent (optional)</option>';
+    agents.forEach(a => {
+        agentSelect.innerHTML += `<option value="${a.id}">${a.full_name || a.email}</option>`;
+    });
+
+    // Show step 2, hide step 1
+    document.getElementById('osEmailStep1').classList.add('hidden');
+    document.getElementById('osEmailStep2').classList.remove('hidden');
+}
+
+function resetOpenserveEmail() {
+    document.getElementById('osEmailStep1').classList.remove('hidden');
+    document.getElementById('osEmailStep2').classList.add('hidden');
+}
+
+async function saveOpenserveLead() {
+    const leadId = document.getElementById('osLeadId').value.trim();
+    const fullName = document.getElementById('osFullName').value.trim();
+    const email = document.getElementById('osEmail').value.trim();
+    const phone = document.getElementById('osPrimaryPhone').value.trim();
+    const altPhone = document.getElementById('osAltPhone').value.trim();
+    const address = document.getElementById('osAddress').value.trim();
+    const building = document.getElementById('osBuilding').value.trim();
+    const floor = document.getElementById('osFloor').value.trim();
+    const unit = document.getElementById('osUnit').value.trim();
+    const contactTime = document.getElementById('osContactTime').value.trim();
+    const dealerCode = document.getElementById('osDealerCode').value.trim();
+    const dealerId = document.getElementById('osDealerSelect').value || null;
+    const agentId = document.getElementById('osAgentSelect').value || null;
+
+    if (!fullName) {
+        alert('Full name is required.');
+        return;
+    }
+
+    // Check for duplicate lead_id
+    if (leadId) {
+        const { data: existing } = await window.supabaseClient
+            .from('leads')
+            .select('id')
+            .eq('lead_id', leadId)
+            .maybeSingle();
+        
+        if (existing) {
+            alert(`A lead with Openserve Lead ID "${leadId}" already exists. Duplicate not created.`);
+            return;
+        }
+    }
+
+    // Build full address with building/floor/unit
+    let fullAddress = address;
+    const extras = [building ? `Building: ${building}` : '', floor ? `Floor: ${floor}` : '', unit ? `Unit: ${unit}` : ''].filter(Boolean).join(', ');
+    if (extras) fullAddress = `${address} (${extras})`;
+
+    // Split full name into first/last
+    const nameParts = fullName.split(' ');
+    const firstName = nameParts[0] || '';
+    const lastName = nameParts.slice(1).join(' ') || '';
+
+    // Build notes
+    const notes = [
+        `Imported from Openserve email`,
+        leadId ? `Openserve Lead ID: ${leadId}` : '',
+        dealerCode ? `Dealer Code: ${dealerCode}` : '',
+        altPhone ? `Alt Contact: ${altPhone}` : '',
+        contactTime ? `Preferred Contact Time: ${contactTime}` : ''
+    ].filter(Boolean).join('\n');
+
+    try {
+        const { error } = await window.supabaseClient.from('leads').insert({
+            lead_id: leadId || null,
+            full_name: fullName,
+            first_name: firstName,
+            last_name: lastName,
+            email: email || '',
+            phone: phone || '',
+            address: fullAddress || '',
+            dealer_id: dealerId,
+            agent_id: agentId,
+            notes: notes,
+            status: 'new',
+            lead_type: 'openserve_email',
+            secondary_contact_number: altPhone || null
+        });
+
+        if (error) throw error;
+
+        closeModal('openserveEmailModal');
+        resetOpenserveEmail();
+        document.getElementById('openserveEmailText').value = '';
+        await loadLeads();
+        alert(`Lead "${fullName}" imported successfully from Openserve email!`);
+    } catch (error) {
+        console.error('Error saving Openserve lead:', error);
+        alert('Error saving lead: ' + error.message);
+    }
+}
