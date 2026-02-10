@@ -123,6 +123,10 @@ async function loadSidebarData() {
     }
 }
 
+// ─── Lead state ───
+let editingLeadId = null;
+let convertingLeadId = null;
+
 // ─── My Leads ───
 function renderMyLeads(filtered = null) {
     const display = filtered || myLeads;
@@ -159,7 +163,10 @@ function renderMyLeads(filtered = null) {
                 </select>
             </td>
             <td class="px-4 py-3">
-                <button onclick="viewLeadDetail('${lead.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition">View</button>
+                <div class="flex gap-1">
+                    <button onclick="viewLeadDetail('${lead.id}')" class="bg-blue-500 hover:bg-blue-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition">Edit</button>
+                    <button onclick="openConvertModal('${lead.id}')" class="bg-emerald-500 hover:bg-emerald-600 text-white px-3 py-1 rounded-lg text-xs font-medium transition">Convert</button>
+                </div>
             </td>
         </tr>`;
     }).join('');
@@ -176,14 +183,29 @@ function filterMyLeads() {
 
 async function updateMyLeadStatus(leadId, newStatus) {
     try {
+        const lead = myLeads.find(l => l.id === leadId);
+        const oldStatus = lead ? lead.status : null;
+
         const { error } = await window.supabaseClient
             .from('leads')
             .update({ status: newStatus, updated_at: new Date().toISOString() })
             .eq('id', leadId);
         if (error) throw error;
 
-        const lead = myLeads.find(l => l.id === leadId);
         if (lead) lead.status = newStatus;
+
+        // If status changed to qualified, the DB trigger auto-creates a sale in sales_log
+        if (newStatus === 'qualified' && oldStatus !== 'qualified') {
+            console.log('Lead qualified — DB trigger will auto-create sale in sales_log');
+        }
+
+        // If status changed to converted, prompt to create order
+        if (newStatus === 'converted' && oldStatus !== 'converted') {
+            if (confirm('Lead marked as converted. Would you like to create an order now?')) {
+                openConvertModal(leadId);
+                return;
+            }
+        }
 
         filterMyLeads();
     } catch (error) {
@@ -192,30 +214,434 @@ async function updateMyLeadStatus(leadId, newStatus) {
     }
 }
 
+// ─── Full Lead Edit Modal ───
 function viewLeadDetail(leadId) {
     const lead = myLeads.find(l => l.id === leadId);
     if (!lead) return;
 
-    const name = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || '-';
+    editingLeadId = leadId;
     const content = document.getElementById('leadDetailContent');
+    const ic = "w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500";
+    const lc = "text-xs text-gray-500 block mb-1";
+
+    // Build package options
+    const packageOptions = allPackages.map(p =>
+        `<option value="${p.id}" ${lead.package_id === p.id ? 'selected' : ''}>${p.name}</option>`
+    ).join('');
+
     content.innerHTML = `
-        <div class="space-y-3">
-            <div class="grid grid-cols-2 gap-4">
-                <div><p class="text-xs text-gray-500">Name</p><p class="font-medium">${name}</p></div>
-                <div><p class="text-xs text-gray-500">Email</p><p class="font-medium">${lead.email || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">Phone</p><p class="font-medium">${lead.phone || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">ID Number</p><p class="font-medium">${lead.id_number || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">Address</p><p class="font-medium">${lead.address || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">Package</p><p class="font-medium">${lead.package?.name || lead.package_name || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">Status</p><p class="font-medium"><span class="px-2 py-0.5 rounded-full text-xs status-${lead.status}">${lead.status}</span></p></div>
-                <div><p class="text-xs text-gray-500">Order #</p><p class="font-medium">${lead.order_number || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">Service ID</p><p class="font-medium">${lead.service_id || '-'}</p></div>
-                <div><p class="text-xs text-gray-500">Created</p><p class="font-medium">${lead.created_at ? new Date(lead.created_at).toLocaleString() : '-'}</p></div>
+        <form id="editLeadForm" class="space-y-4">
+            <div class="grid grid-cols-3 gap-3">
+                <div>
+                    <label class="${lc}">Lead ID</label>
+                    <input type="text" name="lead_id" value="${lead.lead_id || ''}" class="${ic}">
+                </div>
+                <div>
+                    <label class="${lc}">Status</label>
+                    <select name="status" class="${ic}">
+                        <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
+                        <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
+                        <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
+                        <option value="converted" ${lead.status === 'converted' ? 'selected' : ''}>Converted</option>
+                        <option value="lost" ${lead.status === 'lost' ? 'selected' : ''}>Lost</option>
+                    </select>
+                </div>
+                <div>
+                    <label class="${lc}">Service ID</label>
+                    <input type="text" name="service_id" value="${lead.service_id || ''}" class="${ic}">
+                </div>
             </div>
-            ${lead.notes ? `<div><p class="text-xs text-gray-500">Notes</p><p class="text-sm text-gray-700 bg-gray-50 p-3 rounded-lg mt-1">${lead.notes}</p></div>` : ''}
-        </div>
+
+            <div class="bg-gray-50 rounded-xl p-4">
+                <h4 class="font-semibold text-gray-700 mb-3">Client Details</h4>
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label class="${lc}">Full Name</label>
+                        <input type="text" name="full_name" value="${lead.full_name || ''}" class="${ic}">
+                    </div>
+                    <div>
+                        <label class="${lc}">ID Number</label>
+                        <input type="text" name="id_number" maxlength="13" value="${lead.id_number || ''}" class="${ic}" placeholder="13-digit SA ID">
+                    </div>
+                    <div>
+                        <label class="${lc}">First Name</label>
+                        <input type="text" name="first_name" value="${lead.first_name || ''}" class="${ic}">
+                    </div>
+                    <div>
+                        <label class="${lc}">Last Name</label>
+                        <input type="text" name="last_name" value="${lead.last_name || ''}" class="${ic}">
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Contact Info</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${lc}">Email</label>
+                            <input type="email" name="email" value="${lead.email || ''}" class="${ic}">
+                        </div>
+                        <div>
+                            <label class="${lc}">Phone</label>
+                            <input type="text" name="phone" value="${lead.phone || ''}" class="${ic}">
+                        </div>
+                        <div>
+                            <label class="${lc}">Address</label>
+                            <input type="text" name="address" value="${lead.address || ''}" class="${ic}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Secondary Contact</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${lc}">Name</label>
+                            <input type="text" name="secondary_contact_name" value="${lead.secondary_contact_name || ''}" class="${ic}">
+                        </div>
+                        <div>
+                            <label class="${lc}">Number</label>
+                            <input type="text" name="secondary_contact_number" value="${lead.secondary_contact_number || ''}" class="${ic}">
+                        </div>
+                        <div>
+                            <label class="${lc}">Email</label>
+                            <input type="email" name="secondary_contact_email" value="${lead.secondary_contact_email || ''}" class="${ic}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Package & Order</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${lc}">Package</label>
+                            <select name="package_id" class="${ic}">
+                                <option value="">Select Package</option>
+                                ${packageOptions}
+                            </select>
+                        </div>
+                        <div>
+                            <label class="${lc}">Order Number</label>
+                            <input type="text" name="order_number" value="${lead.order_number || ''}" class="${ic}">
+                        </div>
+                        <div>
+                            <label class="${lc}">Account Number</label>
+                            <input type="text" name="account_number" value="${lead.account_number || ''}" class="${ic}">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-50 rounded-xl p-4">
+                    <h4 class="font-semibold text-gray-700 mb-3">Order Info</h4>
+                    <div class="space-y-2">
+                        <div>
+                            <label class="${lc}">Order Status</label>
+                            <input type="text" name="order_status" value="${lead.order_status || ''}" class="${ic}">
+                        </div>
+                        <div>
+                            <label class="${lc}">Order Date</label>
+                            <input type="date" name="order_date" value="${lead.order_date ? lead.order_date.split('T')[0] : ''}" class="${ic}">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="bg-yellow-50 rounded-xl p-4">
+                <label class="${lc}">Notes</label>
+                <textarea name="notes" rows="3" class="${ic}">${lead.notes || ''}</textarea>
+            </div>
+
+            <div class="bg-purple-50 rounded-xl p-4 flex items-center justify-between">
+                <div>
+                    <label class="font-semibold text-gray-700">Preorder</label>
+                    <p class="text-xs text-gray-500">Mark this lead as a preorder for tracking</p>
+                </div>
+                <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" name="is_preorder" ${lead.is_preorder ? 'checked' : ''} class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                </label>
+            </div>
+
+            <div class="flex justify-between pt-2 border-t">
+                <button type="button" onclick="closeModal('leadDetailModal'); openConvertModal('${leadId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-medium text-sm">
+                    Convert to Order
+                </button>
+                <div class="flex gap-3">
+                    <button type="button" onclick="closeModal('leadDetailModal')" class="px-4 py-2 border rounded-xl hover:bg-gray-50 text-sm">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl font-medium text-sm">Save Changes</button>
+                </div>
+            </div>
+        </form>
     `;
+
+    // Attach form submit handler
+    document.getElementById('editLeadForm').addEventListener('submit', saveLeadChanges);
     document.getElementById('leadDetailModal').classList.add('active');
+}
+
+// ─── Save Lead Changes ───
+async function saveLeadChanges(e) {
+    e.preventDefault();
+    if (!editingLeadId) return;
+
+    const form = e.target;
+    const fd = new FormData(form);
+
+    const toNull = (val) => val && val.trim() !== '' ? val : null;
+    const toUUID = (val) => val && val.trim() !== '' && val.length > 30 ? val : null;
+
+    const lead = myLeads.find(l => l.id === editingLeadId);
+    const oldStatus = lead ? lead.status : null;
+    const newStatus = fd.get('status');
+
+    const updateData = {
+        lead_id: toNull(fd.get('lead_id')),
+        status: newStatus,
+        service_id: toNull(fd.get('service_id')),
+        full_name: toNull(fd.get('full_name')),
+        first_name: toNull(fd.get('first_name')),
+        last_name: toNull(fd.get('last_name')),
+        id_number: toNull(fd.get('id_number')),
+        email: toNull(fd.get('email')),
+        phone: toNull(fd.get('phone')),
+        address: toNull(fd.get('address')),
+        secondary_contact_name: toNull(fd.get('secondary_contact_name')),
+        secondary_contact_number: toNull(fd.get('secondary_contact_number')),
+        secondary_contact_email: toNull(fd.get('secondary_contact_email')),
+        package_id: toUUID(fd.get('package_id')),
+        account_number: toNull(fd.get('account_number')),
+        order_number: toNull(fd.get('order_number')),
+        order_status: toNull(fd.get('order_status')),
+        order_date: toNull(fd.get('order_date')),
+        notes: toNull(fd.get('notes')),
+        is_preorder: fd.get('is_preorder') === 'on',
+        updated_at: new Date().toISOString()
+    };
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('leads')
+            .update(updateData)
+            .eq('id', editingLeadId);
+
+        if (error) throw error;
+
+        // If status changed to qualified, the DB trigger auto-creates a sale
+        if (newStatus === 'qualified' && oldStatus !== 'qualified') {
+            console.log('Lead qualified via edit — DB trigger will auto-create sale in sales_log');
+        }
+
+        // If status changed to converted and has order number, create order
+        if (newStatus === 'converted' && oldStatus !== 'converted' && updateData.order_number) {
+            const { data: existingOrders } = await window.supabaseClient
+                .from('orders')
+                .select('id')
+                .eq('lead_id', editingLeadId);
+
+            if (!existingOrders || existingOrders.length === 0) {
+                const { error: orderError } = await window.supabaseClient
+                    .from('orders')
+                    .insert({
+                        lead_id: editingLeadId,
+                        package_id: updateData.package_id,
+                        agent_id: currentUser.id,
+                        order_number: updateData.order_number,
+                        status: updateData.order_status || 'pending',
+                        notes: 'Order created from lead edit by ' + (currentUser.full_name || 'agent')
+                    });
+
+                if (orderError) {
+                    console.error('Failed to create order:', orderError);
+                    alert('Lead saved but failed to create order: ' + orderError.message);
+                } else {
+                    // Also create sale in sales_log for this conversion
+                    await createSaleFromLead(editingLeadId, updateData);
+                    alert('Lead updated, order created, and sale tracked!');
+                    closeModal('leadDetailModal');
+                    await loadSidebarData();
+                    return;
+                }
+            }
+        }
+
+        // Update local data
+        const leadIndex = myLeads.findIndex(l => l.id === editingLeadId);
+        if (leadIndex !== -1) {
+            myLeads[leadIndex] = { ...myLeads[leadIndex], ...updateData };
+        }
+
+        alert('Lead updated successfully!');
+        closeModal('leadDetailModal');
+        filterMyLeads();
+
+    } catch (error) {
+        console.error('Error saving lead:', error);
+        alert('Error saving lead: ' + error.message);
+    }
+}
+
+// ─── Convert to Order Modal ───
+function openConvertModal(leadId) {
+    convertingLeadId = leadId;
+    const lead = myLeads.find(l => l.id === leadId);
+    if (!lead) return;
+
+    const name = lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || 'Unknown';
+    document.getElementById('convertLeadName').textContent = name;
+    document.getElementById('convertOrderNumber').value = lead.order_number || '';
+    document.getElementById('convertNotes').value = '';
+    document.getElementById('convertToOrderModal').classList.add('active');
+}
+
+async function convertLeadToOrder() {
+    if (!convertingLeadId) return;
+
+    const orderNumber = document.getElementById('convertOrderNumber').value.trim();
+    const productType = document.getElementById('convertProductType').value;
+    const notes = document.getElementById('convertNotes').value.trim();
+
+    if (!orderNumber) {
+        alert('Please enter an order number');
+        return;
+    }
+
+    try {
+        // Fetch latest lead data
+        const { data: lead, error: fetchError } = await window.supabaseClient
+            .from('leads')
+            .select('*, package:packages(id, name, price)')
+            .eq('id', convertingLeadId)
+            .single();
+
+        if (fetchError || !lead) throw new Error('Lead not found');
+
+        const commissionAmount = productType === 'prepaid' ? 100 : 200;
+
+        // 1. Update lead to converted
+        const { error: leadError } = await window.supabaseClient
+            .from('leads')
+            .update({
+                status: 'converted',
+                order_number: orderNumber,
+                order_status: 'pending',
+                commission_status: 'pending',
+                commission_amount: commissionAmount,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', convertingLeadId);
+
+        if (leadError) throw leadError;
+
+        // 2. Create order record
+        const { error: orderError } = await window.supabaseClient
+            .from('orders')
+            .insert({
+                lead_id: convertingLeadId,
+                package_id: lead.package_id,
+                agent_id: currentUser.id,
+                order_number: orderNumber,
+                status: 'pending',
+                notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}${notes ? ' | ' + notes : ''}`
+            });
+
+        if (orderError) {
+            console.error('Order creation error:', orderError);
+            throw orderError;
+        }
+
+        // 3. Create sale in sales_log (bridges to Axxess sales tracking)
+        await createSaleFromLead(convertingLeadId, {
+            full_name: lead.full_name,
+            account_number: lead.account_number,
+            service_id: lead.service_id,
+            order_number: orderNumber,
+            package_id: lead.package_id,
+            notes: notes
+        }, lead.package);
+
+        closeModal('convertToOrderModal');
+        convertingLeadId = null;
+
+        // Reload all data
+        await loadSidebarData();
+
+        // Refresh Axxess sales data so the new sale appears
+        if (typeof loadAxxessSalesData === 'function') {
+            await loadAxxessSalesData();
+        }
+
+        alert(`Lead converted! Order #${orderNumber} created.\nCommission: R${commissionAmount} (${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'})\nSale added to Axxess tracking.`);
+
+    } catch (error) {
+        console.error('Error converting lead:', error);
+        alert('Error converting lead: ' + error.message);
+    }
+}
+
+// ─── Create Sale in sales_log (bridges dealer dashboard → Axxess sales tracking) ───
+async function createSaleFromLead(leadId, leadData, packageData) {
+    try {
+        // Find the agent's agent_table_id for the sales_log
+        const agentTableId = currentUser.agent_table_id;
+        if (!agentTableId) {
+            console.warn('No agent_table_id linked to profile — sale will not appear in Axxess sales tracking until linked');
+            return;
+        }
+
+        // Get package info if not provided
+        let pkgName = packageData?.name || 'Unknown Package';
+        let pkgPrice = packageData?.price || 0;
+        if (!packageData && leadData.package_id) {
+            const { data: pkg } = await window.supabaseClient
+                .from('packages')
+                .select('name, price')
+                .eq('id', leadData.package_id)
+                .single();
+            if (pkg) { pkgName = pkg.name; pkgPrice = pkg.price; }
+        }
+
+        // Check if sale already exists for this lead (avoid duplicates from DB trigger)
+        const { data: existingSales } = await window.supabaseClient
+            .from('sales_log')
+            .select('id')
+            .eq('lead_id', leadId);
+
+        if (existingSales && existingSales.length > 0) {
+            console.log('Sale already exists for this lead (likely from DB trigger), skipping duplicate');
+            return;
+        }
+
+        const { error } = await window.supabaseClient
+            .from('sales_log')
+            .insert({
+                agent_id: agentTableId,
+                lead_id: leadId,
+                account_number: leadData.account_number || leadData.order_number || ('LEAD-' + leadId),
+                service_id: leadData.service_id || null,
+                package_name: pkgName,
+                category: 'Fibre',
+                provider: 'Openserve',
+                total_sale: pkgPrice,
+                sale_status: 'Pending',
+                status_reason: 'Awaiting Provider Completion',
+                sale_origin: 'Incoming Sales Leads',
+                notes: 'Converted from lead - ' + (leadData.full_name || '') + (leadData.notes ? ' | ' + leadData.notes : ''),
+                commission_status: 'Does Not Count',
+                import_source: 'INTERNAL_AGENT',
+                created_at: new Date().toISOString()
+            });
+
+        if (error) {
+            console.error('Error creating sale from lead:', error);
+        } else {
+            console.log('Sale created in sales_log from lead conversion');
+        }
+    } catch (error) {
+        console.error('Error in createSaleFromLead:', error);
+    }
 }
 
 // ─── My Orders ───
