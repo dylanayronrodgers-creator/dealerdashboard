@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Internal Agent Dashboard - Axxess Dealer Portal</title>
+    <title>Axxess Sales Agent Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -12,18 +12,18 @@
     <style>
         * { font-family: 'Poppins', sans-serif; }
         :root {
-            --primary: #2c4a6e;
-            --primary-dark: #1a3a5c;
-            --primary-light: #3d5a7e;
-            --accent: #10b981;
-            --accent-light: #34d399;
+            --axxess-blue: #2c4a6e;
+            --axxess-blue-dark: #1a3a5c;
+            --axxess-blue-light: #3d5a7e;
+            --openserve-green: #10b981;
+            --openserve-green-light: #34d399;
         }
-        .sidebar-bg { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%); }
+        .sidebar-bg { background: linear-gradient(180deg, var(--axxess-blue) 0%, var(--axxess-blue-light) 100%); }
         .main-bg { background: #f1f5f9; }
         .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
         .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); transition: all 0.2s ease; }
-        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,58,95,0.4); }
+        .btn-primary { background: linear-gradient(135deg, var(--axxess-blue) 0%, var(--axxess-blue-dark) 100%); transition: all 0.2s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,58,95,0.4); background: linear-gradient(135deg, var(--axxess-blue-light) 0%, var(--axxess-blue) 100%); }
         .status-new { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
         .status-contacted { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #3730a3; }
         .status-qualified { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
@@ -41,19 +41,22 @@
             background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1rem;
             padding-right: 2rem; cursor: pointer; border-radius: 0.5rem; transition: all 0.2s ease;
         }
-        select:hover { border-color: var(--primary); }
-        select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        select:hover { border-color: var(--axxess-blue); }
+        select:focus { outline: none; border-color: var(--openserve-green); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
         .nav-item { transition: all 0.2s ease; border-radius: 0.5rem; }
         .nav-item:hover { background: rgba(255,255,255,0.1); }
-        .nav-item.active { background: rgba(16,185,129,0.2); border-left: 3px solid var(--accent); }
+        .nav-item.active { background: rgba(16,185,129,0.2); border-left: 3px solid var(--openserve-green); }
         .table-row:hover { background: #f8fafc; }
         .modal { display: none; }
         .modal.active { display: flex; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
+        .modal-container { background: white; border-radius: 1rem; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+        .modal-container .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
+        .modal-container .modal-header button { font-size: 1.5rem; line-height: 1; }
         .ax-tab-btn { color: #6b7280; background: transparent; }
         .ax-tab-btn:hover { background: rgba(0,0,0,0.05); }
-        .ax-tab-btn.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        .ax-tab-btn.active { background: white; color: var(--axxess-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
             .sidebar.open { transform: translateX(0); }
@@ -84,19 +87,15 @@
                 <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-10">
                 <div>
                     <h1 class="text-white font-bold text-sm">Axxess</h1>
-                    <p class="text-white/50 text-xs">Internal Agent</p>
+                    <p class="text-white/50 text-xs">Sales Agent Dashboard</p>
                 </div>
             </div>
         </div>
 
         <nav class="flex-1 p-3 space-y-1">
             <a href="#dashboard" class="nav-item active flex items-center gap-3 text-white px-4 py-3 rounded-xl" onclick="showSection('dashboard')">
-                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
-                Dashboard
-            </a>
-            <a href="#axxess-sales" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('axxess-sales')">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                Axxess Sales
+                Sales Dashboard
             </a>
             <a href="#my-leads" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('my-leads')">
                 <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
@@ -141,7 +140,7 @@
                 </div>
                 <div>
                     <p class="text-white font-medium text-sm" id="userName">Agent</p>
-                    <p class="text-white/50 text-xs">Internal Agent</p>
+                    <p class="text-white/50 text-xs" id="userRoleLabel">Internal Agent</p>
                 </div>
             </div>
             <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white py-2 px-4 rounded-lg hover:bg-white/10 transition">
@@ -159,56 +158,73 @@
                 <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
             </button>
             <div class="flex-1">
-                <h2 class="text-lg md:text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h2>
-                <p class="text-gray-500 text-xs md:text-sm hidden md:block" id="pageSubtitle">Your performance overview</p>
+                <h2 class="text-lg md:text-2xl font-bold text-gray-800" id="pageTitle">Axxess Sales</h2>
+                <p class="text-gray-500 text-xs md:text-sm hidden md:block" id="pageSubtitle">Agent sales performance from the Axxess tracking system</p>
             </div>
             <div class="flex items-center gap-3">
-                <input type="text" id="globalSearch" placeholder="Search..." class="hidden md:block pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 w-48" oninput="handleSearch(this.value)">
+                <input type="text" id="globalSearch" placeholder="Search..." class="hidden md:block pl-4 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 w-48" oninput="handleSearch(this.value)">
+                <div class="relative">
+                    <button id="notifBtn" class="p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl relative">
+                        <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        <span id="notifDot" class="hidden absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
+                    </button>
+                </div>
+                <span class="text-sm text-gray-500 hidden md:inline" id="headerEmail"></span>
             </div>
         </header>
 
-        <!-- ═══ DASHBOARD ═══ -->
-        <section id="section-dashboard" class="p-6 md:p-8">
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+        <!-- ═══ DASHBOARD / AXXESS SALES (Primary Landing) ═══ -->
+        <section id="section-dashboard" class="p-4 md:p-8">
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Axxess Sales Dashboard</h3>
+                    <p class="text-gray-500 text-sm">Full sales management — add, track, import, export, commissions & reminders</p>
+                </div>
+                <button onclick="loadAxxessSalesData()" class="border px-4 py-2 rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+                    </svg>
+                    Refresh
+                </button>
+            </div>
+
+            <!-- Agent Selector (super_admin sees dropdown, others see their name) -->
+            <div id="axAgentSelector"></div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="card p-5 border-l-4 border-blue-500">
-                    <p class="text-3xl font-bold text-gray-800" id="statMyLeads">0</p>
-                    <p class="text-gray-500 text-sm">My Leads</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessAgentCount">0</p>
+                    <p class="text-gray-500 text-sm">Total Sales (All Valid)</p>
                 </div>
                 <div class="card p-5 border-l-4 border-emerald-500">
-                    <p class="text-3xl font-bold text-gray-800" id="statMyOrders">0</p>
-                    <p class="text-gray-500 text-sm">My Orders</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessTotalSales">0</p>
+                    <p class="text-gray-500 text-sm">Commissioned Sales</p>
                 </div>
                 <div class="card p-5 border-l-4 border-purple-500">
-                    <p class="text-3xl font-bold text-gray-800" id="statMySales">0</p>
-                    <p class="text-gray-500 text-sm">Axxess Sales</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessMonthSales">0</p>
+                    <p class="text-gray-500 text-sm">Progress to Target</p>
                 </div>
                 <div class="card p-5 border-l-4 border-orange-500">
-                    <p class="text-3xl font-bold text-gray-800" id="statConversion">0%</p>
-                    <p class="text-gray-500 text-sm">Conversion Rate</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessTotalValue">R0</p>
+                    <p class="text-gray-500 text-sm">Net Commission</p>
                 </div>
             </div>
 
-            <!-- Recent Activity -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                <div class="card p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Recent Leads</h3>
-                    <div class="space-y-3" id="dashRecentLeads">
-                        <p class="text-gray-400 text-sm">Loading...</p>
-                    </div>
-                </div>
-                <div class="card p-6">
-                    <h3 class="font-semibold text-gray-800 mb-4">Recent Orders</h3>
-                    <div class="space-y-3" id="dashRecentOrders">
-                        <p class="text-gray-400 text-sm">Loading...</p>
-                    </div>
-                </div>
+            <!-- Sub-Tabs — Add Sale is default/first -->
+            <div class="flex flex-wrap gap-1 mb-6 bg-gray-100 rounded-xl p-1">
+                <button data-ax-tab="ax-add-sale" class="ax-tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-add-sale')">Add Sale</button>
+                <button data-ax-tab="ax-mass-import" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-mass-import')">Mass Import</button>
+                <button data-ax-tab="ax-current-month" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-current-month')">Current Month</button>
+                <button data-ax-tab="ax-sales-history" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-sales-history')">Sales History</button>
+                <button data-ax-tab="ax-commission" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-commission')">Commission</button>
+                <button data-ax-tab="ax-reminders" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-reminders')">Reminders</button>
+                <button data-ax-tab="ax-export" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-export')">Export</button>
             </div>
-        </section>
 
-        <!-- ═══ AXXESS SALES ═══ -->
-        <section id="section-axxess-sales" class="p-6 md:p-8 hidden">
-            <div id="axxessSalesContent">
-                <p class="text-gray-400">Loading Axxess Sales...</p>
+            <!-- Tab Content (rendered dynamically by axxess-sales.js) -->
+            <div id="axTabContent">
+                <div class="card p-6 text-center text-gray-500">Loading Axxess sales data...</div>
             </div>
         </section>
 
@@ -389,7 +405,6 @@
         <!-- ═══ SETTINGS ═══ -->
         <section id="section-settings" class="p-6 md:p-8 hidden">
             <div class="max-w-2xl space-y-6">
-                <!-- Profile Settings -->
                 <div class="card p-6">
                     <h3 class="font-semibold text-gray-800 mb-4">Profile Settings</h3>
                     <form id="profileSettingsForm" class="space-y-4">
@@ -425,8 +440,6 @@
                         <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">Save Settings</button>
                     </form>
                 </div>
-
-                <!-- Account Info (read-only) -->
                 <div class="card p-6">
                     <h3 class="font-semibold text-gray-800 mb-4">Account Information</h3>
                     <div class="space-y-2 text-sm">
@@ -445,9 +458,7 @@
                     <h3 class="font-semibold text-lg">Lead Details</h3>
                     <button onclick="closeModal('leadDetailModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
                 </div>
-                <div class="p-5" id="leadDetailContent">
-                    <p class="text-gray-400">Loading...</p>
-                </div>
+                <div class="p-5" id="leadDetailContent"><p class="text-gray-400">Loading...</p></div>
             </div>
         </div>
 
@@ -458,8 +469,95 @@
                     <h3 class="font-semibold text-lg">Order Details</h3>
                     <button onclick="closeModal('orderDetailModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
                 </div>
-                <div class="p-5" id="orderDetailContent">
-                    <p class="text-gray-400">Loading...</p>
+                <div class="p-5" id="orderDetailContent"><p class="text-gray-400">Loading...</p></div>
+            </div>
+        </div>
+
+        <!-- ═══ AXXESS STATUS UPDATE MODAL ═══ -->
+        <div id="axStatusModal" class="modal-overlay">
+            <div class="modal-container" style="max-width:480px">
+                <div class="modal-header">
+                    <h3 class="text-lg font-semibold">Update Sale Status</h3>
+                    <button onclick="closeModal('axStatusModal')" class="text-gray-400 hover:text-gray-600">&times;</button>
+                </div>
+                <div class="modal-body p-6 space-y-4">
+                    <p class="text-sm text-gray-500" id="axModalSaleInfo">-</p>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">New Status</label>
+                        <select id="axModalStatus" onchange="axModalUpdateReasons()" class="w-full border rounded-xl px-3 py-2">
+                            <option value="Paid-Active">Paid-Active</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Partial">Partial</option>
+                            <option value="Failed">Failed</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Status Details</label>
+                        <select id="axModalReason" class="w-full border rounded-xl px-3 py-2">
+                            <option value="">Select Details...</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea id="axModalNotes" class="w-full border rounded-xl px-3 py-2" rows="3"></textarea>
+                    </div>
+                </div>
+                <div class="modal-footer flex justify-end gap-3 p-4 border-t">
+                    <button onclick="closeModal('axStatusModal')" class="border px-4 py-2 rounded-xl text-sm">Cancel</button>
+                    <button onclick="axUpdateSaleStatus()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Update Status</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ AXXESS REMINDER MODAL ═══ -->
+        <div id="axReminderModal" class="modal-overlay">
+            <div class="modal-container" style="max-width:520px">
+                <div class="modal-header">
+                    <h3 class="text-lg font-semibold">Create Reminder</h3>
+                    <button onclick="closeModal('axReminderModal')" class="text-gray-400 hover:text-gray-600">&times;</button>
+                </div>
+                <div class="modal-body p-6 space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
+                        <input type="text" id="axRemTitle" class="w-full border rounded-xl px-3 py-2" placeholder="Follow up with client...">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                        <textarea id="axRemDesc" class="w-full border rounded-xl px-3 py-2" rows="2"></textarea>
+                    </div>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time *</label>
+                            <input type="datetime-local" id="axRemDatetime" class="w-full border rounded-xl px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
+                            <select id="axRemPriority" class="w-full border rounded-xl px-3 py-2">
+                                <option value="low">Low</option>
+                                <option value="normal" selected>Normal</option>
+                                <option value="high">High</option>
+                                <option value="urgent">Urgent</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
+                            <input type="text" id="axRemClient" class="w-full border rounded-xl px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Account #</label>
+                            <input type="text" id="axRemAccount" class="w-full border rounded-xl px-3 py-2">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Service ID</label>
+                            <input type="text" id="axRemService" class="w-full border rounded-xl px-3 py-2">
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer flex justify-end gap-3 p-4 border-t">
+                    <button onclick="closeModal('axReminderModal')" class="border px-4 py-2 rounded-xl text-sm">Cancel</button>
+                    <button onclick="axSaveReminder()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Create Reminder</button>
                 </div>
             </div>
         </div>

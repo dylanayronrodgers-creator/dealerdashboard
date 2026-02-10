@@ -37,7 +37,7 @@ async function fetchAllRows(table, query = {}) {
     return allData;
 }
 let axxessCurrentAgent = null; // The linked agents table row for logged-in user
-let axxessCurrentTab = 'ax-overview';
+let axxessCurrentTab = window.location.pathname.includes('internal-agent') ? 'ax-add-sale' : 'ax-overview';
 let axxessEditingSale = null;
 let axxessPendingImport = [];
 let axxessReminderView = 'active';
@@ -69,7 +69,7 @@ const AX_REASON_OPTIONS = {
 // ─── Permission helpers ───
 function axCanManageSales() {
     if (!currentUser) return false;
-    return ['super_admin', 'admin'].includes(currentUser.role);
+    return ['super_admin', 'admin', 'internal_agent'].includes(currentUser.role);
 }
 
 function axCanAssignLeads() {
@@ -171,10 +171,22 @@ function renderAxStats() {
     const metrics = axCalcCommission(monthSales, axxessCurrentAgent?.target || 0);
 
     const el = (id, val) => { const e = document.getElementById(id); if (e) e.textContent = val; };
-    el('axxessAgentCount', axxessAgents.length);
-    el('axxessTotalSales', mySales.length);
-    el('axxessMonthSales', monthSales.length);
-    el('axxessTotalValue', 'R' + metrics.commissionedValue.toLocaleString());
+
+    // Internal agent dashboard shows agent-specific stats
+    const isInternalAgent = window.location.pathname.includes('internal-agent');
+    if (isInternalAgent) {
+        const validSales = monthSales.filter(s => s.sale_status !== 'Failed');
+        el('axxessAgentCount', validSales.length);
+        el('axxessTotalSales', metrics.commCount);
+        const pct = Math.round(metrics.commProg);
+        el('axxessMonthSales', pct + '%');
+        el('axxessTotalValue', 'R' + metrics.net.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 2}));
+    } else {
+        el('axxessAgentCount', axxessAgents.length);
+        el('axxessTotalSales', mySales.length);
+        el('axxessMonthSales', monthSales.length);
+        el('axxessTotalValue', 'R' + (metrics.commValue || 0).toLocaleString());
+    }
 }
 
 // ─── Agent selector (super_admin sees all, admin sees own) ───

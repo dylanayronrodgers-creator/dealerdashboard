@@ -1,6 +1,7 @@
 // ═══════════════════════════════════════════════════════════
 // INTERNAL AGENT DASHBOARD — js/internal-agent.js
-// Filtered views: only shows data assigned to the logged-in agent
+// Primary landing: Axxess Sales with Add Sale as default tab
+// Sidebar: My Leads, Orders, Preorders, Shipping, Returned, Settings
 // ═══════════════════════════════════════════════════════════
 
 let currentUser = null;
@@ -14,18 +15,25 @@ let currentSection = 'dashboard';
 
 // ─── Initialization ───
 document.addEventListener('DOMContentLoaded', async () => {
-    const auth = await requireAuth('internal_agent');
+    // Allow both internal_agent and super_admin to access this dashboard
+    const auth = await requireAuth(['internal_agent', 'super_admin']);
     if (!auth) return;
 
     currentUser = auth.profile;
 
-    // Set user info in sidebar
+    // Set user info in sidebar + header
     const name = currentUser.full_name || 'Agent';
     document.getElementById('userName').textContent = name;
     const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
     document.getElementById('userInitials').textContent = initials;
     if (document.getElementById('settingPreviewInitials')) {
         document.getElementById('settingPreviewInitials').textContent = initials;
+    }
+    if (document.getElementById('headerEmail')) {
+        document.getElementById('headerEmail').textContent = currentUser.email || '';
+    }
+    if (document.getElementById('userRoleLabel')) {
+        document.getElementById('userRoleLabel').textContent = currentUser.role === 'super_admin' ? 'Super Admin' : 'Internal Agent';
     }
 
     // Apply saved color scheme
@@ -38,8 +46,18 @@ document.addEventListener('DOMContentLoaded', async () => {
         applyProfilePicture(currentUser.profile_picture);
     }
 
-    // Load all data
-    await loadAllData();
+    // Set default Axxess tab to Add Sale (axxess-sales.js reads this)
+    if (typeof axxessCurrentTab !== 'undefined') {
+        axxessCurrentTab = 'ax-add-sale';
+    }
+
+    // Load Axxess Sales data immediately (this is the landing page)
+    if (typeof loadAxxessSalesData === 'function') {
+        await loadAxxessSalesData();
+    }
+
+    // Load sidebar data (leads, orders, etc.)
+    await loadSidebarData();
 
     // Setup form handlers
     setupFormHandlers();
@@ -48,8 +66,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     populateSettings();
 });
 
-// ─── Data Loading ───
-async function loadAllData() {
+// ─── Sidebar Data Loading (leads, orders, preorders, shipping, returned) ───
+async function loadSidebarData() {
     try {
         const userId = currentUser.id;
 
@@ -91,9 +109,7 @@ async function loadAllData() {
         const returnedOrders = myOrders.filter(o => o.status === 'returned').map(o => ({ ...o, _type: 'order' }));
         myReturned = [...returnedLeads, ...returnedOrders];
 
-        // Update stats
-        updateDashboardStats();
-        renderDashboardRecent();
+        // Render sidebar sections
         renderMyLeads();
         renderMyOrders();
         renderPreorders();
@@ -103,71 +119,7 @@ async function loadAllData() {
 
         console.log(`Internal agent data loaded: ${myLeads.length} leads, ${myOrders.length} orders`);
     } catch (error) {
-        console.error('Error loading data:', error);
-    }
-}
-
-// ─── Dashboard Stats ───
-function updateDashboardStats() {
-    document.getElementById('statMyLeads').textContent = myLeads.length;
-    document.getElementById('statMyOrders').textContent = myOrders.length;
-
-    // Axxess sales count (will be updated by axxess-sales.js if loaded)
-    const salesCount = typeof axxessSales !== 'undefined' ? axxessSales.filter(s => {
-        if (!currentUser.agent_table_id) return false;
-        return s.agent_id === currentUser.agent_table_id;
-    }).length : 0;
-    document.getElementById('statMySales').textContent = salesCount;
-
-    const converted = myLeads.filter(l => l.status === 'converted').length + myOrders.length;
-    const total = myLeads.length + converted;
-    const rate = total > 0 ? Math.round((converted / total) * 100) : 0;
-    document.getElementById('statConversion').textContent = rate + '%';
-}
-
-function renderDashboardRecent() {
-    // Recent leads
-    const recentLeadsEl = document.getElementById('dashRecentLeads');
-    const recent5Leads = myLeads.slice(0, 5);
-    if (recent5Leads.length === 0) {
-        recentLeadsEl.innerHTML = '<p class="text-gray-400 text-sm">No leads assigned yet</p>';
-    } else {
-        recentLeadsEl.innerHTML = recent5Leads.map(l => {
-            const name = l.full_name || `${l.first_name || ''} ${l.last_name || ''}`.trim() || 'Unknown';
-            const date = l.created_at ? new Date(l.created_at).toLocaleDateString() : '';
-            return `<div class="flex items-center justify-between py-2 border-b last:border-0">
-                <div>
-                    <p class="font-medium text-sm text-gray-800">${name}</p>
-                    <p class="text-xs text-gray-400">${l.package?.name || 'No package'}</p>
-                </div>
-                <div class="text-right">
-                    <span class="px-2 py-0.5 rounded-full text-xs status-${l.status}">${l.status}</span>
-                    <p class="text-xs text-gray-400 mt-1">${date}</p>
-                </div>
-            </div>`;
-        }).join('');
-    }
-
-    // Recent orders
-    const recentOrdersEl = document.getElementById('dashRecentOrders');
-    const recent5Orders = myOrders.slice(0, 5);
-    if (recent5Orders.length === 0) {
-        recentOrdersEl.innerHTML = '<p class="text-gray-400 text-sm">No orders yet</p>';
-    } else {
-        recentOrdersEl.innerHTML = recent5Orders.map(o => {
-            const clientName = o.lead?.full_name || `${o.lead?.first_name || ''} ${o.lead?.last_name || ''}`.trim() || 'Unknown';
-            const date = o.created_at ? new Date(o.created_at).toLocaleDateString() : '';
-            return `<div class="flex items-center justify-between py-2 border-b last:border-0">
-                <div>
-                    <p class="font-medium text-sm text-gray-800">${clientName}</p>
-                    <p class="text-xs text-gray-400">${o.package?.name || 'No package'} · ${o.order_number || ''}</p>
-                </div>
-                <div class="text-right">
-                    <span class="px-2 py-0.5 rounded-full text-xs status-${o.status}">${o.status}</span>
-                    <p class="text-xs text-gray-400 mt-1">${date}</p>
-                </div>
-            </div>`;
-        }).join('');
+        console.error('Error loading sidebar data:', error);
     }
 }
 
@@ -175,6 +127,7 @@ function renderDashboardRecent() {
 function renderMyLeads(filtered = null) {
     const display = filtered || myLeads;
     const tbody = document.getElementById('myLeadsTable');
+    if (!tbody) return;
     document.getElementById('myLeadsCount').textContent = display.length;
 
     if (display.length === 0) {
@@ -233,7 +186,6 @@ async function updateMyLeadStatus(leadId, newStatus) {
         if (lead) lead.status = newStatus;
 
         filterMyLeads();
-        updateDashboardStats();
     } catch (error) {
         console.error('Error updating lead status:', error);
         alert('Error updating status: ' + error.message);
@@ -270,6 +222,7 @@ function viewLeadDetail(leadId) {
 function renderMyOrders(filtered = null) {
     const display = filtered || myOrders;
     const tbody = document.getElementById('myOrdersTable');
+    if (!tbody) return;
     document.getElementById('myOrdersCount').textContent = display.length;
 
     if (display.length === 0) {
@@ -331,14 +284,12 @@ function viewOrderDetail(orderId) {
 // ─── Preorders ───
 function renderPreorders() {
     const tbody = document.getElementById('preordersTable');
-    const badge = document.getElementById('preordersBadge');
+    if (!tbody) return;
 
     if (myPreorders.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No preorders</td></tr>';
         return;
     }
-
-    if (badge) { badge.textContent = myPreorders.length; badge.classList.remove('hidden'); }
 
     tbody.innerHTML = myPreorders.map(p => {
         const name = p.full_name || `${p.first_name || ''} ${p.last_name || ''}`.trim() || '-';
@@ -356,14 +307,12 @@ function renderPreorders() {
 // ─── Shipping ───
 function renderShipping() {
     const tbody = document.getElementById('shippingTable');
-    const badge = document.getElementById('shippingBadge');
+    if (!tbody) return;
 
     if (myShipping.length === 0) {
         tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">No shipping items</td></tr>';
         return;
     }
-
-    if (badge) { badge.textContent = myShipping.length; badge.classList.remove('hidden'); }
 
     tbody.innerHTML = myShipping.map(s => {
         const clientName = s.lead?.full_name || `${s.lead?.first_name || ''} ${s.lead?.last_name || ''}`.trim() || '-';
@@ -382,14 +331,12 @@ function renderShipping() {
 // ─── Returned Items ───
 function renderReturned() {
     const tbody = document.getElementById('returnedTable');
-    const badge = document.getElementById('returnedBadge');
+    if (!tbody) return;
 
     if (myReturned.length === 0) {
         tbody.innerHTML = '<tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">No returned items</td></tr>';
         return;
     }
-
-    if (badge) { badge.textContent = myReturned.length; badge.classList.remove('hidden'); }
 
     tbody.innerHTML = myReturned.map(r => {
         const name = r.full_name || r.lead?.full_name || `${r.first_name || r.lead?.first_name || ''} ${r.last_name || r.lead?.last_name || ''}`.trim() || '-';
@@ -406,8 +353,6 @@ function renderReturned() {
 
 // ─── Reports ───
 function renderReports() {
-    // Stats
-    const allLeadsIncConverted = [...myLeads];
     const converted = myOrders.length;
     const qualified = myLeads.filter(l => l.status === 'qualified').length;
     const lost = myLeads.filter(l => l.status === 'lost').length;
@@ -437,7 +382,7 @@ function renderReports() {
         });
     }
 
-    // Monthly chart — leads per month for last 6 months
+    // Monthly chart
     const months = [];
     const leadCounts = [];
     const orderCounts = [];
@@ -493,17 +438,12 @@ function populateSettings() {
     document.getElementById('settingEmail').textContent = currentUser.email || '-';
     document.getElementById('settingRole').textContent = currentUser.role || '-';
     document.getElementById('settingAgentId').textContent = currentUser.agent_table_id || 'Not linked';
-
-    // Highlight active color scheme
     highlightColorScheme(currentUser.color_scheme || 'default');
 }
 
 function highlightColorScheme(scheme) {
     document.querySelectorAll('#colorSchemeOptions button').forEach(btn => {
-        btn.classList.remove('border-white', 'ring-2', 'ring-offset-2', 'ring-green-500');
-    });
-    // Find the button by matching scheme name in onclick
-    document.querySelectorAll('#colorSchemeOptions button').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-offset-2', 'ring-green-500');
         const onclick = btn.getAttribute('onclick') || '';
         if (onclick.includes(`'${scheme}'`)) {
             btn.classList.add('ring-2', 'ring-offset-2', 'ring-green-500');
@@ -512,14 +452,12 @@ function highlightColorScheme(scheme) {
 }
 
 function setColorScheme(scheme) {
-    // Remove all theme classes
     document.body.className = document.body.className.replace(/theme-\w+/g, '').trim();
     if (scheme !== 'default') {
         document.body.classList.add('theme-' + scheme);
     }
     highlightColorScheme(scheme);
 
-    // Save to DB
     window.supabaseClient
         .from('profiles')
         .update({ color_scheme: scheme })
@@ -542,7 +480,7 @@ function applyProfilePicture(url) {
     if (!url) return;
     const avatar = document.getElementById('userAvatar');
     if (avatar) {
-        avatar.innerHTML = `<img src="${url}" alt="Profile" class="w-full h-full object-cover rounded-full" onerror="this.style.display='none'; this.parentElement.querySelector('#userInitials') && (this.parentElement.querySelector('#userInitials').style.display='block')">`;
+        avatar.innerHTML = `<img src="${url}" alt="Profile" class="w-full h-full object-cover rounded-full" onerror="this.style.display='none'">`;
     }
 }
 
@@ -555,10 +493,7 @@ function setupFormHandlers() {
         try {
             const { error } = await window.supabaseClient
                 .from('profiles')
-                .update({
-                    full_name: name,
-                    profile_picture: picture || null
-                })
+                .update({ full_name: name, profile_picture: picture || null })
                 .eq('id', currentUser.id);
 
             if (error) throw error;
@@ -566,7 +501,6 @@ function setupFormHandlers() {
             currentUser.full_name = name;
             currentUser.profile_picture = picture || null;
 
-            // Update sidebar
             document.getElementById('userName').textContent = name;
             const initials = name.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
             document.getElementById('userInitials').textContent = initials;
@@ -606,8 +540,7 @@ function showSection(section) {
 
     // Update page title
     const titles = {
-        'dashboard': ['Dashboard', 'Your performance overview'],
-        'axxess-sales': ['Axxess Sales', 'Sales tracking and management'],
+        'dashboard': ['Axxess Sales', 'Agent sales performance from the Axxess tracking system'],
         'my-leads': ['My Leads', 'Leads assigned to you'],
         'my-orders': ['My Orders', 'Your order pipeline'],
         'reports': ['Reports', 'Performance analytics'],
@@ -616,14 +549,11 @@ function showSection(section) {
         'returned': ['Returned Items', 'Items returned for review'],
         'settings': ['Settings', 'Profile and preferences']
     };
-    const [title, subtitle] = titles[section] || ['Dashboard', ''];
+    const [title, subtitle] = titles[section] || ['Axxess Sales', ''];
     document.getElementById('pageTitle').textContent = title;
     document.getElementById('pageSubtitle').textContent = subtitle;
 
     // Section-specific loading
-    if (section === 'axxess-sales' && typeof loadAxxessSalesData === 'function') {
-        loadAxxessSalesData();
-    }
     if (section === 'reports') {
         renderReports();
     }
@@ -634,20 +564,24 @@ function closeModal(id) {
     document.getElementById(id)?.classList.remove('active');
 }
 
+function openModal(id) {
+    document.getElementById(id)?.classList.add('active');
+}
+
 function toggleSidebar() {
     document.getElementById('sidebar').classList.toggle('open');
     document.getElementById('sidebarOverlay').classList.toggle('active');
 }
 
 function handleSearch(value) {
-    if (!value) {
-        renderMyLeads();
-        return;
+    // Search across current section
+    if (currentSection === 'my-leads') {
+        if (!value) { renderMyLeads(); return; }
+        const q = value.toLowerCase();
+        const filtered = myLeads.filter(l => {
+            const name = (l.full_name || `${l.first_name || ''} ${l.last_name || ''}`).toLowerCase();
+            return name.includes(q) || (l.email || '').toLowerCase().includes(q) || (l.phone || '').includes(q) || (l.order_number || '').toLowerCase().includes(q);
+        });
+        renderMyLeads(filtered);
     }
-    const q = value.toLowerCase();
-    const filtered = myLeads.filter(l => {
-        const name = (l.full_name || `${l.first_name || ''} ${l.last_name || ''}`).toLowerCase();
-        return name.includes(q) || (l.email || '').toLowerCase().includes(q) || (l.phone || '').includes(q) || (l.order_number || '').toLowerCase().includes(q);
-    });
-    renderMyLeads(filtered);
 }
