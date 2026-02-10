@@ -2900,7 +2900,21 @@ function normalizeHeader(header) {
         'last_updated': 'last_updated',
         'secondary_contact_name': 'secondary_contact_name',
         'secondary_contact_number': 'secondary_contact_number',
-        'secondary_contact_email': 'secondary_contact_email'
+        'secondary_contact_email': 'secondary_contact_email',
+        // Openserve email export mappings
+        'dealer_code': 'dealer_name',
+        'dealercode': 'dealer_name',
+        'dealer code': 'dealer_name',
+        'full_name': 'full_name',
+        'alt_phone': 'secondary_contact_number',
+        'altphone': 'secondary_contact_number',
+        'alt phone': 'secondary_contact_number',
+        'alternative contact number': 'secondary_contact_number',
+        'preferred_contact_time': 'notes',
+        'preferred contact time': 'notes',
+        'email_date': 'date_captured',
+        'emaildate': 'date_captured',
+        'email date': 'date_captured'
     };
     
     const normalized = header.toLowerCase().trim();
@@ -2992,11 +3006,23 @@ async function confirmImport() {
                 if (dealerCache[dealerKey]) {
                     dealerId = dealerCache[dealerKey];
                 } else {
-                    const { data: dealerData } = await window.supabaseClient
+                    // Try matching by name first, then by dealer code
+                    let dealerData = null;
+                    const { data: byName } = await window.supabaseClient
                         .from('dealers')
                         .select('id')
                         .ilike('name', row.dealer_name)
                         .limit(1);
+                    dealerData = byName;
+                    
+                    if (!dealerData || dealerData.length === 0) {
+                        const { data: byCode } = await window.supabaseClient
+                            .from('dealers')
+                            .select('id')
+                            .ilike('code', row.dealer_name)
+                            .limit(1);
+                        dealerData = byCode;
+                    }
                     
                     if (dealerData && dealerData.length > 0) {
                         dealerId = dealerData[0].id;
