@@ -1,0 +1,473 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Internal Agent Dashboard - Axxess Dealer Portal</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        * { font-family: 'Poppins', sans-serif; }
+        :root {
+            --primary: #2c4a6e;
+            --primary-dark: #1a3a5c;
+            --primary-light: #3d5a7e;
+            --accent: #10b981;
+            --accent-light: #34d399;
+        }
+        .sidebar-bg { background: linear-gradient(180deg, var(--primary) 0%, var(--primary-light) 100%); }
+        .main-bg { background: #f1f5f9; }
+        .card { background: white; border-radius: 0.75rem; box-shadow: 0 1px 3px rgba(0,0,0,0.08); border: 1px solid #e2e8f0; }
+        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+        .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); transition: all 0.2s ease; }
+        .btn-primary:hover { transform: translateY(-1px); box-shadow: 0 4px 14px rgba(30,58,95,0.4); }
+        .status-new { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
+        .status-contacted { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #3730a3; }
+        .status-qualified { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
+        .status-converted { background: linear-gradient(135deg, #bbf7d0, #86efac); color: #166534; }
+        .status-pending { background: linear-gradient(135deg, #fef3c7, #fde68a); color: #92400e; }
+        .status-processing { background: linear-gradient(135deg, #dbeafe, #bfdbfe); color: #1e40af; }
+        .status-scheduled { background: linear-gradient(135deg, #e0e7ff, #c7d2fe); color: #3730a3; }
+        .status-completed { background: linear-gradient(135deg, #d1fae5, #a7f3d0); color: #065f46; }
+        .status-cancelled { background: linear-gradient(135deg, #fee2e2, #fecaca); color: #991b1b; }
+        .status-returned { background: linear-gradient(135deg, #fce7f3, #fbcfe8); color: #9d174d; }
+        .status-lost { background: linear-gradient(135deg, #f3f4f6, #e5e7eb); color: #4b5563; }
+        select {
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
+            background-repeat: no-repeat; background-position: right 0.5rem center; background-size: 1rem;
+            padding-right: 2rem; cursor: pointer; border-radius: 0.5rem; transition: all 0.2s ease;
+        }
+        select:hover { border-color: var(--primary); }
+        select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(16,185,129,0.1); }
+        .nav-item { transition: all 0.2s ease; border-radius: 0.5rem; }
+        .nav-item:hover { background: rgba(255,255,255,0.1); }
+        .nav-item.active { background: rgba(16,185,129,0.2); border-left: 3px solid var(--accent); }
+        .table-row:hover { background: #f8fafc; }
+        .modal { display: none; }
+        .modal.active { display: flex; }
+        .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; justify-content: center; align-items: center; }
+        .modal-overlay.active { display: flex; }
+        .ax-tab-btn { color: #6b7280; background: transparent; }
+        .ax-tab-btn:hover { background: rgba(0,0,0,0.05); }
+        .ax-tab-btn.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+        @media (max-width: 768px) {
+            .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
+            .sidebar.open { transform: translateX(0); }
+            .sidebar-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 40; }
+            .sidebar-overlay.active { display: block; }
+            .main-content { margin-left: 0 !important; }
+            .mobile-header { display: flex !important; }
+        }
+        @media (min-width: 769px) { .mobile-header { display: none !important; } .sidebar-overlay { display: none !important; } }
+        @media (max-width: 640px) { table { font-size: 0.75rem; } th, td { padding: 0.5rem 0.25rem; } }
+        .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+        /* Color scheme support */
+        body.theme-blue .sidebar-bg { background: linear-gradient(180deg, #1e3a5f 0%, #2c5282 100%); }
+        body.theme-green .sidebar-bg { background: linear-gradient(180deg, #065f46 0%, #047857 100%); }
+        body.theme-purple .sidebar-bg { background: linear-gradient(180deg, #4c1d95 0%, #6d28d9 100%); }
+        body.theme-dark .sidebar-bg { background: linear-gradient(180deg, #1f2937 0%, #374151 100%); }
+        body.theme-red .sidebar-bg { background: linear-gradient(180deg, #7f1d1d 0%, #991b1b 100%); }
+    </style>
+</head>
+<body class="min-h-screen flex">
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
+
+    <!-- Sidebar -->
+    <aside class="sidebar sidebar-bg w-72 min-h-screen flex flex-col fixed left-0 top-0 z-50" id="sidebar">
+        <div class="p-5 border-b border-white/10">
+            <div class="flex items-center gap-3">
+                <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-10">
+                <div>
+                    <h1 class="text-white font-bold text-sm">Axxess</h1>
+                    <p class="text-white/50 text-xs">Internal Agent</p>
+                </div>
+            </div>
+        </div>
+
+        <nav class="flex-1 p-3 space-y-1">
+            <a href="#dashboard" class="nav-item active flex items-center gap-3 text-white px-4 py-3 rounded-xl" onclick="showSection('dashboard')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
+                Dashboard
+            </a>
+            <a href="#axxess-sales" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('axxess-sales')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                Axxess Sales
+            </a>
+            <a href="#my-leads" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('my-leads')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                My Leads
+                <span id="myLeadsBadge" class="hidden bg-blue-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
+            <a href="#my-orders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('my-orders')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                My Orders
+                <span id="myOrdersBadge" class="hidden bg-emerald-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
+            <a href="#reports" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('reports')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Reports
+            </a>
+            <a href="#preorders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('preorders')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Preorders
+                <span id="preordersBadge" class="hidden bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
+            <a href="#shipping" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('shipping')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                Shipping
+                <span id="shippingBadge" class="hidden bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
+            <a href="#returned" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('returned')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                Returned Items
+                <span id="returnedBadge" class="hidden bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
+            <a href="#settings" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('settings')">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                Settings
+            </a>
+        </nav>
+
+        <!-- User Section -->
+        <div class="p-4 border-t border-white/10">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold overflow-hidden" id="userAvatar">
+                    <span id="userInitials">A</span>
+                </div>
+                <div>
+                    <p class="text-white font-medium text-sm" id="userName">Agent</p>
+                    <p class="text-white/50 text-xs">Internal Agent</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white py-2 px-4 rounded-lg hover:bg-white/10 transition">
+                <svg class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                Logout
+            </button>
+        </div>
+    </aside>
+
+    <!-- Main Content -->
+    <main class="main-content main-bg flex-1 ml-72 min-h-screen">
+        <!-- Header -->
+        <header class="bg-white border-b px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-40">
+            <button class="mobile-header p-2 -ml-2 text-gray-700 hover:bg-gray-100 rounded-xl" onclick="toggleSidebar()">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+            </button>
+            <div class="flex-1">
+                <h2 class="text-lg md:text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h2>
+                <p class="text-gray-500 text-xs md:text-sm hidden md:block" id="pageSubtitle">Your performance overview</p>
+            </div>
+            <div class="flex items-center gap-3">
+                <input type="text" id="globalSearch" placeholder="Search..." class="hidden md:block pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 w-48" oninput="handleSearch(this.value)">
+            </div>
+        </header>
+
+        <!-- ═══ DASHBOARD ═══ -->
+        <section id="section-dashboard" class="p-6 md:p-8">
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+                <div class="card p-5 border-l-4 border-blue-500">
+                    <p class="text-3xl font-bold text-gray-800" id="statMyLeads">0</p>
+                    <p class="text-gray-500 text-sm">My Leads</p>
+                </div>
+                <div class="card p-5 border-l-4 border-emerald-500">
+                    <p class="text-3xl font-bold text-gray-800" id="statMyOrders">0</p>
+                    <p class="text-gray-500 text-sm">My Orders</p>
+                </div>
+                <div class="card p-5 border-l-4 border-purple-500">
+                    <p class="text-3xl font-bold text-gray-800" id="statMySales">0</p>
+                    <p class="text-gray-500 text-sm">Axxess Sales</p>
+                </div>
+                <div class="card p-5 border-l-4 border-orange-500">
+                    <p class="text-3xl font-bold text-gray-800" id="statConversion">0%</p>
+                    <p class="text-gray-500 text-sm">Conversion Rate</p>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div class="card p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Recent Leads</h3>
+                    <div class="space-y-3" id="dashRecentLeads">
+                        <p class="text-gray-400 text-sm">Loading...</p>
+                    </div>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Recent Orders</h3>
+                    <div class="space-y-3" id="dashRecentOrders">
+                        <p class="text-gray-400 text-sm">Loading...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ AXXESS SALES ═══ -->
+        <section id="section-axxess-sales" class="p-6 md:p-8 hidden">
+            <div id="axxessSalesContent">
+                <p class="text-gray-400">Loading Axxess Sales...</p>
+            </div>
+        </section>
+
+        <!-- ═══ MY LEADS ═══ -->
+        <section id="section-my-leads" class="p-6 md:p-8 hidden">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex gap-2">
+                    <select id="leadStatusFilter" onchange="filterMyLeads()" class="text-sm border rounded-lg px-3 py-2">
+                        <option value="">All Statuses</option>
+                        <option value="new">New</option>
+                        <option value="contacted">Contacted</option>
+                        <option value="qualified">Qualified</option>
+                        <option value="converted">Converted</option>
+                        <option value="lost">Lost</option>
+                    </select>
+                </div>
+                <p class="text-sm text-gray-500"><span id="myLeadsCount">0</span> leads assigned to you</p>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-xs text-gray-500 uppercase border-b">
+                                <th class="px-4 py-3">Client</th>
+                                <th class="px-4 py-3">Contact</th>
+                                <th class="px-4 py-3">Address</th>
+                                <th class="px-4 py-3">Package</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myLeadsTable">
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ MY ORDERS ═══ -->
+        <section id="section-my-orders" class="p-6 md:p-8 hidden">
+            <div class="flex flex-wrap items-center justify-between gap-4 mb-6">
+                <div class="flex gap-2">
+                    <select id="orderStatusFilter" onchange="filterMyOrders()" class="text-sm border rounded-lg px-3 py-2">
+                        <option value="">All Statuses</option>
+                        <option value="pending">Pending</option>
+                        <option value="processing">Processing</option>
+                        <option value="scheduled">Scheduled</option>
+                        <option value="completed">Completed</option>
+                        <option value="cancelled">Cancelled</option>
+                    </select>
+                </div>
+                <p class="text-sm text-gray-500"><span id="myOrdersCount">0</span> orders</p>
+            </div>
+            <div class="card">
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-xs text-gray-500 uppercase border-b">
+                                <th class="px-4 py-3">Order #</th>
+                                <th class="px-4 py-3">Client</th>
+                                <th class="px-4 py-3">Package</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Date</th>
+                                <th class="px-4 py-3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="myOrdersTable">
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ REPORTS ═══ -->
+        <section id="section-reports" class="p-6 md:p-8 hidden">
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+                <div class="card p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Monthly Performance</h3>
+                    <canvas id="monthlyChart" height="200"></canvas>
+                </div>
+                <div class="card p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Lead Status Breakdown</h3>
+                    <canvas id="statusChart" height="200"></canvas>
+                </div>
+            </div>
+            <div class="card p-6">
+                <h3 class="font-semibold text-gray-800 mb-4">Performance Summary</h3>
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="reportStats">
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <p class="text-2xl font-bold text-gray-800" id="rptTotalLeads">0</p>
+                        <p class="text-xs text-gray-500">Total Leads</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <p class="text-2xl font-bold text-emerald-600" id="rptConverted">0</p>
+                        <p class="text-xs text-gray-500">Converted</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <p class="text-2xl font-bold text-blue-600" id="rptQualified">0</p>
+                        <p class="text-xs text-gray-500">Qualified</p>
+                    </div>
+                    <div class="bg-gray-50 rounded-lg p-4 text-center">
+                        <p class="text-2xl font-bold text-red-500" id="rptLost">0</p>
+                        <p class="text-xs text-gray-500">Lost</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ PREORDERS ═══ -->
+        <section id="section-preorders" class="p-6 md:p-8 hidden">
+            <div class="card">
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-xs text-gray-500 uppercase border-b">
+                                <th class="px-4 py-3">Client</th>
+                                <th class="px-4 py-3">Package</th>
+                                <th class="px-4 py-3">Address</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="preordersTable">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ SHIPPING ═══ -->
+        <section id="section-shipping" class="p-6 md:p-8 hidden">
+            <div class="card">
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-xs text-gray-500 uppercase border-b">
+                                <th class="px-4 py-3">Order #</th>
+                                <th class="px-4 py-3">Client</th>
+                                <th class="px-4 py-3">Address</th>
+                                <th class="px-4 py-3">Tracking</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="shippingTable">
+                            <tr><td colspan="6" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ RETURNED ITEMS ═══ -->
+        <section id="section-returned" class="p-6 md:p-8 hidden">
+            <div class="card">
+                <div class="table-container">
+                    <table class="w-full">
+                        <thead>
+                            <tr class="text-left text-xs text-gray-500 uppercase border-b">
+                                <th class="px-4 py-3">Type</th>
+                                <th class="px-4 py-3">Client</th>
+                                <th class="px-4 py-3">Reason</th>
+                                <th class="px-4 py-3">Status</th>
+                                <th class="px-4 py-3">Date</th>
+                            </tr>
+                        </thead>
+                        <tbody id="returnedTable">
+                            <tr><td colspan="5" class="px-4 py-8 text-center text-gray-400">Loading...</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ SETTINGS ═══ -->
+        <section id="section-settings" class="p-6 md:p-8 hidden">
+            <div class="max-w-2xl space-y-6">
+                <!-- Profile Settings -->
+                <div class="card p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Profile Settings</h3>
+                    <form id="profileSettingsForm" class="space-y-4">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
+                            <input type="text" id="settingName" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture URL</label>
+                            <input type="url" id="settingPicture" placeholder="https://example.com/photo.jpg" class="w-full border rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500">
+                            <p class="text-xs text-gray-400 mt-1">Enter a URL to your profile photo</p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Profile Picture Preview</label>
+                            <div class="flex items-center gap-4">
+                                <div class="w-16 h-16 rounded-full bg-gray-200 overflow-hidden flex items-center justify-center" id="settingPicturePreview">
+                                    <span class="text-gray-400 text-xl" id="settingPreviewInitials">A</span>
+                                </div>
+                                <button type="button" onclick="previewProfilePicture()" class="text-sm text-blue-600 hover:underline">Preview</button>
+                            </div>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-2">Color Scheme</label>
+                            <div class="flex gap-3" id="colorSchemeOptions">
+                                <button type="button" onclick="setColorScheme('default')" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#2c4a6e] to-[#3d5a7e] border-2 border-transparent hover:border-gray-400 transition" title="Default Blue"></button>
+                                <button type="button" onclick="setColorScheme('blue')" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1e3a5f] to-[#2c5282] border-2 border-transparent hover:border-gray-400 transition" title="Deep Blue"></button>
+                                <button type="button" onclick="setColorScheme('green')" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#065f46] to-[#047857] border-2 border-transparent hover:border-gray-400 transition" title="Green"></button>
+                                <button type="button" onclick="setColorScheme('purple')" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#4c1d95] to-[#6d28d9] border-2 border-transparent hover:border-gray-400 transition" title="Purple"></button>
+                                <button type="button" onclick="setColorScheme('dark')" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#1f2937] to-[#374151] border-2 border-transparent hover:border-gray-400 transition" title="Dark"></button>
+                                <button type="button" onclick="setColorScheme('red')" class="w-10 h-10 rounded-full bg-gradient-to-br from-[#7f1d1d] to-[#991b1b] border-2 border-transparent hover:border-gray-400 transition" title="Red"></button>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">Save Settings</button>
+                    </form>
+                </div>
+
+                <!-- Account Info (read-only) -->
+                <div class="card p-6">
+                    <h3 class="font-semibold text-gray-800 mb-4">Account Information</h3>
+                    <div class="space-y-2 text-sm">
+                        <div class="flex justify-between"><span class="text-gray-500">Email</span><span class="font-medium" id="settingEmail">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Role</span><span class="font-medium" id="settingRole">-</span></div>
+                        <div class="flex justify-between"><span class="text-gray-500">Linked Agent ID</span><span class="font-medium" id="settingAgentId">-</span></div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ LEAD DETAIL MODAL ═══ -->
+        <div class="modal fixed inset-0 bg-black/50 z-50 items-center justify-center" id="leadDetailModal">
+            <div class="bg-white rounded-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between p-5 border-b">
+                    <h3 class="font-semibold text-lg">Lead Details</h3>
+                    <button onclick="closeModal('leadDetailModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <div class="p-5" id="leadDetailContent">
+                    <p class="text-gray-400">Loading...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- ═══ ORDER DETAIL MODAL ═══ -->
+        <div class="modal fixed inset-0 bg-black/50 z-50 items-center justify-center" id="orderDetailModal">
+            <div class="bg-white rounded-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+                <div class="flex items-center justify-between p-5 border-b">
+                    <h3 class="font-semibold text-lg">Order Details</h3>
+                    <button onclick="closeModal('orderDetailModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
+                </div>
+                <div class="p-5" id="orderDetailContent">
+                    <p class="text-gray-400">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/supabase-config.js"></script>
+    <script src="js/auth.js"></script>
+    <script src="js/internal-agent.js"></script>
+    <script src="js/axxess-sales.js"></script>
+</body>
+</html>

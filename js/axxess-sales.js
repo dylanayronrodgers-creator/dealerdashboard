@@ -961,27 +961,44 @@ function renderAxPermissions(container) {
 }
 
 async function loadAxLinkingTable() {
-    const { data: profiles } = await window.supabaseClient.from('profiles').select('id, email, full_name, role, agent_table_id').in('role', ['super_admin', 'admin', 'agent']).order('full_name');
+    const { data: profiles } = await window.supabaseClient.from('profiles').select('id, email, full_name, role, agent_table_id').order('full_name');
     const el = document.getElementById('axLinkingTable');
     if (!profiles || profiles.length === 0) { el.innerHTML = '<p class="text-gray-500">No profiles found</p>'; return; }
 
-    let html = `<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Profile</th><th class="px-3 py-2">Role</th><th class="px-3 py-2">Linked Agent</th><th class="px-3 py-2">Action</th></tr></thead><tbody>`;
+    const roleOptions = ['super_admin', 'admin', 'internal_agent', 'agent', 'external_agent', 'dealer', 'openserve'];
+    const roleColors = { super_admin: 'bg-red-100 text-red-700', admin: 'bg-blue-100 text-blue-700', internal_agent: 'bg-purple-100 text-purple-700', agent: 'bg-green-100 text-green-700', external_agent: 'bg-teal-100 text-teal-700', dealer: 'bg-orange-100 text-orange-700', openserve: 'bg-yellow-100 text-yellow-700' };
+
+    let html = `<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Profile</th><th class="px-3 py-2">Role</th><th class="px-3 py-2">Linked Agent</th><th class="px-3 py-2">Status</th></tr></thead><tbody>`;
     profiles.forEach(p => {
         const linked = axxessAgents.find(a => a.id === p.agent_table_id);
-        html += `<tr class="border-t"><td class="px-3 py-2">${p.full_name} <span class="text-xs text-gray-400">${p.email}</span></td>
-            <td class="px-3 py-2"><span class="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">${p.role}</span></td>
+        const rc = roleColors[p.role] || 'bg-gray-100 text-gray-700';
+        html += `<tr class="border-t">
+            <td class="px-3 py-2">${p.full_name || 'Unnamed'} <span class="text-xs text-gray-400">${p.email}</span></td>
+            <td class="px-3 py-2">
+                <select onchange="axChangeRole('${p.id}', this.value)" class="border rounded-lg px-2 py-1 text-xs">
+                    ${roleOptions.map(r => `<option value="${r}" ${p.role === r ? 'selected' : ''}>${r.replace('_', ' ')}</option>`).join('')}
+                </select>
+            </td>
             <td class="px-3 py-2">
                 <select onchange="axLinkProfile('${p.id}', this.value)" class="border rounded-lg px-2 py-1 text-sm">
                     <option value="">Not linked</option>
                     ${axxessAgents.map(a => `<option value="${a.id}" ${p.agent_table_id === a.id ? 'selected' : ''}>${a.name} (${a.email || ''})</option>`).join('')}
                 </select>
             </td>
-            <td class="px-3 py-2">${linked ? '<span class="text-emerald-600 text-xs">Linked</span>' : '<span class="text-gray-400 text-xs">Unlinked</span>'}</td>
+            <td class="px-3 py-2">${linked ? '<span class="text-emerald-600 text-xs font-medium">Linked</span>' : '<span class="text-gray-400 text-xs">Unlinked</span>'}</td>
         </tr>`;
     });
     html += '</tbody></table>';
     el.innerHTML = html;
 }
+
+window.axChangeRole = async function(profileId, newRole) {
+    try {
+        const { error } = await window.supabaseClient.from('profiles').update({ role: newRole }).eq('id', profileId);
+        if (error) throw error;
+        alert('Role updated to ' + newRole.replace('_', ' '));
+    } catch (err) { alert('Error changing role: ' + err.message); }
+};
 
 window.axLinkProfile = async function(profileId, agentId) {
     try {

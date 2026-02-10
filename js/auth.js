@@ -68,8 +68,10 @@ async function handleLogin(e) {
         sessionStorage.setItem('userId', data.user.id);
 
         // Redirect based on role
-        if (profile.role === 'admin') {
+        if (profile.role === 'super_admin' || profile.role === 'admin') {
             window.location.href = 'admin-dashboard.html';
+        } else if (profile.role === 'internal_agent') {
+            window.location.href = 'internal-agent-dashboard.html';
         } else if (profile.role === 'dealer') {
             window.location.href = 'dealer-dashboard.html';
         } else if (profile.role === 'openserve') {
@@ -176,6 +178,8 @@ async function requireAuth(requiredRole = null) {
                 // Redirect to appropriate dashboard
                 if (profile.role === 'admin' || profile.role === 'super_admin') {
                     window.location.href = 'admin-dashboard.html';
+                } else if (profile.role === 'internal_agent') {
+                    window.location.href = 'internal-agent-dashboard.html';
                 } else if (profile.role === 'dealer') {
                     window.location.href = 'dealer-dashboard.html';
                 } else if (profile.role === 'openserve') {
