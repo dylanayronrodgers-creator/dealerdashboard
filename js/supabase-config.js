@@ -11,10 +11,9 @@ const SUPABASE_CONFIG = {
 // ============================================
 
 function getSupabaseConfig() {
-    // First check if centralized config is set
-    if (SUPABASE_CONFIG.url !== 'https://xitiatikzlzcswakgevy.supabase.co' && 
-        SUPABASE_CONFIG.anonKey !== 'sb_publishable_o-2_PZ2xRLLPt7JfC2Stzw_knc5GHGE') {
-        return SUPABASE_CONFIG;
+    // Use centralized config if set
+    if (SUPABASE_CONFIG.url && SUPABASE_CONFIG.anonKey) {
+        return { url: SUPABASE_CONFIG.url, key: SUPABASE_CONFIG.anonKey };
     }
     
     // Fallback to localStorage for backward compatibility

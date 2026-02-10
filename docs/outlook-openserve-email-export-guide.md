@@ -28,18 +28,27 @@ Sub ExportOpenserveLeadsToCSV()
     Dim body As String
     Dim csvPath As String
     Dim count As Long
+    Dim leadId As String
+    Dim dealerCode As String
+    Dim fullName As String
+    Dim emailAddr As String
+    Dim phone As String
+    Dim altPhone As String
+    Dim address As String
+    Dim building As String
+    Dim floorVal As String
+    Dim unit As String
+    Dim contactTime As String
+    Dim emailDate As String
     
-    ' Let user pick the folder containing Openserve emails
     Set olFolder = Application.Session.PickFolder
     If olFolder Is Nothing Then Exit Sub
     
-    ' Set output path - change this to your preferred location
     csvPath = Environ("USERPROFILE") & "\Desktop\openserve_leads_export.csv"
     
     Set fso = CreateObject("Scripting.FileSystemObject")
     Set csvFile = fso.CreateTextFile(csvPath, True, True)
     
-    ' Write CSV header
     csvFile.WriteLine "lead_id,dealer_code,full_name,email,phone,alt_phone,address,building,floor,unit,preferred_contact_time,email_date"
     
     count = 0
@@ -49,21 +58,7 @@ Sub ExportOpenserveLeadsToCSV()
             Set olMail = olItem
             body = olMail.body
             
-            ' Only process Openserve lead notification emails
             If InStr(body, "Lead ID:") > 0 And InStr(body, "Customer details:") > 0 Then
-                Dim leadId As String
-                Dim dealerCode As String
-                Dim fullName As String
-                Dim emailAddr As String
-                Dim phone As String
-                Dim altPhone As String
-                Dim address As String
-                Dim building As String
-                Dim floorVal As String
-                Dim unit As String
-                Dim contactTime As String
-                Dim emailDate As String
-                
                 leadId = ExtractField(body, "Lead ID:")
                 dealerCode = ExtractField(body, "Dealer code:")
                 fullName = ExtractField(body, "Full names:")
@@ -78,7 +73,6 @@ Sub ExportOpenserveLeadsToCSV()
                 contactTime = ExtractField(body, "Preferred contact time:")
                 emailDate = Format(olMail.ReceivedTime, "yyyy-mm-dd hh:nn:ss")
                 
-                ' Escape commas in fields
                 csvFile.WriteLine EscapeCSV(leadId) & "," & _
                     EscapeCSV(dealerCode) & "," & _
                     EscapeCSV(fullName) & "," & _
@@ -103,7 +97,6 @@ Sub ExportOpenserveLeadsToCSV()
            count & " Openserve leads exported to:" & vbCrLf & csvPath, _
            vbInformation, "Openserve Lead Export"
     
-    ' Open the file location
     Shell "explorer.exe /select," & csvPath, vbNormalFocus
 End Sub
 

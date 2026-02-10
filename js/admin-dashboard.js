@@ -300,6 +300,7 @@ function showSection(section) {
         'import': { title: 'Import Leads', subtitle: 'Upload CSV files to import leads' },
         'dealers': { title: 'Dealers', subtitle: 'Manage dealer organizations' },
         'pending-agents': { title: 'Pending Agents', subtitle: 'Review and approve new agents' },
+        'axxess-sales': { title: 'Axxess Sales', subtitle: 'Agent sales performance from the Axxess tracking system' },
         'settings': { title: 'Settings', subtitle: 'System configuration' }
     };
     
@@ -321,6 +322,8 @@ function showSection(section) {
         renderLeadsTable(leads);
     } else if (section === 'shipping') {
         loadShippingDeliveries();
+    } else if (section === 'axxess-sales') {
+        loadAxxessSalesData();
     }
 }
 
@@ -4223,4 +4226,154 @@ async function saveOpenserveLead() {
         console.error('Error saving Openserve lead:', error);
         alert('Error saving lead: ' + error.message);
     }
+}
+
+// ═══════════════════════════════════════════════
+// AXXESS SALES DASHBOARD INTEGRATION
+// Loads data from agents, sales_log, and
+// service_status_checks tables (shared DB)
+// ═══════════════════════════════════════════════
+
+let axxessAgents = [];
+let axxessSales = [];
+let axxessTeams = [];
+let axxessStatusChecks = [];
+
+async function loadAxxessSalesData() {
+    try {
+        const [agentsRes, salesRes, teamsRes, checksRes] = await Promise.all([
+            window.supabaseClient.from('agents').select('*').order('name'),
+            window.supabaseClient.from('sales_log').select('*').order('created_at', { ascending: false }).limit(200),
+            window.supabaseClient.from('teams').select('*'),
+            window.supabaseClient.from('service_status_checks').select('*').order('checked_at', { ascending: false }).limit(50)
+        ]);
+
+        axxessAgents = agentsRes.data || [];
+        axxessSales = salesRes.data || [];
+        axxessTeams = teamsRes.data || [];
+        axxessStatusChecks = checksRes.data || [];
+
+        renderAxxessStats();
+        renderAxxessAgentsGrid();
+        renderAxxessSalesTable();
+        renderAxxessStatusChecks();
+
+        console.log(`Axxess data loaded: ${axxessAgents.length} agents, ${axxessSales.length} sales, ${axxessStatusChecks.length} status checks`);
+    } catch (error) {
+        console.error('Error loading Axxess sales data:', error);
+    }
+}
+
+function renderAxxessStats() {
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const monthSales = axxessSales.filter(s => s.created_at >= monthStart);
+    const totalValue = axxessSales.reduce((sum, s) => sum + (parseFloat(s.total_sale) || 0), 0);
+
+    document.getElementById('axxessAgentCount').textContent = axxessAgents.length;
+    document.getElementById('axxessTotalSales').textContent = axxessSales.length;
+    document.getElementById('axxessMonthSales').textContent = monthSales.length;
+    document.getElementById('axxessTotalValue').textContent = 'R' + totalValue.toLocaleString();
+}
+
+function renderAxxessAgentsGrid() {
+    const grid = document.getElementById('axxessAgentsGrid');
+    if (axxessAgents.length === 0) {
+        grid.innerHTML = '<div class="card p-6 text-center col-span-full"><p class="text-gray-500">No Axxess agents found in the database</p></div>';
+        return;
+    }
+
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+
+    grid.innerHTML = axxessAgents.map(agent => {
+        const agentSales = axxessSales.filter(s => s.agent_id === agent.id);
+        const monthAgentSales = agentSales.filter(s => s.created_at >= monthStart);
+        const agentValue = agentSales.reduce((sum, s) => sum + (parseFloat(s.total_sale) || 0), 0);
+        const team = axxessTeams.find(t => t.id === agent.team_id);
+        const target = agent.target || 0;
+        const pct = target > 0 ? Math.round((monthAgentSales.length / target) * 100) : 0;
+        const pctColor = pct >= 100 ? 'text-emerald-600' : pct >= 50 ? 'text-yellow-600' : 'text-red-500';
+        const barColor = pct >= 100 ? 'bg-emerald-500' : pct >= 50 ? 'bg-yellow-500' : 'bg-red-400';
+
+        return `
+        <div class="card p-5">
+            <div class="flex items-center gap-3 mb-3">
+                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                    ${(agent.name || '?').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2)}
+                </div>
+                <div class="flex-1 min-w-0">
+                    <h4 class="font-semibold text-gray-800 truncate">${agent.name || 'Unknown'}</h4>
+                    <p class="text-gray-400 text-xs">${team ? team.name : 'No team'} · ${agent.email || ''}</p>
+                </div>
+            </div>
+            <div class="grid grid-cols-3 gap-2 text-center mb-3">
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-lg font-bold text-gray-800">${agentSales.length}</p>
+                    <p class="text-xs text-gray-500">Total</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-lg font-bold text-blue-600">${monthAgentSales.length}</p>
+                    <p class="text-xs text-gray-500">Month</p>
+                </div>
+                <div class="bg-gray-50 rounded-lg p-2">
+                    <p class="text-lg font-bold ${pctColor}">${pct}%</p>
+                    <p class="text-xs text-gray-500">Target</p>
+                </div>
+            </div>
+            ${target > 0 ? `<div class="w-full bg-gray-200 rounded-full h-2"><div class="${barColor} h-2 rounded-full" style="width:${Math.min(pct, 100)}%"></div></div>` : ''}
+            <p class="text-xs text-gray-400 mt-2">Value: R${agentValue.toLocaleString()}</p>
+        </div>`;
+    }).join('');
+}
+
+function renderAxxessSalesTable() {
+    const tbody = document.getElementById('axxessSalesTable');
+    if (axxessSales.length === 0) {
+        tbody.innerHTML = '<tr class="border-t"><td class="px-4 py-4 text-gray-500 text-center" colspan="8">No sales data found</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = axxessSales.slice(0, 50).map(sale => {
+        const agent = axxessAgents.find(a => a.id === sale.agent_id);
+        const statusColor = (sale.sale_status || '').toLowerCase() === 'approved' ? 'bg-emerald-100 text-emerald-700' :
+            (sale.sale_status || '').toLowerCase() === 'pending' ? 'bg-yellow-100 text-yellow-700' : 'bg-gray-100 text-gray-700';
+        const bobColor = (sale.bob_status || '').toLowerCase().includes('active') ? 'text-emerald-600 font-medium' :
+            sale.bob_status ? 'text-red-500 font-medium' : 'text-gray-400';
+        const date = sale.created_at ? new Date(sale.created_at).toLocaleDateString() : '-';
+
+        return `<tr class="border-t hover:bg-gray-50">
+            <td class="px-4 py-3 text-sm">${agent?.name || 'Unknown'}</td>
+            <td class="px-4 py-3 text-sm">${sale.package_name || '-'}</td>
+            <td class="px-4 py-3 text-sm font-mono">${sale.account_number || '-'}</td>
+            <td class="px-4 py-3 text-sm font-mono">${sale.service_id || '-'}</td>
+            <td class="px-4 py-3 text-sm font-medium">R${parseFloat(sale.total_sale || 0).toLocaleString()}</td>
+            <td class="px-4 py-3 text-sm"><span class="px-2 py-0.5 rounded-full text-xs ${statusColor}">${sale.sale_status || '-'}</span></td>
+            <td class="px-4 py-3 text-sm ${bobColor}">${sale.bob_status || '-'}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">${date}</td>
+        </tr>`;
+    }).join('');
+}
+
+function renderAxxessStatusChecks() {
+    const tbody = document.getElementById('axxessStatusChecksTable');
+    if (axxessStatusChecks.length === 0) {
+        tbody.innerHTML = '<tr class="border-t"><td class="px-4 py-4 text-gray-500 text-center" colspan="6">No status checks yet. Use the Tampermonkey script to sync.</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = axxessStatusChecks.map(check => {
+        const bobColor = (check.bob_status || '').toLowerCase().includes('active') ? 'text-emerald-600 font-medium' :
+            check.bob_status ? 'text-red-500 font-medium' : 'text-gray-400';
+        const date = check.checked_at ? new Date(check.checked_at).toLocaleString() : '-';
+
+        return `<tr class="border-t hover:bg-gray-50">
+            <td class="px-4 py-3 text-sm font-mono">${check.service_id || '-'}</td>
+            <td class="px-4 py-3 text-sm">${check.company || '-'}</td>
+            <td class="px-4 py-3 text-sm">${check.product || '-'}</td>
+            <td class="px-4 py-3 text-sm ${bobColor}">${check.bob_status || '-'}</td>
+            <td class="px-4 py-3 text-sm">${check.checked_by || '-'}</td>
+            <td class="px-4 py-3 text-sm text-gray-500">${date}</td>
+        </tr>`;
+    }).join('');
 }
