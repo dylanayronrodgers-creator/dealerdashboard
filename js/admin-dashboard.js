@@ -733,6 +733,7 @@ async function loadOrders() {
         orders = data || [];
         
         renderOrdersTable();
+        filterOrders();
         document.getElementById('totalOrders').textContent = orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled').length;
     } catch (error) {
         console.error('Error loading orders:', error);
@@ -1650,15 +1651,28 @@ function filterLeads() {
         filtered = filtered.filter(l => l.dealer_id === dealerId);
     }
     
+    // Update lead pipeline count cards
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setEl('leadsAllCount', leads.length);
+    setEl('leadsNewCount', leads.filter(l => l.status === 'new').length);
+    setEl('leadsContactedCount', leads.filter(l => l.status === 'contacted').length);
+    setEl('leadsQualifiedCount', leads.filter(l => l.status === 'qualified').length);
+    setEl('leadsConvertedCount', leads.filter(l => l.status === 'converted').length);
+    setEl('leadsLostCount', leads.filter(l => l.status === 'lost').length);
+    
     // Update filter count display
     const countEl = document.getElementById('leadFilterCount');
     if (countEl) {
         if (search || status || agentId || dealerId) {
             countEl.textContent = `Showing ${filtered.length} of ${leads.length} leads`;
         } else {
-            countEl.textContent = `Showing ${leads.length} leads (last 500)`;
+            countEl.textContent = `${leads.length} leads`;
         }
     }
+    
+    // Update subtitle
+    const subtitleEl = document.getElementById('leadsSubtitle');
+    if (subtitleEl) subtitleEl.textContent = `${leads.length} leads total \u2022 Sorted by Date \u2022 Filtered by All`;
     
     renderLeadsTable(filtered);
 }
@@ -1678,8 +1692,9 @@ function clearLeadFilters() {
 }
 
 function filterOrders() {
-    const status = document.getElementById('orderStatusFilter').value;
-    const agentId = document.getElementById('orderAgentFilter').value;
+    const status = document.getElementById('orderStatusFilter')?.value || '';
+    const agentId = document.getElementById('orderAgentFilter')?.value || '';
+    const search = (document.getElementById('orderSearchFilter')?.value || '').toLowerCase();
     
     let filtered = orders;
     
@@ -1690,6 +1705,27 @@ function filterOrders() {
     if (agentId) {
         filtered = filtered.filter(o => o.agent_id === agentId);
     }
+    
+    if (search) {
+        filtered = filtered.filter(o => {
+            const name = (o.lead?.full_name || o.client_name || `${o.lead?.first_name || ''} ${o.lead?.last_name || ''}`).toLowerCase();
+            const orderNum = (o.order_number || '').toLowerCase();
+            const serviceId = (o.service_id || o.lead?.service_id || '').toLowerCase();
+            const acct = (o.account_number || '').toLowerCase();
+            return name.includes(search) || orderNum.includes(search) || serviceId.includes(search) || acct.includes(search);
+        });
+    }
+    
+    // Update order status count cards
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    setEl('ordersAllCount', orders.length);
+    setEl('ordersPendingCount', orders.filter(o => o.status === 'pending').length);
+    setEl('ordersProcessingCount', orders.filter(o => o.status === 'processing' || o.status === 'scheduled').length);
+    setEl('ordersCompletedCount', orders.filter(o => o.status === 'completed').length);
+    setEl('ordersCancelledCount', orders.filter(o => o.status === 'cancelled').length);
+    
+    const countEl = document.getElementById('orderFilterCount');
+    if (countEl) countEl.textContent = (status || agentId || search) ? `Showing ${filtered.length} of ${orders.length} orders` : `${orders.length} orders`;
     
     renderOrdersTable(filtered);
 }

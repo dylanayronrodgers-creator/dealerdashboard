@@ -546,67 +546,112 @@
             </div>
         </section>
 
-        <!-- Leads Section -->
+        <!-- Leads Section - Vuma-Style -->
         <section id="section-leads" class="p-8 hidden">
-            <div class="flex flex-col gap-4 mb-6">
+            <!-- Leads Banner -->
+            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-5 mb-6 text-white shadow-lg">
                 <div class="flex items-center justify-between">
-                    <h3 class="text-lg font-semibold text-gray-800">Lead Management</h3>
-                    <div class="flex items-center gap-3">
-                        <button onclick="openModal('openserveEmailModal')" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-5 py-2 rounded-xl font-medium flex items-center gap-2 shadow-sm hover:shadow-md hover:from-green-600 hover:to-emerald-700 transition-all duration-200">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                            </svg>
-                            Import Openserve Email
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </div>
+                        <div>
+                            <p class="text-white/60 text-xs uppercase tracking-wider">Leads</p>
+                            <h2 class="text-lg font-bold">Lead Management</h2>
+                            <p class="text-white/70 text-sm" id="leadsSubtitle">Manage and track all incoming leads</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="openModal('openserveEmailModal')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
+                            Import Email
                         </button>
-                        <button onclick="openModal('addLeadModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                            </svg>
+                        <button onclick="openModal('addLeadModal')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
                             Add Lead
                         </button>
                     </div>
                 </div>
-                <div class="flex flex-wrap items-center gap-3">
-                    <input type="text" id="leadSearchFilter" placeholder="Search name, email, phone..." 
-                        class="border rounded-xl px-4 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-emerald-500/20"
-                        oninput="filterLeads()">
-                    <select id="leadStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        <option value="">All Status</option>
-                        <option value="new">New</option>
-                        <option value="contacted">Contacted</option>
-                        <option value="qualified">Qualified</option>
-                        <option value="converted">Converted</option>
-                        <option value="lost">Lost</option>
-                    </select>
-                    <select id="leadAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        <option value="">All Agents</option>
-                    </select>
-                    <select id="leadDealerFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
-                        <option value="">All Dealers</option>
-                    </select>
-                    <button onclick="clearLeadFilters()" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm">Clear Filters</button>
-                    <span id="leadFilterCount" class="text-sm text-gray-500 ml-auto"></span>
+            </div>
+
+            <!-- Lead Pipeline Cards -->
+            <div class="mb-2">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <div class="w-1 h-4 bg-blue-500 rounded-full"></div>
+                    Lead Pipeline
+                </h3>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value=''; filterLeads();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">All Leads</p>
+                    <p class="text-3xl font-bold text-gray-700" id="leadsAllCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value='new'; filterLeads();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">New</p>
+                    <p class="text-3xl font-bold text-blue-500" id="leadsNewCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value='contacted'; filterLeads();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Contacted</p>
+                    <p class="text-3xl font-bold text-indigo-500" id="leadsContactedCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value='qualified'; filterLeads();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Qualified</p>
+                    <p class="text-3xl font-bold text-emerald-500" id="leadsQualifiedCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value='converted'; filterLeads();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Converted</p>
+                    <p class="text-3xl font-bold text-green-600" id="leadsConvertedCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value='lost'; filterLeads();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Lost</p>
+                    <p class="text-3xl font-bold text-gray-500" id="leadsLostCount">0</p>
                 </div>
             </div>
 
-            <div class="card p-6">
+            <!-- Filters & Search -->
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <div class="relative flex-1 min-w-[200px] max-w-sm">
+                    <input type="text" id="leadSearchFilter" placeholder="Search name, email, phone, lead ID..." 
+                        class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        oninput="filterLeads()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <select id="leadStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
+                    <option value="">All Status</option>
+                    <option value="new">New</option>
+                    <option value="contacted">Contacted</option>
+                    <option value="qualified">Qualified</option>
+                    <option value="converted">Converted</option>
+                    <option value="lost">Lost</option>
+                </select>
+                <select id="leadAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
+                    <option value="">All Agents</option>
+                </select>
+                <select id="leadDealerFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
+                    <option value="">All Dealers</option>
+                </select>
+                <button onclick="clearLeadFilters()" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm border rounded-xl hover:bg-gray-50">Clear</button>
+                <span id="leadFilterCount" class="text-sm text-gray-500 ml-auto"></span>
+            </div>
+
+            <div class="card">
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead>
-                            <tr class="text-left text-gray-500 text-sm border-b">
-                                <th class="pb-4 font-medium">Client Name</th>
-                                <th class="pb-4 font-medium">Contact</th>
-                                <th class="pb-4 font-medium">Address</th>
-                                <th class="pb-4 font-medium">Package Interest</th>
-                                <th class="pb-4 font-medium">Agent</th>
-                                <th class="pb-4 font-medium">Dealer</th>
-                                <th class="pb-4 font-medium">Status</th>
-                                <th class="pb-4 font-medium">Actions</th>
+                        <thead class="bg-gray-50">
+                            <tr class="text-left text-gray-500 text-xs uppercase tracking-wider">
+                                <th class="py-3 px-4 font-medium">Client Name</th>
+                                <th class="py-3 px-4 font-medium">Contact</th>
+                                <th class="py-3 px-4 font-medium">Address</th>
+                                <th class="py-3 px-4 font-medium">Package Interest</th>
+                                <th class="py-3 px-4 font-medium">Agent</th>
+                                <th class="py-3 px-4 font-medium">Dealer</th>
+                                <th class="py-3 px-4 font-medium">Status</th>
+                                <th class="py-3 px-4 font-medium">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="leadsTable">
                             <tr class="table-row border-b">
-                                <td class="py-4" colspan="8">
+                                <td class="py-4 px-4" colspan="8">
                                     <p class="text-gray-500 text-center">Loading leads...</p>
                                 </td>
                             </tr>
@@ -616,41 +661,89 @@
             </div>
         </section>
 
-        <!-- Orders Section -->
+        <!-- Orders Section - Vuma-Style -->
         <section id="section-orders" class="p-8 hidden">
-            <div class="flex items-center justify-between mb-6">
+            <!-- Orders Banner -->
+            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-5 mb-6 text-white shadow-lg">
                 <div class="flex items-center gap-4">
-                    <select id="orderStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
-                        <option value="">All Status</option>
-                        <option value="pending">Pending</option>
-                        <option value="processing">Processing</option>
-                        <option value="scheduled">Scheduled</option>
-                        <option value="completed">Completed</option>
-                        <option value="cancelled">Cancelled</option>
-                    </select>
-                    <select id="orderAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
-                        <option value="">All Agents</option>
-                    </select>
+                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    </div>
+                    <div>
+                        <p class="text-white/60 text-xs uppercase tracking-wider">Orders</p>
+                        <h2 class="text-lg font-bold">Order Management</h2>
+                        <p class="text-white/70 text-sm">Track and manage all customer orders</p>
+                    </div>
                 </div>
             </div>
 
-            <div class="card p-6">
+            <!-- Order Status Summary Cards -->
+            <div class="mb-2">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <div class="w-1 h-4 bg-emerald-500 rounded-full"></div>
+                    Order Status Overview
+                </h3>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('orderStatusFilter').value=''; filterOrders();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">All Orders</p>
+                    <p class="text-3xl font-bold text-gray-700" id="ordersAllCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('orderStatusFilter').value='pending'; filterOrders();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Pending</p>
+                    <p class="text-3xl font-bold text-amber-500" id="ordersPendingCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('orderStatusFilter').value='processing'; filterOrders();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Processing</p>
+                    <p class="text-3xl font-bold text-blue-500" id="ordersProcessingCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('orderStatusFilter').value='completed'; filterOrders();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Completed</p>
+                    <p class="text-3xl font-bold text-emerald-500" id="ordersCompletedCount">0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('orderStatusFilter').value='cancelled'; filterOrders();">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Cancelled</p>
+                    <p class="text-3xl font-bold text-red-500" id="ordersCancelledCount">0</p>
+                </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <div class="relative flex-1 min-w-[200px] max-w-sm">
+                    <input type="text" id="orderSearchFilter" placeholder="Search orders..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" oninput="filterOrders()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <select id="orderStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="filterOrders()">
+                    <option value="">All Status</option>
+                    <option value="pending">Pending</option>
+                    <option value="processing">Processing</option>
+                    <option value="scheduled">Scheduled</option>
+                    <option value="completed">Completed</option>
+                    <option value="cancelled">Cancelled</option>
+                </select>
+                <select id="orderAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="filterOrders()">
+                    <option value="">All Agents</option>
+                </select>
+                <span id="orderFilterCount" class="text-sm text-gray-500 ml-auto"></span>
+            </div>
+
+            <div class="card">
                 <div class="overflow-x-auto">
                     <table class="w-full">
-                        <thead>
-                            <tr class="text-left text-gray-500 text-sm border-b">
-                                <th class="pb-4 font-medium">Order ID</th>
-                                <th class="pb-4 font-medium">Client</th>
-                                <th class="pb-4 font-medium">Package</th>
-                                <th class="pb-4 font-medium">Agent</th>
-                                <th class="pb-4 font-medium">Status</th>
-                                <th class="pb-4 font-medium">Created</th>
-                                <th class="pb-4 font-medium">Actions</th>
+                        <thead class="bg-gray-50">
+                            <tr class="text-left text-gray-500 text-xs uppercase tracking-wider">
+                                <th class="py-3 px-4 font-medium">Order ID</th>
+                                <th class="py-3 px-4 font-medium">Client</th>
+                                <th class="py-3 px-4 font-medium">Package</th>
+                                <th class="py-3 px-4 font-medium">Agent</th>
+                                <th class="py-3 px-4 font-medium">Status</th>
+                                <th class="py-3 px-4 font-medium">Created</th>
+                                <th class="py-3 px-4 font-medium">Actions</th>
                             </tr>
                         </thead>
                         <tbody id="ordersTable">
                             <tr class="table-row border-b">
-                                <td class="py-4" colspan="7">
+                                <td class="py-4 px-4" colspan="7">
                                     <p class="text-gray-500 text-center">Loading orders...</p>
                                 </td>
                             </tr>
