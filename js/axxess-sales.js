@@ -63,8 +63,37 @@ const AX_REASON_OPTIONS = {
         { value: 'No Coverage', label: 'No Coverage' },
         { value: 'Non-Payment', label: 'Non-Payment' },
         { value: 'No Feedback from Client', label: 'No Feedback from Client' }
+    ],
+    'Free Trial': [
+        { value: 'Openserve 30-Day Free Trial', label: 'Openserve 30-Day Free Trial' },
+        { value: 'Provider Free Trial', label: 'Provider Free Trial' },
+        { value: 'Promotional Trial', label: 'Promotional Trial' }
     ]
 };
+
+// ─── Free Trial helpers ───
+const FREE_TRIAL_DAYS = 30;
+
+function axGetTrialDaysLeft(sale) {
+    if (sale.sale_status !== 'Free Trial') return null;
+    const start = sale.trial_start_date ? new Date(sale.trial_start_date) : new Date(sale.created_at);
+    const now = new Date();
+    const elapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
+    return Math.max(FREE_TRIAL_DAYS - elapsed, 0);
+}
+
+function axTrialBadge(sale) {
+    const days = axGetTrialDaysLeft(sale);
+    if (days === null) return '';
+    if (days === 0) return '<span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-bold">EXPIRED</span>';
+    if (days <= 7) return `<span class="px-2 py-0.5 rounded-full text-xs bg-red-100 text-red-700 font-bold">${days}d left</span>`;
+    if (days <= 14) return `<span class="px-2 py-0.5 rounded-full text-xs bg-orange-100 text-orange-700 font-bold">${days}d left</span>`;
+    return `<span class="px-2 py-0.5 rounded-full text-xs bg-blue-100 text-blue-700 font-medium">${days}d left</span>`;
+}
+
+function axGetFreeTrialSales() {
+    return axGetMySales().filter(s => s.sale_status === 'Free Trial');
+}
 
 // ─── Permission helpers ───
 function axCanManageSales() {
@@ -130,6 +159,7 @@ async function loadAxxessSalesData() {
 function renderAxxessSection() {
     renderAxStats();
     renderAxAgentSelector();
+    renderAxTabBadges();
     renderAxCurrentTab();
     axCheckDueReminders();
 }
@@ -158,8 +188,40 @@ function renderAxCurrentTab() {
         case 'ax-export': renderAxExport(container); break;
         case 'ax-status-checks': renderAxStatusChecks(container); break;
         case 'ax-permissions': renderAxPermissions(container); break;
+        case 'ax-free-trials': renderAxFreeTrials(container); break;
         default: container.innerHTML = '<p class="text-gray-500 p-4">Select a tab</p>';
     }
+}
+
+// ─── Tab Badge Counts (shown without clicking) ───
+function renderAxTabBadges() {
+    const mySales = axGetMySales();
+    const now = new Date();
+    const monthStart = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+    const monthSales = mySales.filter(s => s.created_at >= monthStart);
+
+    const pending = monthSales.filter(s => s.sale_status === 'Pending').length;
+    const partial = monthSales.filter(s => s.sale_status === 'Partial').length;
+    const freeTrials = mySales.filter(s => s.sale_status === 'Free Trial').length;
+    const activeReminders = axGetMyReminders().filter(r => !r.is_completed && !r.is_dismissed).length;
+
+    const setBadge = (tabName, count, color) => {
+        const btn = document.querySelector(`[data-ax-tab="${tabName}"]`);
+        if (!btn) return;
+        // Remove existing badge
+        const existing = btn.querySelector('.ax-tab-badge');
+        if (existing) existing.remove();
+        if (count > 0) {
+            const badge = document.createElement('span');
+            badge.className = `ax-tab-badge ml-1 px-1.5 py-0.5 rounded-full text-xs font-bold ${color}`;
+            badge.textContent = count;
+            btn.appendChild(badge);
+        }
+    };
+
+    setBadge('ax-current-month', pending, 'bg-yellow-100 text-yellow-700');
+    setBadge('ax-free-trials', freeTrials, 'bg-cyan-100 text-cyan-700');
+    setBadge('ax-reminders', activeReminders, 'bg-red-100 text-red-700');
 }
 
 // ─── Stats Cards ───
@@ -366,11 +428,12 @@ function renderAxAddSale(container) {
             </div>
             <div>
                 <label class="block text-sm font-medium text-gray-700 mb-1">Status *</label>
-                <select id="axStatus" onchange="axUpdateReasons()" class="w-full border rounded-xl px-3 py-2">
+                <select id="axStatus" onchange="axUpdateReasons();axToggleTrialDate()" class="w-full border rounded-xl px-3 py-2">
                     <option value="Paid-Active">Paid-Active</option>
                     <option value="Pending">Pending</option>
                     <option value="Partial">Partial</option>
                     <option value="Failed">Failed</option>
+                    <option value="Free Trial">Free Trial</option>
                 </select>
             </div>
             <div>
@@ -397,6 +460,10 @@ function renderAxAddSale(container) {
                 <label class="block text-sm font-medium text-gray-700 mb-1">Campaign Name *</label>
                 <input type="text" id="axCampaignName" class="w-full border rounded-xl px-3 py-2">
             </div>` : ''}
+            <div id="axTrialDateField" class="hidden">
+                <label class="block text-sm font-medium text-gray-700 mb-1">Trial Start Date</label>
+                <input type="date" id="axTrialStartDate" class="w-full border rounded-xl px-3 py-2" value="${new Date().toISOString().slice(0,10)}">
+            </div>
             <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                 <textarea id="axNotes" class="w-full border rounded-xl px-3 py-2" rows="2" placeholder="Optional notes..."></textarea>
@@ -449,6 +516,12 @@ window.axToggleCampaign = function() {
     if (field) field.classList.toggle('hidden', origin !== 'Marketing Campaign');
 };
 
+window.axToggleTrialDate = function() {
+    const status = document.getElementById('axStatus')?.value;
+    const field = document.getElementById('axTrialDateField');
+    if (field) field.classList.toggle('hidden', status !== 'Free Trial');
+};
+
 window.axAddSale = async function() {
     const msg = document.getElementById('axSaleMsg');
     msg.innerHTML = '';
@@ -483,6 +556,7 @@ window.axAddSale = async function() {
 
     try {
         const pkg = axxessPricing.find(p => p.id === parseInt(pkgId));
+        const trialStartDate = (status === 'Free Trial') ? (document.getElementById('axTrialStartDate')?.value || new Date().toISOString().slice(0,10)) : null;
         const saleData = {
             agent_id: axxessCurrentAgent.id,
             account_number: accountNum,
@@ -498,6 +572,7 @@ window.axAddSale = async function() {
             notes: notes || '',
             commission_status: (status === 'Paid-Active' && reason === 'Full Payment') ? 'Counts' : 'Does Not Count',
             import_source: null,
+            trial_start_date: trialStartDate,
             created_at: new Date().toISOString()
         };
 
@@ -540,7 +615,8 @@ function renderAxCurrentMonth(container) {
 
         sales.forEach(s => {
             const date = new Date(s.created_at).toLocaleDateString();
-            const statusCls = s.sale_status === 'Paid-Active' ? 'bg-emerald-100 text-emerald-700' : s.sale_status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : s.sale_status === 'Partial' ? 'bg-orange-100 text-orange-700' : 'bg-red-100 text-red-700';
+            const statusCls = s.sale_status === 'Paid-Active' ? 'bg-emerald-100 text-emerald-700' : s.sale_status === 'Pending' ? 'bg-yellow-100 text-yellow-700' : s.sale_status === 'Partial' ? 'bg-orange-100 text-orange-700' : s.sale_status === 'Free Trial' ? 'bg-cyan-100 text-cyan-700' : 'bg-red-100 text-red-700';
+            const trialBadge = axTrialBadge(s);
             let commDisp = '-';
             if (s.sale_status === 'Paid-Active' && s.status_reason === 'Full Payment' && metrics.rate > 0) {
                 const c = (parseFloat(s.total_sale) * metrics.rate / 100) * 0.85;
@@ -554,7 +630,7 @@ function renderAxCurrentMonth(container) {
                 <td class="px-3 py-2 font-mono">${s.service_id || '-'}</td>
                 <td class="px-3 py-2">${s.package_name} ${src}</td>
                 <td class="px-3 py-2 font-medium">R${parseFloat(s.total_sale).toFixed(2)}</td>
-                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${statusCls}">${s.sale_status}</span></td>
+                <td class="px-3 py-2"><span class="px-2 py-0.5 rounded-full text-xs ${statusCls}">${s.sale_status}</span> ${trialBadge}</td>
                 <td class="px-3 py-2 text-xs text-gray-500">${s.status_reason || '-'}</td>
                 <td class="px-3 py-2">${commDisp}</td>
                 <td class="px-3 py-2"><button onclick="axOpenStatusModal('${s.id}')" class="text-blue-600 hover:underline text-xs">Edit</button></td>
@@ -603,13 +679,14 @@ function renderAxSalesHistory(container) {
                 </tr></thead><tbody>`;
 
         grouped[key].forEach(s => {
-            const statusCls = s.sale_status === 'Paid-Active' ? 'text-emerald-600' : s.sale_status === 'Pending' ? 'text-yellow-600' : s.sale_status === 'Failed' ? 'text-red-500' : 'text-orange-500';
+            const statusCls = s.sale_status === 'Paid-Active' ? 'text-emerald-600' : s.sale_status === 'Pending' ? 'text-yellow-600' : s.sale_status === 'Failed' ? 'text-red-500' : s.sale_status === 'Free Trial' ? 'text-cyan-600' : 'text-orange-500';
+            const trialBadge = axTrialBadge(s);
             html += `<tr class="border-t"><td class="px-3 py-2 text-xs">${new Date(s.created_at).toLocaleDateString()}</td>
                 <td class="px-3 py-2 font-mono text-xs">${s.account_number || '-'}</td>
                 <td class="px-3 py-2 font-mono text-xs">${s.service_id || '-'}</td>
                 <td class="px-3 py-2 text-xs">${s.package_name}</td>
                 <td class="px-3 py-2 text-xs font-medium">R${parseFloat(s.total_sale).toFixed(2)}</td>
-                <td class="px-3 py-2 text-xs ${statusCls} font-medium">${s.sale_status}</td></tr>`;
+                <td class="px-3 py-2 text-xs ${statusCls} font-medium">${s.sale_status} ${trialBadge}</td></tr>`;
         });
 
         html += '</tbody></table></div></div></div>';
@@ -932,6 +1009,96 @@ function axCheckDueReminders() {
             axxessShownNotifications.add(key);
         }
     });
+}
+
+// ─── Free Trials Tab ───
+function renderAxFreeTrials(container) {
+    const trials = axGetFreeTrialSales();
+
+    // Summary stats
+    const active = trials.filter(s => axGetTrialDaysLeft(s) > 0);
+    const expiring = trials.filter(s => { const d = axGetTrialDaysLeft(s); return d > 0 && d <= 7; });
+    const expired = trials.filter(s => axGetTrialDaysLeft(s) === 0);
+
+    let html = `
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 mb-4">
+        <div class="bg-cyan-50 rounded-xl p-3 text-center border border-cyan-200">
+            <p class="text-2xl font-bold text-cyan-700">${trials.length}</p>
+            <p class="text-xs text-gray-500">Total Free Trials</p>
+        </div>
+        <div class="bg-blue-50 rounded-xl p-3 text-center border border-blue-200">
+            <p class="text-2xl font-bold text-blue-700">${active.length}</p>
+            <p class="text-xs text-gray-500">Active Trials</p>
+        </div>
+        <div class="bg-orange-50 rounded-xl p-3 text-center border border-orange-200">
+            <p class="text-2xl font-bold text-orange-700">${expiring.length}</p>
+            <p class="text-xs text-gray-500">Expiring Soon (≤7d)</p>
+        </div>
+        <div class="bg-red-50 rounded-xl p-3 text-center border border-red-200">
+            <p class="text-2xl font-bold text-red-700">${expired.length}</p>
+            <p class="text-xs text-gray-500">Expired</p>
+        </div>
+    </div>`;
+
+    if (trials.length === 0) {
+        html += '<div class="card p-6 text-center text-gray-500">No free trial clients. Add a sale with status "Free Trial" to start tracking.</div>';
+        container.innerHTML = html;
+        return;
+    }
+
+    // Sort: expired first, then by days left ascending (most urgent first)
+    const sorted = [...trials].sort((a, b) => {
+        const da = axGetTrialDaysLeft(a);
+        const db = axGetTrialDaysLeft(b);
+        return da - db;
+    });
+
+    html += `<div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm">
+        <thead class="bg-cyan-600 text-white"><tr class="text-left">
+            <th class="px-3 py-2">Days Left</th>
+            <th class="px-3 py-2">Account #</th>
+            <th class="px-3 py-2">Service ID</th>
+            <th class="px-3 py-2">Package</th>
+            <th class="px-3 py-2">Amount</th>
+            <th class="px-3 py-2">Trial Started</th>
+            <th class="px-3 py-2">Trial Ends</th>
+            <th class="px-3 py-2">Details</th>
+            <th class="px-3 py-2">Actions</th>
+        </tr></thead><tbody>`;
+
+    sorted.forEach(s => {
+        const days = axGetTrialDaysLeft(s);
+        const startDate = s.trial_start_date ? new Date(s.trial_start_date) : new Date(s.created_at);
+        const endDate = new Date(startDate);
+        endDate.setDate(endDate.getDate() + FREE_TRIAL_DAYS);
+
+        const rowCls = days === 0 ? 'bg-red-50' : days <= 7 ? 'bg-orange-50' : days <= 14 ? 'bg-yellow-50' : '';
+        const daysBadge = axTrialBadge(s);
+        const progressPct = Math.round(((FREE_TRIAL_DAYS - days) / FREE_TRIAL_DAYS) * 100);
+        const barColor = days === 0 ? 'bg-red-500' : days <= 7 ? 'bg-orange-500' : days <= 14 ? 'bg-yellow-500' : 'bg-cyan-500';
+
+        html += `<tr class="border-t ${rowCls}">
+            <td class="px-3 py-2">
+                <div class="flex items-center gap-2">
+                    ${daysBadge}
+                    <div class="w-16 bg-gray-200 rounded-full h-1.5"><div class="${barColor} h-1.5 rounded-full" style="width:${progressPct}%"></div></div>
+                </div>
+            </td>
+            <td class="px-3 py-2 font-mono font-medium">${s.account_number || '-'}</td>
+            <td class="px-3 py-2 font-mono">${s.service_id || '-'}</td>
+            <td class="px-3 py-2">${s.package_name}</td>
+            <td class="px-3 py-2 font-medium">R${parseFloat(s.total_sale).toFixed(2)}</td>
+            <td class="px-3 py-2 text-xs">${startDate.toLocaleDateString()}</td>
+            <td class="px-3 py-2 text-xs font-medium ${days === 0 ? 'text-red-600' : ''}">${endDate.toLocaleDateString()}</td>
+            <td class="px-3 py-2 text-xs text-gray-500">${s.status_reason || '-'}</td>
+            <td class="px-3 py-2">
+                <button onclick="axOpenStatusModal('${s.id}')" class="text-blue-600 hover:underline text-xs mr-2">Edit Status</button>
+            </td>
+        </tr>`;
+    });
+
+    html += '</tbody></table></div></div>';
+    container.innerHTML = html;
 }
 
 // ─── Status Checks Tab ───
