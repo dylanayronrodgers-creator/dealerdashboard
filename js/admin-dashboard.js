@@ -906,7 +906,38 @@ async function loadDashboardStats() {
         if (pendingCountEl) pendingCountEl.textContent = pendingCount;
         if (rejectedCountEl) rejectedCountEl.textContent = rejectedCount;
         
-        console.log('Dashboard stats loaded:', { totalLeadsCount, convertedLeads, conversionRate, confirmedRevenue, pendingRevenue });
+        // Vuma-style Order Status Summary
+        const ordersPending = orders.filter(o => o.status === 'pending').length;
+        const ordersProcessing = orders.filter(o => o.status === 'processing' || o.status === 'scheduled').length;
+        const ordersCompleted = orders.filter(o => o.status === 'completed').length;
+        const ordersCancelled = orders.filter(o => o.status === 'cancelled').length;
+        
+        const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+        setEl('dashPendingOrders', ordersPending);
+        setEl('dashProcessingOrders', ordersProcessing);
+        setEl('dashCompletedOrders', ordersCompleted);
+        setEl('dashCancelledOrders', ordersCancelled);
+        
+        // Vuma-style Lead Pipeline Summary
+        const newLeads = (allLeads || []).filter(l => l.status === 'new').length;
+        const contactedLeads = (allLeads || []).filter(l => l.status === 'contacted').length;
+        const qualifiedLeads = (allLeads || []).filter(l => l.status === 'qualified').length;
+        const lostLeads = (allLeads || []).filter(l => l.status === 'lost').length;
+        
+        setEl('dashNewLeads', newLeads);
+        setEl('dashContactedLeads', contactedLeads);
+        setEl('dashQualifiedLeads', qualifiedLeads);
+        setEl('dashConvertedLeads', convertedLeads);
+        setEl('dashLostLeads', lostLeads);
+        
+        // Dashboard timestamp
+        const now = new Date();
+        const ts = `As of ${now.toLocaleDateString('en-ZA', { day: '2-digit', month: 'short', year: 'numeric' })}, ${now.toLocaleTimeString('en-ZA', { hour: '2-digit', minute: '2-digit' })}`;
+        setEl('dashboardTimestamp', ts);
+        setEl('dashTimestampSmall', ts);
+        setEl('dashTimestampSmall2', ts);
+        
+        console.log('Dashboard stats loaded:', { totalLeadsCount, convertedLeads, conversionRate, confirmedRevenue, pendingRevenue, ordersPending, ordersProcessing, ordersCompleted, ordersCancelled });
         
     } catch (error) {
         console.error('Error loading stats:', error);
