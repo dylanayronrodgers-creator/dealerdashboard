@@ -758,8 +758,8 @@ function renderOrdersTable(filteredOrders = null) {
         <tr class="table-row border-b">
             <td class="py-4">
                 <div class="font-medium text-gray-800">${order.lead?.order_number || order.order_number || '-'}</div>
-                <div class="text-xs text-gray-400">Service ID: ${order.lead?.service_id || '-'}</div>
-                <div class="text-xs text-gray-400">Lead ID: ${order.lead?.id?.slice(0, 8) || '-'}</div>
+                <div class="text-xs text-gray-400">Service ID: ${order.service_id || order.lead?.service_id || '-'}</div>
+                <div class="text-xs text-gray-400">Account: ${order.account_number || '-'}</div>
             </td>
             <td class="py-4">
                 <div class="font-medium text-gray-800">${order.lead?.full_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || '-'}</div>
@@ -2251,6 +2251,13 @@ async function saveLeadChanges(e) {
                         dealer_id: updateData.dealer_id,
                         order_number: updateData.order_number,
                         status: updateData.order_status || 'pending',
+                        service_id: updateData.service_id || null,
+                        account_number: updateData.account_number || null,
+                        client_name: updateData.full_name || `${updateData.first_name || ''} ${updateData.last_name || ''}`.trim() || null,
+                        client_email: updateData.email || null,
+                        client_phone: updateData.phone || updateData.cell_number || null,
+                        commission_amount: originalLead.commission_amount || 200,
+                        commission_status: 'pending',
                         notes: `Order created from lead edit - Commission: R${originalLead.commission_amount || 200}`
                     });
                 
@@ -2359,6 +2366,13 @@ async function convertToOrder() {
                 dealer_id: lead.dealer_id,
                 order_number: orderNumber,
                 status: 'pending',
+                service_id: lead.service_id || null,
+                account_number: lead.account_number || null,
+                client_name: lead.full_name || `${lead.first_name || ''} ${lead.last_name || ''}`.trim() || null,
+                client_email: lead.email || null,
+                client_phone: lead.phone || lead.cell_number || null,
+                commission_amount: commissionAmount,
+                commission_status: 'pending',
                 notes: `${productType === 'prepaid' ? 'Prepaid' : 'Postpaid'} - Commission: R${commissionAmount}`
             })
             .select();
