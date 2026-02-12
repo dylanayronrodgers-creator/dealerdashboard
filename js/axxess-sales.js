@@ -576,7 +576,7 @@ window.axAddSale = async function() {
             sale_origin: saleOrigin,
             campaign_name: campaignName,
             notes: notes || '',
-            commission_status: (status === 'Paid-Active' && reason === 'Full Payment') ? 'Counts' : 'Does Not Count',
+            commission_status: (status === 'Free Trial' || (status === 'Paid-Active' && reason === 'Full Payment')) ? 'Counts' : 'Does Not Count',
             import_source: null,
             created_at: new Date().toISOString()
         };
@@ -839,7 +839,7 @@ window.axConfirmImport = async function() {
             package_name: r.pkg, category: r.pkgData?.category || 'Unknown', provider: r.pkgData?.provider || 'Unknown',
             total_sale: parseFloat(r.amt), sale_status: r.status, status_reason: r.details,
             sale_origin: r.origin || null, campaign_name: r.campaign || null, notes: r.notes || '',
-            commission_status: (r.status === 'Paid-Active' && r.details === 'Full Payment') ? 'Counts' : 'Does Not Count',
+            commission_status: (r.status === 'Free Trial' || (r.status === 'Paid-Active' && r.details === 'Full Payment')) ? 'Counts' : 'Does Not Count',
             import_source: 'MASS_IMPORT', created_at: new Date().toISOString()
         }));
         const { error } = await window.supabaseClient.from('sales_log').insert(inserts);
@@ -1277,7 +1277,7 @@ window.axConfirmStatusCsvUpload = async function() {
                         const updateData = {
                             sale_status: row.mapped.sale_status,
                             status_reason: row.mapped.status_reason,
-                            commission_status: (row.mapped.sale_status === 'Paid-Active' && row.mapped.status_reason === 'Full Payment') ? 'Counts' : 'Does Not Count'
+                            commission_status: (row.mapped.sale_status === 'Free Trial' || (row.mapped.sale_status === 'Paid-Active' && row.mapped.status_reason === 'Full Payment')) ? 'Counts' : 'Does Not Count'
                         };
                         const { error: updateErr } = await window.supabaseClient
                             .from('sales_log')
@@ -1418,7 +1418,7 @@ window.axUpdateSaleStatus = async function() {
     try {
         const { error } = await window.supabaseClient.from('sales_log').update({
             sale_status: status, status_reason: reason, notes,
-            commission_status: (status === 'Paid-Active' && reason === 'Full Payment') ? 'Counts' : 'Does Not Count',
+            commission_status: (status === 'Free Trial' || (status === 'Paid-Active' && reason === 'Full Payment')) ? 'Counts' : 'Does Not Count',
             updated_at: new Date().toISOString()
         }).eq('id', axxessEditingSale.id);
         if (error) throw error;
