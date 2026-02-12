@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html><head><title>Run Payment Migration</title>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+</head><body style="font-family:sans-serif;padding:2rem;">
+<h2>Payment Columns Migration</h2>
+<p>Click the button below to add payment tracking columns to the orders table.</p>
+<button id="runBtn" onclick="runMigration()" style="padding:12px 24px;background:#e11d48;color:white;border:none;border-radius:8px;cursor:pointer;font-size:16px;">Run Migration</button>
+<pre id="log" style="margin-top:1rem;background:#f1f5f9;padding:1rem;border-radius:8px;"></pre>
+<script>
+const sb = supabase.createClient(
+    'https://xitiatikzlzcswakgevy.supabase.co',
+    'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InhpdGlhdGlremx6Y3N3YWtnZXZ5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3MzY3NzY5NTUsImV4cCI6MjA1MjM1Mjk1NX0.KjSbJKRbFnxdOsBJVOkLRFKBR8EGMrx8Iy0e8FMnSYE'
+);
+const log = document.getElementById('log');
+
+async function runMigration() {
+    document.getElementById('runBtn').disabled = true;
+    log.textContent = 'Testing if columns already exist...\n';
+    
+    // Try to read an order with payment_status to see if column exists
+    const { data, error } = await sb.from('orders').select('id, payment_status').limit(1);
+    
+    if (!error) {
+        log.textContent += 'payment_status column already exists! Migration may have already run.\n';
+        log.textContent += 'Testing write...\n';
+        
+        // Test that we can write to the new columns
+        if (data && data.length > 0) {
+            const testId = data[0].id;
+            const currentStatus = data[0].payment_status || 'unpaid';
+            const { error: writeErr } = await sb.from('orders').update({ payment_status: currentStatus }).eq('id', testId);
+            if (writeErr) {
+                log.textContent += 'Write test failed: ' + writeErr.message + '\n';
+            } else {
+                log.textContent += 'Write test passed! All payment columns are working.\n';
+            }
+        }
+        log.textContent += '\nDone! You can close this page.';
+        return;
+    }
+    
+    log.textContent += 'Columns do not exist yet. Please run this SQL in Supabase Dashboard > SQL Editor:\n\n';
+    log.textContent += `ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_status text DEFAULT 'unpaid';
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_due_date timestamptz;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_amount numeric DEFAULT 0;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_method text;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_date timestamptz;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_reminder_sent boolean DEFAULT false;
+ALTER TABLE orders ADD COLUMN IF NOT EXISTS payment_notes text;`;
+    
+    log.textContent += '\n\nAfter running the SQL, refresh this page and click the button again to verify.';
+}
+</script>
+</body></html>

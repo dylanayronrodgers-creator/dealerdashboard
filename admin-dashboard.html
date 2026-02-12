@@ -182,6 +182,13 @@
                 </svg>
                 Orders
             </a>
+            <a href="#payments" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('payments')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
+                </svg>
+                Payments
+                <span id="paymentsBadge" class="hidden bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
             <a href="#agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('agents')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
@@ -752,6 +759,197 @@
                 </div>
             </div>
         </section>
+
+        <!-- Payments Section - Vuma-Style -->
+        <section id="section-payments" class="p-8 hidden">
+            <!-- Payments Banner -->
+            <div class="bg-gradient-to-r from-rose-600 to-pink-600 rounded-2xl p-5 mb-6 text-white shadow-lg">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center gap-4">
+                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+                        </div>
+                        <div>
+                            <p class="text-white/60 text-xs uppercase tracking-wider">Payments</p>
+                            <h2 class="text-lg font-bold">Payment Tracking</h2>
+                            <p class="text-white/70 text-sm">Monitor client payments, flag overdue accounts, send reminders</p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button onclick="exportPaymentReport()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                            Export Report
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Payment Summary Cards -->
+            <div class="mb-2">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <div class="w-1 h-4 bg-rose-500 rounded-full"></div>
+                    Payment Overview
+                </h3>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterPayments('')">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Total Orders</p>
+                    <p class="text-3xl font-bold text-gray-700" id="payTotalOrders">0</p>
+                    <p class="text-xs text-gray-400 mt-1" id="payTotalAmount">R0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-emerald-500" onclick="filterPayments('paid')">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Paid</p>
+                    <p class="text-3xl font-bold text-emerald-600" id="payPaidCount">0</p>
+                    <p class="text-xs text-emerald-500 mt-1" id="payPaidAmount">R0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-amber-500" onclick="filterPayments('unpaid')">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Unpaid</p>
+                    <p class="text-3xl font-bold text-amber-600" id="payUnpaidCount">0</p>
+                    <p class="text-xs text-amber-500 mt-1" id="payUnpaidAmount">R0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-red-500" onclick="filterPayments('overdue')">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Overdue</p>
+                    <p class="text-3xl font-bold text-red-600" id="payOverdueCount">0</p>
+                    <p class="text-xs text-red-500 mt-1" id="payOverdueAmount">R0</p>
+                </div>
+                <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-blue-500" onclick="filterPayments('partial')">
+                    <p class="text-xs text-gray-400 font-medium mb-1">Partial</p>
+                    <p class="text-3xl font-bold text-blue-600" id="payPartialCount">0</p>
+                    <p class="text-xs text-blue-500 mt-1" id="payPartialAmount">R0</p>
+                </div>
+            </div>
+
+            <!-- Aging Report -->
+            <div class="mb-2">
+                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                    <div class="w-1 h-4 bg-amber-500 rounded-full"></div>
+                    Aging Report
+                </h3>
+            </div>
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+                <div class="card p-4 text-center">
+                    <p class="text-xs text-gray-400 font-medium mb-1">0-7 Days</p>
+                    <p class="text-2xl font-bold text-green-600" id="aging7">0</p>
+                    <p class="text-xs text-gray-400">Current</p>
+                </div>
+                <div class="card p-4 text-center">
+                    <p class="text-xs text-gray-400 font-medium mb-1">8-14 Days</p>
+                    <p class="text-2xl font-bold text-amber-500" id="aging14">0</p>
+                    <p class="text-xs text-gray-400">Due Soon</p>
+                </div>
+                <div class="card p-4 text-center">
+                    <p class="text-xs text-gray-400 font-medium mb-1">15-30 Days</p>
+                    <p class="text-2xl font-bold text-orange-500" id="aging30">0</p>
+                    <p class="text-xs text-gray-400">Overdue</p>
+                </div>
+                <div class="card p-4 text-center">
+                    <p class="text-xs text-gray-400 font-medium mb-1">30+ Days</p>
+                    <p class="text-2xl font-bold text-red-600" id="aging30plus">0</p>
+                    <p class="text-xs text-gray-400">Critical</p>
+                </div>
+            </div>
+
+            <!-- Filters & Search -->
+            <div class="flex flex-wrap items-center gap-3 mb-6">
+                <div class="relative flex-1 min-w-[200px] max-w-sm">
+                    <input type="text" id="paymentSearchFilter" placeholder="Search client, order #, account..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20" oninput="filterPayments()">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
+                </div>
+                <select id="paymentStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20" onchange="filterPayments()">
+                    <option value="">All Payment Status</option>
+                    <option value="paid">Paid</option>
+                    <option value="unpaid">Unpaid</option>
+                    <option value="overdue">Overdue</option>
+                    <option value="partial">Partial</option>
+                </select>
+                <button onclick="sendBulkReminders()" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:shadow-md transition-all flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
+                    Send Reminders to Overdue
+                </button>
+                <span id="paymentFilterCount" class="text-sm text-gray-500 ml-auto"></span>
+            </div>
+
+            <!-- Payments Table -->
+            <div class="card">
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-gray-50">
+                            <tr class="text-left text-gray-500 text-xs uppercase tracking-wider">
+                                <th class="py-3 px-4 font-medium">Client</th>
+                                <th class="py-3 px-4 font-medium">Order #</th>
+                                <th class="py-3 px-4 font-medium">Package</th>
+                                <th class="py-3 px-4 font-medium">Amount</th>
+                                <th class="py-3 px-4 font-medium">Payment Status</th>
+                                <th class="py-3 px-4 font-medium">Age</th>
+                                <th class="py-3 px-4 font-medium">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="paymentsTable">
+                            <tr class="table-row border-b">
+                                <td class="py-4 px-4" colspan="7">
+                                    <p class="text-gray-500 text-center">Loading payment data...</p>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Payment Status Modal -->
+        <div class="modal-overlay" id="paymentStatusModal">
+            <div class="modal-container max-w-lg">
+                <div class="modal-header">
+                    <h3 class="font-bold text-gray-800">Update Payment Status</h3>
+                    <button onclick="closeModal('paymentStatusModal')" class="text-gray-400 hover:text-gray-600">&times;</button>
+                </div>
+                <div class="p-6 space-y-4">
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Client</p>
+                        <p class="font-medium text-gray-800" id="payModalClient">-</p>
+                    </div>
+                    <div>
+                        <p class="text-sm text-gray-500 mb-1">Order</p>
+                        <p class="font-medium text-gray-800" id="payModalOrder">-</p>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
+                        <select id="payModalStatus" class="w-full border rounded-xl px-4 py-2">
+                            <option value="unpaid">Unpaid</option>
+                            <option value="paid">Paid</option>
+                            <option value="partial">Partial Payment</option>
+                            <option value="overdue">Overdue</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Amount (R)</label>
+                        <input type="number" id="payModalAmount" class="w-full border rounded-xl px-4 py-2" placeholder="0.00">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
+                        <select id="payModalMethod" class="w-full border rounded-xl px-4 py-2">
+                            <option value="">Select method</option>
+                            <option value="eft">EFT / Bank Transfer</option>
+                            <option value="debit_order">Debit Order</option>
+                            <option value="cash">Cash</option>
+                            <option value="card">Card Payment</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
+                        <input type="date" id="payModalDate" class="w-full border rounded-xl px-4 py-2">
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
+                        <textarea id="payModalNotes" class="w-full border rounded-xl px-4 py-2" rows="2" placeholder="Payment reference, notes..."></textarea>
+                    </div>
+                    <button onclick="savePaymentStatus()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all">
+                        Save Payment Status
+                    </button>
+                </div>
+            </div>
+        </div>
 
         <!-- Agents Section -->
         <section id="section-agents" class="p-8 hidden">

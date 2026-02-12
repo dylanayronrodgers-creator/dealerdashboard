@@ -300,6 +300,7 @@ function showSection(section) {
         'import': { title: 'Import Leads', subtitle: 'Upload CSV files to import leads' },
         'dealers': { title: 'Dealers', subtitle: 'Manage dealer organizations' },
         'pending-agents': { title: 'Pending Agents', subtitle: 'Review and approve new agents' },
+        'payments': { title: 'Payments', subtitle: 'Track client payments, flag overdue accounts, send reminders' },
         'axxess-sales': { title: 'Axxess Sales', subtitle: 'Agent sales performance from the Axxess tracking system' },
         'settings': { title: 'Settings', subtitle: 'System configuration' }
     };
@@ -322,6 +323,8 @@ function showSection(section) {
         renderLeadsTable(leads);
     } else if (section === 'shipping') {
         loadShippingDeliveries();
+    } else if (section === 'payments') {
+        renderPaymentsSection();
     } else if (section === 'axxess-sales') {
         loadAxxessSalesData();
     }
@@ -734,6 +737,7 @@ async function loadOrders() {
         
         renderOrdersTable();
         filterOrders();
+        renderPaymentsSection();
         document.getElementById('totalOrders').textContent = orders.filter(o => o.status !== 'completed' && o.status !== 'cancelled').length;
     } catch (error) {
         console.error('Error loading orders:', error);
@@ -4396,6 +4400,324 @@ async function saveOpenserveLead() {
     } catch (error) {
         console.error('Error saving Openserve lead:', error);
         alert('Error saving lead: ' + error.message);
+    }
+}
+
+// ═══════════════════════════════════════════════
+// PAYMENT TRACKING SYSTEM
+// ═══════════════════════════════════════════════
+
+let currentPaymentOrderId = null;
+
+function getOrderAge(order) {
+    const created = new Date(order.created_at);
+    const now = new Date();
+    return Math.floor((now - created) / (1000 * 60 * 60 * 24));
+}
+
+function getPaymentStatus(order) {
+    return order.payment_status || 'unpaid';
+}
+
+function getPaymentAmount(order) {
+    return order.payment_amount || order.commission_amount || order.package?.price || 0;
+}
+
+function renderPaymentsSection() {
+    const setEl = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+    const fmt = (v) => `R${(v || 0).toLocaleString()}`;
+
+    const activeOrders = orders.filter(o => o.status !== 'cancelled');
+
+    let paid = [], unpaid = [], overdue = [], partial = [];
+    let paidAmt = 0, unpaidAmt = 0, overdueAmt = 0, partialAmt = 0, totalAmt = 0;
+    let age7 = 0, age14 = 0, age30 = 0, age30plus = 0;
+
+    activeOrders.forEach(o => {
+        const ps = getPaymentStatus(o);
+        const amt = getPaymentAmount(o);
+        totalAmt += amt;
+        const days = getOrderAge(o);
+
+        if (ps === 'paid') { paid.push(o); paidAmt += amt; }
+        else if (ps === 'partial') { partial.push(o); partialAmt += amt; }
+        else if (ps === 'overdue' || (ps === 'unpaid' && days > 14)) { overdue.push(o); overdueAmt += amt; }
+        else { unpaid.push(o); unpaidAmt += amt; }
+
+        if (ps !== 'paid') {
+            if (days <= 7) age7++;
+            else if (days <= 14) age14++;
+            else if (days <= 30) age30++;
+            else age30plus++;
+        }
+    });
+
+    setEl('payTotalOrders', activeOrders.length);
+    setEl('payTotalAmount', fmt(totalAmt));
+    setEl('payPaidCount', paid.length);
+    setEl('payPaidAmount', fmt(paidAmt));
+    setEl('payUnpaidCount', unpaid.length);
+    setEl('payUnpaidAmount', fmt(unpaidAmt));
+    setEl('payOverdueCount', overdue.length);
+    setEl('payOverdueAmount', fmt(overdueAmt));
+    setEl('payPartialCount', partial.length);
+    setEl('payPartialAmount', fmt(partialAmt));
+
+    setEl('aging7', age7);
+    setEl('aging14', age14);
+    setEl('aging30', age30);
+    setEl('aging30plus', age30plus);
+
+    const badge = document.getElementById('paymentsBadge');
+    if (badge) {
+        if (overdue.length > 0) { badge.textContent = overdue.length; badge.classList.remove('hidden'); }
+        else { badge.classList.add('hidden'); }
+    }
+
+    filterPayments();
+}
+
+function filterPayments(statusOverride) {
+    const statusEl = document.getElementById('paymentStatusFilter');
+    const searchEl = document.getElementById('paymentSearchFilter');
+
+    if (statusOverride !== undefined && statusEl) statusEl.value = statusOverride;
+
+    const status = statusEl?.value || '';
+    const search = (searchEl?.value || '').toLowerCase();
+
+    let filtered = orders.filter(o => o.status !== 'cancelled');
+
+    if (status) {
+        filtered = filtered.filter(o => {
+            const ps = getPaymentStatus(o);
+            if (status === 'overdue') return ps === 'overdue' || (ps === 'unpaid' && getOrderAge(o) > 14);
+            return ps === status;
+        });
+    }
+
+    if (search) {
+        filtered = filtered.filter(o => {
+            const name = (o.lead?.full_name || o.client_name || `${o.lead?.first_name || ''} ${o.lead?.last_name || ''}`).toLowerCase();
+            const orderNum = (o.order_number || '').toLowerCase();
+            const acct = (o.account_number || '').toLowerCase();
+            return name.includes(search) || orderNum.includes(search) || acct.includes(search);
+        });
+    }
+
+    const countEl = document.getElementById('paymentFilterCount');
+    if (countEl) countEl.textContent = (status || search) ? `Showing ${filtered.length} of ${orders.length}` : `${filtered.length} orders`;
+
+    renderPaymentsTable(filtered);
+}
+
+function renderPaymentsTable(filteredOrders) {
+    const table = document.getElementById('paymentsTable');
+    if (!table) return;
+
+    const displayOrders = filteredOrders || orders.filter(o => o.status !== 'cancelled');
+
+    if (displayOrders.length === 0) {
+        table.innerHTML = `<tr><td class="py-4 px-4 text-center text-gray-500" colspan="7">No payment records found</td></tr>`;
+        return;
+    }
+
+    table.innerHTML = displayOrders.map(order => {
+        const ps = getPaymentStatus(order);
+        const days = getOrderAge(order);
+        const isOverdue = ps === 'overdue' || (ps === 'unpaid' && days > 14);
+        const amt = getPaymentAmount(order);
+        const clientName = order.lead?.full_name || order.client_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || '-';
+        const clientEmail = order.lead?.email || order.client_email || '';
+        const clientPhone = order.lead?.phone || order.client_phone || '';
+        const orderNum = order.order_number || order.lead?.order_number || '-';
+
+        let statusBadge = '';
+        if (ps === 'paid') statusBadge = '<span class="bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full text-xs font-medium">Paid</span>';
+        else if (ps === 'partial') statusBadge = '<span class="bg-blue-100 text-blue-700 px-2 py-1 rounded-full text-xs font-medium">Partial</span>';
+        else if (isOverdue) statusBadge = '<span class="bg-red-100 text-red-700 px-2 py-1 rounded-full text-xs font-medium animate-pulse">OVERDUE</span>';
+        else statusBadge = '<span class="bg-amber-100 text-amber-700 px-2 py-1 rounded-full text-xs font-medium">Unpaid</span>';
+
+        let ageBadge = '';
+        if (days <= 7) ageBadge = `<span class="text-green-600 text-xs font-medium">${days}d</span>`;
+        else if (days <= 14) ageBadge = `<span class="text-amber-500 text-xs font-medium">${days}d</span>`;
+        else if (days <= 30) ageBadge = `<span class="text-orange-500 text-xs font-bold">${days}d</span>`;
+        else ageBadge = `<span class="text-red-600 text-xs font-bold">${days}d</span>`;
+
+        return `
+        <tr class="table-row border-b ${isOverdue ? 'bg-red-50/50' : ''}">
+            <td class="py-3 px-4">
+                <div class="font-medium text-gray-800">${clientName}</div>
+                <div class="text-xs text-gray-400">${clientEmail}</div>
+                <div class="text-xs text-gray-400">${clientPhone}</div>
+            </td>
+            <td class="py-3 px-4">
+                <div class="font-medium text-gray-700">${orderNum}</div>
+                <div class="text-xs text-gray-400">Acct: ${order.account_number || '-'}</div>
+            </td>
+            <td class="py-3 px-4 text-sm text-gray-600">${order.package?.name || '-'}</td>
+            <td class="py-3 px-4 text-sm font-semibold text-gray-800">R${amt.toLocaleString()}</td>
+            <td class="py-3 px-4">${statusBadge}</td>
+            <td class="py-3 px-4">${ageBadge}</td>
+            <td class="py-3 px-4">
+                <div class="flex gap-1 items-center flex-wrap">
+                    <button onclick="openPaymentModal('${order.id}')" class="inline-flex items-center gap-1 bg-gradient-to-r from-rose-500 to-pink-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm hover:shadow-md transition-all">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                        Update
+                    </button>
+                    <button onclick="sendPaymentReminder('${order.id}')" class="inline-flex items-center gap-1 bg-gradient-to-r from-amber-500 to-orange-500 text-white px-3 py-1.5 rounded-lg text-xs font-medium shadow-sm hover:shadow-md transition-all" title="Send WhatsApp reminder">
+                        <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                        Remind
+                    </button>
+                </div>
+            </td>
+        </tr>`;
+    }).join('');
+}
+
+function openPaymentModal(orderId) {
+    currentPaymentOrderId = orderId;
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const clientName = order.lead?.full_name || order.client_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || '-';
+    document.getElementById('payModalClient').textContent = clientName;
+    document.getElementById('payModalOrder').textContent = order.order_number || order.lead?.order_number || orderId;
+    document.getElementById('payModalStatus').value = getPaymentStatus(order);
+    document.getElementById('payModalAmount').value = getPaymentAmount(order);
+    document.getElementById('payModalMethod').value = order.payment_method || '';
+    document.getElementById('payModalDate').value = order.payment_date ? new Date(order.payment_date).toISOString().split('T')[0] : new Date().toISOString().split('T')[0];
+    document.getElementById('payModalNotes').value = order.payment_notes || '';
+
+    openModal('paymentStatusModal');
+}
+
+async function savePaymentStatus() {
+    if (!currentPaymentOrderId) return;
+
+    const status = document.getElementById('payModalStatus').value;
+    const amount = parseFloat(document.getElementById('payModalAmount').value) || 0;
+    const method = document.getElementById('payModalMethod').value;
+    const date = document.getElementById('payModalDate').value;
+    const notes = document.getElementById('payModalNotes').value;
+
+    try {
+        const { error } = await window.supabaseClient
+            .from('orders')
+            .update({
+                payment_status: status,
+                payment_amount: amount,
+                payment_method: method,
+                payment_date: date ? new Date(date).toISOString() : null,
+                payment_notes: notes,
+                updated_at: new Date().toISOString()
+            })
+            .eq('id', currentPaymentOrderId);
+
+        if (error) throw error;
+
+        closeModal('paymentStatusModal');
+        currentPaymentOrderId = null;
+        await loadOrders();
+        renderPaymentsSection();
+        alert('Payment status updated successfully!');
+    } catch (error) {
+        console.error('Error updating payment:', error);
+        alert('Error updating payment: ' + error.message);
+    }
+}
+
+function sendPaymentReminder(orderId) {
+    const order = orders.find(o => o.id === orderId);
+    if (!order) return;
+
+    const clientName = order.lead?.full_name || order.client_name || `${order.lead?.first_name || ''} ${order.lead?.last_name || ''}`.trim() || 'Client';
+    const phone = order.lead?.phone || order.client_phone || '';
+    const amt = getPaymentAmount(order);
+    const orderNum = order.order_number || order.lead?.order_number || '-';
+    const days = getOrderAge(order);
+
+    const message = `Hi ${clientName},\n\nThis is a friendly reminder regarding your Axxess Fibre order #${orderNum}.\n\nOutstanding Amount: R${amt.toLocaleString()}\nDays Outstanding: ${days} days\n\nPlease arrange payment at your earliest convenience to avoid service interruption.\n\nPayment Methods:\n- EFT: Axxess DSL (Pty) Ltd\n- Debit Order: Contact us to set up\n\nThank you for choosing Axxess!\n\nRegards,\nAxxess Dealer Team`;
+
+    if (phone) {
+        const cleanPhone = phone.replace(/\D/g, '');
+        const intlPhone = cleanPhone.startsWith('0') ? '27' + cleanPhone.slice(1) : cleanPhone;
+        const waUrl = `https://wa.me/${intlPhone}?text=${encodeURIComponent(message)}`;
+        window.open(waUrl, '_blank');
+    } else {
+        navigator.clipboard.writeText(message).then(() => {
+            alert('No phone number found. Reminder message copied to clipboard!');
+        }).catch(() => {
+            alert('No phone number found for this client. Please add a contact number.');
+        });
+    }
+}
+
+function sendBulkReminders() {
+    const overdueOrders = orders.filter(o => {
+        if (o.status === 'cancelled') return false;
+        const ps = getPaymentStatus(o);
+        return ps === 'overdue' || (ps === 'unpaid' && getOrderAge(o) > 14);
+    });
+
+    if (overdueOrders.length === 0) {
+        alert('No overdue orders found!');
+        return;
+    }
+
+    const withPhone = overdueOrders.filter(o => o.lead?.phone || o.client_phone);
+    const withoutPhone = overdueOrders.length - withPhone.length;
+
+    if (!confirm(`Send WhatsApp reminders to ${withPhone.length} overdue clients?\n${withoutPhone > 0 ? `(${withoutPhone} clients have no phone number)` : ''}`)) return;
+
+    let sent = 0;
+    withPhone.forEach((order, i) => {
+        setTimeout(() => {
+            sendPaymentReminder(order.id);
+            sent++;
+        }, i * 1500);
+    });
+
+    alert(`Opening WhatsApp for ${withPhone.length} overdue clients. Each will open in a new tab.`);
+}
+
+function exportPaymentReport() {
+    const activeOrders = orders.filter(o => o.status !== 'cancelled');
+
+    const rows = activeOrders.map(o => {
+        const clientName = o.lead?.full_name || o.client_name || `${o.lead?.first_name || ''} ${o.lead?.last_name || ''}`.trim() || '-';
+        const ps = getPaymentStatus(o);
+        const days = getOrderAge(o);
+        const isOverdue = ps === 'overdue' || (ps === 'unpaid' && days > 14);
+        return {
+            'Client Name': clientName,
+            'Email': o.lead?.email || o.client_email || '',
+            'Phone': o.lead?.phone || o.client_phone || '',
+            'Order #': o.order_number || o.lead?.order_number || '',
+            'Account #': o.account_number || '',
+            'Package': o.package?.name || '',
+            'Amount': getPaymentAmount(o),
+            'Payment Status': isOverdue ? 'OVERDUE' : ps.toUpperCase(),
+            'Payment Method': o.payment_method || '',
+            'Payment Date': o.payment_date ? new Date(o.payment_date).toLocaleDateString() : '',
+            'Days Outstanding': days,
+            'Order Date': new Date(o.created_at).toLocaleDateString(),
+            'Notes': o.payment_notes || ''
+        };
+    });
+
+    if (typeof XLSX !== 'undefined') {
+        const ws = XLSX.utils.json_to_sheet(rows);
+        const wb = XLSX.utils.book_new();
+        XLSX.utils.book_append_sheet(wb, ws, 'Payment Report');
+        XLSX.writeFile(wb, `Axxess_Payment_Report_${new Date().toISOString().split('T')[0]}.xlsx`);
+    } else {
+        const csv = [Object.keys(rows[0] || {}).join(','), ...rows.map(r => Object.values(r).map(v => `"${v}"`).join(','))].join('\n');
+        const blob = new Blob([csv], { type: 'text/csv' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = `Axxess_Payment_Report_${new Date().toISOString().split('T')[0]}.csv`;
+        a.click();
     }
 }
 
