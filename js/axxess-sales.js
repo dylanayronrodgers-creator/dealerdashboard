@@ -122,17 +122,24 @@ function axHasPermission(perm) {
 async function loadAxxessSalesData() {
     try {
         // Small tables: normal queries (well under 1000 rows)
-        const [agentsRes, teamsRes, pricingRes, checksRes] = await Promise.all([
+        const [agentsRes, teamsRes, pricingRes] = await Promise.all([
             window.supabaseClient.from('agents').select('*').order('name'),
             window.supabaseClient.from('teams').select('*'),
-            window.supabaseClient.from('axxess_pricing').select('*').eq('is_active', true),
-            window.supabaseClient.from('service_status_checks').select('service_id,company,product,bob_status,checked_by,checked_at').order('checked_at', { ascending: false }).limit(100)
+            window.supabaseClient.from('axxess_pricing').select('*').eq('is_active', true)
         ]);
 
         axxessAgents = agentsRes.data || [];
         axxessTeams = teamsRes.data || [];
         axxessPricing = pricingRes.data || [];
-        axxessStatusChecks = checksRes.data || [];
+
+        // Status checks — separate query, fails gracefully if table doesn't exist
+        const checksRes = await window.supabaseClient.from('service_status_checks').select('*').order('checked_at', { ascending: false }).limit(100);
+        if (checksRes.error) {
+            console.warn('service_status_checks not available:', checksRes.error.message);
+            axxessStatusChecks = [];
+        } else {
+            axxessStatusChecks = checksRes.data || [];
+        }
 
         // Large tables: paginated fetch (bypasses 1000-row cap)
         const [allSales, allReminders] = await Promise.all([
