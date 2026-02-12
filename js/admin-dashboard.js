@@ -391,6 +391,7 @@ function renderAgentsGrid() {
             </div>
             <div class="flex gap-2">
                 <button onclick="viewAgentDetails('${agent.id}')" class="flex-1 text-blue-600 hover:bg-blue-50 py-2 rounded-lg text-sm font-medium">View</button>
+                <button onclick="shareAgentLogin('${agent.email}', '${agent.full_name}')" class="flex-1 text-emerald-600 hover:bg-emerald-50 py-2 rounded-lg text-sm font-medium">Share</button>
                 <button onclick="deleteAgent('${agent.id}')" class="flex-1 text-red-600 hover:bg-red-50 py-2 rounded-lg text-sm font-medium">Remove</button>
             </div>
         </div>
@@ -1660,6 +1661,38 @@ function filterOrders() {
     }
     
     renderOrdersTable(filtered);
+}
+
+// Share agent login details
+function shareAgentLogin(email, name) {
+    const config = getSupabaseConfig();
+    const text = `🔐 Axxess Agent Dashboard Login
+
+👤 Name: ${name}
+📧 Email: ${email}
+🔑 Password: (use the password set during account creation)
+
+🌐 Dashboard URL:
+https://dylanayronrodgers-creator.github.io/AxxessSalesDashboardNew/portal/index.html
+
+⚙️ Supabase Setup (if prompted):
+URL: ${config ? config.url : 'https://xitiatikzlzcswakgevy.supabase.co'}
+API Key: ${config ? config.key : 'sb_publishable_o-2_PZ2xRLLPt7JfC2Stzw_knc5GHGE'}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const original = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.remove('text-emerald-600');
+        btn.classList.add('text-white', 'bg-emerald-500');
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.classList.add('text-emerald-600');
+            btn.classList.remove('text-white', 'bg-emerald-500');
+        }, 2000);
+    }).catch(() => {
+        prompt('Copy these login details:', text);
+    });
 }
 
 // Delete functions
