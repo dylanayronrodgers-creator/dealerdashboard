@@ -126,7 +126,7 @@ async function loadAxxessSalesData() {
             window.supabaseClient.from('agents').select('*').order('name'),
             window.supabaseClient.from('teams').select('*'),
             window.supabaseClient.from('axxess_pricing').select('*').eq('is_active', true),
-            window.supabaseClient.from('service_status_checks').select('*').order('checked_at', { ascending: false }).limit(100)
+            window.supabaseClient.from('service_status_checks').select('service_id,company,product,bob_status,checked_by,checked_at').order('checked_at', { ascending: false }).limit(100)
         ]);
 
         axxessAgents = agentsRes.data || [];
@@ -556,7 +556,6 @@ window.axAddSale = async function() {
 
     try {
         const pkg = axxessPricing.find(p => p.id === parseInt(pkgId));
-        const trialStartDate = (status === 'Free Trial') ? (document.getElementById('axTrialStartDate')?.value || new Date().toISOString().slice(0,10)) : null;
         const saleData = {
             agent_id: axxessCurrentAgent.id,
             account_number: accountNum,
@@ -572,7 +571,6 @@ window.axAddSale = async function() {
             notes: notes || '',
             commission_status: (status === 'Paid-Active' && reason === 'Full Payment') ? 'Counts' : 'Does Not Count',
             import_source: null,
-            trial_start_date: trialStartDate,
             created_at: new Date().toISOString()
         };
 
@@ -1137,11 +1135,10 @@ function renderAxStatusChecks(container) {
         html += `<div class="card overflow-hidden"><div class="flex items-center justify-between px-4 py-3 bg-gray-50">
             <span class="font-semibold text-gray-800">Recent Status Checks (${axxessStatusChecks.length})</span>
         </div><div class="overflow-x-auto"><table class="w-full text-sm">
-            <thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Service ID</th><th class="px-3 py-2">Company</th><th class="px-3 py-2">Product</th><th class="px-3 py-2">Bob Status</th><th class="px-3 py-2">Sale Updated</th><th class="px-3 py-2">Checked By</th><th class="px-3 py-2">Checked At</th></tr></thead><tbody>`;
+            <thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Service ID</th><th class="px-3 py-2">Company</th><th class="px-3 py-2">Product</th><th class="px-3 py-2">Bob Status</th><th class="px-3 py-2">Checked By</th><th class="px-3 py-2">Checked At</th></tr></thead><tbody>`;
         axxessStatusChecks.forEach(c => {
             const bobCls = (c.bob_status || '').toLowerCase().includes('active') ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium';
-            const updatedBadge = c.sale_updated ? '<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700">Yes</span>' : '<span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-500">No</span>';
-            html += `<tr class="border-t hover:bg-gray-50"><td class="px-3 py-2 font-mono">${c.service_id || '-'}</td><td class="px-3 py-2">${c.company || '-'}</td><td class="px-3 py-2">${c.product || '-'}</td><td class="px-3 py-2 ${bobCls}">${c.bob_status || '-'}</td><td class="px-3 py-2">${updatedBadge}</td><td class="px-3 py-2">${c.checked_by || '-'}</td><td class="px-3 py-2 text-gray-500">${c.checked_at ? new Date(c.checked_at).toLocaleString() : '-'}</td></tr>`;
+            html += `<tr class="border-t hover:bg-gray-50"><td class="px-3 py-2 font-mono">${c.service_id || '-'}</td><td class="px-3 py-2">${c.company || '-'}</td><td class="px-3 py-2">${c.product || '-'}</td><td class="px-3 py-2 ${bobCls}">${c.bob_status || '-'}</td><td class="px-3 py-2">${c.checked_by || '-'}</td><td class="px-3 py-2 text-gray-500">${c.checked_at ? new Date(c.checked_at).toLocaleString() : '-'}</td></tr>`;
         });
         html += '</tbody></table></div></div>';
     }
@@ -1250,8 +1247,7 @@ window.axConfirmStatusCsvUpload = async function() {
                 product: row.product || null,
                 bob_status: row.csv_status,
                 checked_by: checkedBy,
-                checked_at: now,
-                sale_updated: false
+                checked_at: now
             };
 
             const { error: checkErr } = await window.supabaseClient.from('service_status_checks').insert([checkData]);
@@ -1283,11 +1279,6 @@ window.axConfirmStatusCsvUpload = async function() {
 
                         if (!updateErr) {
                             updatedCount++;
-                            // Mark the check as having updated a sale
-                            await window.supabaseClient.from('service_status_checks')
-                                .update({ sale_updated: true })
-                                .eq('service_id', row.service_id)
-                                .eq('checked_at', now);
                         }
                     }
                 }
