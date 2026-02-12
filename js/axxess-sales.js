@@ -1101,21 +1101,219 @@ function renderAxFreeTrials(container) {
     container.innerHTML = html;
 }
 
+// ─── CSV Status → Sale Status mapping ───
+const CSV_STATUS_MAP = {
+    'active':                        { sale_status: 'Paid-Active', status_reason: 'Full Payment' },
+    'awaiting provider completion':  { sale_status: 'Pending',     status_reason: 'Awaiting Provider Completion' },
+    'awaiting client feedback':      { sale_status: 'Pending',     status_reason: 'Awaiting Client Feedback' },
+    'not found':                     { sale_status: 'Failed',      status_reason: 'No Feedback from Client' },
+    'non payment':                   { sale_status: 'Failed',      status_reason: 'Non-Payment' }
+};
+
 // ─── Status Checks Tab ───
 function renderAxStatusChecks(container) {
-    if (axxessStatusChecks.length === 0) {
-        container.innerHTML = '<div class="card p-6 text-center text-gray-500">No status checks yet. Use the Tampermonkey script to sync.</div>';
-        return;
+    let html = `
+    <div class="card p-6 mb-4">
+        <h4 class="font-semibold text-gray-800 mb-2">Upload Status Check CSV</h4>
+        <p class="text-sm text-gray-500 mb-3">Upload a CSV with <strong>Service ID</strong> and <strong>Status</strong> columns. This will log each check and auto-update matching sales.</p>
+        <div class="bg-gray-50 rounded-xl p-4 mb-3 text-xs text-gray-500">
+            <strong>Status Mapping:</strong><br>
+            <span class="text-emerald-600 font-medium">Active</span> → Paid-Active (Full Payment) &nbsp;|&nbsp;
+            <span class="text-yellow-600 font-medium">Awaiting Provider Completion</span> → Pending &nbsp;|&nbsp;
+            <span class="text-yellow-600 font-medium">Awaiting Client Feedback</span> → Pending &nbsp;|&nbsp;
+            <span class="text-red-600 font-medium">Not Found</span> → Failed &nbsp;|&nbsp;
+            <span class="text-red-600 font-medium">Non Payment</span> → Failed (Non-Payment)
+        </div>
+        <div class="flex items-center gap-3">
+            <input type="file" id="axStatusCsvFile" accept=".csv" class="text-sm">
+            <button onclick="axProcessStatusCsv()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm font-medium">Upload & Process</button>
+        </div>
+        <div id="axStatusCsvMsg" class="mt-3"></div>
+        <div id="axStatusCsvPreview" class="mt-3"></div>
+    </div>`;
+
+    // Existing checks table
+    if (axxessStatusChecks.length > 0) {
+        html += `<div class="card overflow-hidden"><div class="flex items-center justify-between px-4 py-3 bg-gray-50">
+            <span class="font-semibold text-gray-800">Recent Status Checks (${axxessStatusChecks.length})</span>
+        </div><div class="overflow-x-auto"><table class="w-full text-sm">
+            <thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Service ID</th><th class="px-3 py-2">Company</th><th class="px-3 py-2">Product</th><th class="px-3 py-2">Bob Status</th><th class="px-3 py-2">Sale Updated</th><th class="px-3 py-2">Checked By</th><th class="px-3 py-2">Checked At</th></tr></thead><tbody>`;
+        axxessStatusChecks.forEach(c => {
+            const bobCls = (c.bob_status || '').toLowerCase().includes('active') ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium';
+            const updatedBadge = c.sale_updated ? '<span class="px-2 py-0.5 rounded-full text-xs bg-emerald-100 text-emerald-700">Yes</span>' : '<span class="px-2 py-0.5 rounded-full text-xs bg-gray-100 text-gray-500">No</span>';
+            html += `<tr class="border-t hover:bg-gray-50"><td class="px-3 py-2 font-mono">${c.service_id || '-'}</td><td class="px-3 py-2">${c.company || '-'}</td><td class="px-3 py-2">${c.product || '-'}</td><td class="px-3 py-2 ${bobCls}">${c.bob_status || '-'}</td><td class="px-3 py-2">${updatedBadge}</td><td class="px-3 py-2">${c.checked_by || '-'}</td><td class="px-3 py-2 text-gray-500">${c.checked_at ? new Date(c.checked_at).toLocaleString() : '-'}</td></tr>`;
+        });
+        html += '</tbody></table></div></div>';
     }
-    let html = `<div class="card overflow-hidden"><div class="overflow-x-auto"><table class="w-full text-sm">
-        <thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Service ID</th><th class="px-3 py-2">Company</th><th class="px-3 py-2">Product</th><th class="px-3 py-2">Bob Status</th><th class="px-3 py-2">Checked By</th><th class="px-3 py-2">Checked At</th></tr></thead><tbody>`;
-    axxessStatusChecks.forEach(c => {
-        const bobCls = (c.bob_status || '').toLowerCase().includes('active') ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium';
-        html += `<tr class="border-t hover:bg-gray-50"><td class="px-3 py-2 font-mono">${c.service_id || '-'}</td><td class="px-3 py-2">${c.company || '-'}</td><td class="px-3 py-2">${c.product || '-'}</td><td class="px-3 py-2 ${bobCls}">${c.bob_status || '-'}</td><td class="px-3 py-2">${c.checked_by || '-'}</td><td class="px-3 py-2 text-gray-500">${c.checked_at ? new Date(c.checked_at).toLocaleString() : '-'}</td></tr>`;
-    });
-    html += '</tbody></table></div></div>';
+
     container.innerHTML = html;
 }
+
+// ─── CSV Upload Processing ───
+window.axProcessStatusCsv = async function() {
+    const msg = document.getElementById('axStatusCsvMsg');
+    const preview = document.getElementById('axStatusCsvPreview');
+    const fileInput = document.getElementById('axStatusCsvFile');
+    msg.innerHTML = '';
+    preview.innerHTML = '';
+
+    if (!fileInput.files.length) {
+        msg.innerHTML = '<p class="text-red-600 text-sm">Please select a CSV file</p>';
+        return;
+    }
+
+    const file = fileInput.files[0];
+    const text = await file.text();
+    const lines = text.split(/\r?\n/).filter(l => l.trim());
+
+    if (lines.length < 2) {
+        msg.innerHTML = '<p class="text-red-600 text-sm">CSV must have a header row and at least one data row</p>';
+        return;
+    }
+
+    // Parse header
+    const header = lines[0].split(',').map(h => h.trim().toLowerCase().replace(/['"]/g, ''));
+    const sidIdx = header.findIndex(h => h.includes('service') && h.includes('id') || h === 'service_id' || h === 'serviceid');
+    const statusIdx = header.findIndex(h => h === 'status' || h === 'bob_status' || h === 'bob status');
+    const companyIdx = header.findIndex(h => h === 'company' || h === 'client' || h === 'name');
+    const productIdx = header.findIndex(h => h === 'product' || h === 'package');
+
+    if (sidIdx === -1 || statusIdx === -1) {
+        msg.innerHTML = '<p class="text-red-600 text-sm">CSV must have "Service ID" and "Status" columns. Found headers: <strong>' + header.join(', ') + '</strong></p>';
+        return;
+    }
+
+    // Parse rows
+    const rows = [];
+    for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(',').map(c => c.trim().replace(/^['"]|['"]$/g, ''));
+        const serviceId = cols[sidIdx]?.trim();
+        const csvStatus = cols[statusIdx]?.trim();
+        if (!serviceId || !csvStatus) continue;
+
+        const mapped = CSV_STATUS_MAP[csvStatus.toLowerCase()];
+        rows.push({
+            service_id: serviceId,
+            csv_status: csvStatus,
+            company: companyIdx >= 0 ? cols[companyIdx] || '' : '',
+            product: productIdx >= 0 ? cols[productIdx] || '' : '',
+            mapped: mapped || null
+        });
+    }
+
+    if (rows.length === 0) {
+        msg.innerHTML = '<p class="text-red-600 text-sm">No valid data rows found in CSV</p>';
+        return;
+    }
+
+    // Show preview
+    const unmapped = rows.filter(r => !r.mapped);
+    let previewHtml = `<p class="text-sm text-gray-600 mb-2">Found <strong>${rows.length}</strong> rows. ${unmapped.length > 0 ? `<span class="text-orange-600">${unmapped.length} with unknown status (will be logged but not mapped).</span>` : ''}</p>`;
+    previewHtml += `<div class="overflow-x-auto max-h-64 overflow-y-auto"><table class="w-full text-xs">
+        <thead class="bg-gray-100 sticky top-0"><tr><th class="px-2 py-1 text-left">Service ID</th><th class="px-2 py-1 text-left">CSV Status</th><th class="px-2 py-1 text-left">→ Sale Status</th><th class="px-2 py-1 text-left">→ Reason</th></tr></thead><tbody>`;
+    rows.forEach(r => {
+        const cls = r.mapped ? '' : 'bg-orange-50';
+        previewHtml += `<tr class="border-t ${cls}"><td class="px-2 py-1 font-mono">${r.service_id}</td><td class="px-2 py-1">${r.csv_status}</td><td class="px-2 py-1">${r.mapped ? r.mapped.sale_status : '<span class="text-orange-500">Unknown</span>'}</td><td class="px-2 py-1">${r.mapped ? r.mapped.status_reason : '-'}</td></tr>`;
+    });
+    previewHtml += '</tbody></table></div>';
+    previewHtml += `<button onclick="axConfirmStatusCsvUpload()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm font-medium mt-3">Confirm & Process ${rows.length} Rows</button>`;
+    preview.innerHTML = previewHtml;
+
+    // Store parsed rows for confirmation
+    window._axPendingCsvRows = rows;
+};
+
+window.axConfirmStatusCsvUpload = async function() {
+    const msg = document.getElementById('axStatusCsvMsg');
+    const preview = document.getElementById('axStatusCsvPreview');
+    const rows = window._axPendingCsvRows;
+
+    if (!rows || rows.length === 0) {
+        msg.innerHTML = '<p class="text-red-600 text-sm">No data to process</p>';
+        return;
+    }
+
+    msg.innerHTML = '<p class="text-blue-600 text-sm font-medium">Processing... please wait</p>';
+    preview.innerHTML = '';
+
+    const checkedBy = currentUser?.full_name || currentUser?.email || 'CSV Upload';
+    const now = new Date().toISOString();
+    let loggedCount = 0, updatedCount = 0, errorCount = 0;
+    const results = [];
+
+    for (const row of rows) {
+        try {
+            // 1. Log to service_status_checks
+            const checkData = {
+                service_id: row.service_id,
+                company: row.company || null,
+                product: row.product || null,
+                bob_status: row.csv_status,
+                checked_by: checkedBy,
+                checked_at: now,
+                sale_updated: false
+            };
+
+            const { error: checkErr } = await window.supabaseClient.from('service_status_checks').insert([checkData]);
+            if (checkErr) throw checkErr;
+            loggedCount++;
+
+            // 2. Auto-update matching sales_log if mapped
+            if (row.mapped) {
+                const { data: matchingSales } = await window.supabaseClient
+                    .from('sales_log')
+                    .select('id, sale_status, status_reason')
+                    .eq('service_id', row.service_id)
+                    .order('created_at', { ascending: false })
+                    .limit(1);
+
+                if (matchingSales && matchingSales.length > 0) {
+                    const sale = matchingSales[0];
+                    // Only update if status actually changed
+                    if (sale.sale_status !== row.mapped.sale_status || sale.status_reason !== row.mapped.status_reason) {
+                        const updateData = {
+                            sale_status: row.mapped.sale_status,
+                            status_reason: row.mapped.status_reason,
+                            commission_status: (row.mapped.sale_status === 'Paid-Active' && row.mapped.status_reason === 'Full Payment') ? 'Counts' : 'Does Not Count'
+                        };
+                        const { error: updateErr } = await window.supabaseClient
+                            .from('sales_log')
+                            .update(updateData)
+                            .eq('id', sale.id);
+
+                        if (!updateErr) {
+                            updatedCount++;
+                            // Mark the check as having updated a sale
+                            await window.supabaseClient.from('service_status_checks')
+                                .update({ sale_updated: true })
+                                .eq('service_id', row.service_id)
+                                .eq('checked_at', now);
+                        }
+                    }
+                }
+            }
+
+            results.push({ ...row, success: true });
+        } catch (err) {
+            errorCount++;
+            results.push({ ...row, success: false, error: err.message });
+        }
+    }
+
+    // Show results
+    let resultHtml = `<div class="bg-gray-50 rounded-xl p-4 space-y-1">
+        <p class="text-sm font-medium text-gray-800">Upload Complete</p>
+        <p class="text-sm"><span class="text-emerald-600 font-bold">${loggedCount}</span> status checks logged</p>
+        <p class="text-sm"><span class="text-blue-600 font-bold">${updatedCount}</span> sales updated</p>
+        ${errorCount > 0 ? `<p class="text-sm"><span class="text-red-600 font-bold">${errorCount}</span> errors</p>` : ''}
+    </div>`;
+
+    msg.innerHTML = resultHtml;
+    window._axPendingCsvRows = null;
+
+    // Reload data to reflect changes
+    setTimeout(() => loadAxxessSalesData(), 1000);
+};
 
 // ─── Permissions Tab (super_admin only) ───
 function renderAxPermissions(container) {
