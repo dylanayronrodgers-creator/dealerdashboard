@@ -133,7 +133,11 @@ async function loadAxxessSalesData() {
         axxessPricing = pricingRes.data || [];
 
         // Status checks — separate query, fails gracefully if table doesn't exist
-        const checksRes = await window.supabaseClient.from('service_status_checks').select('*').order('checked_at', { ascending: false }).limit(100);
+        let checksRes = await window.supabaseClient.from('service_status_checks').select('*').order('created_at', { ascending: false }).limit(100);
+        if (checksRes.error) {
+            // Try without ordering if column doesn't exist
+            checksRes = await window.supabaseClient.from('service_status_checks').select('*').limit(100);
+        }
         if (checksRes.error) {
             console.warn('service_status_checks not available:', checksRes.error.message);
             axxessStatusChecks = [];
@@ -1145,7 +1149,8 @@ function renderAxStatusChecks(container) {
             <thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Service ID</th><th class="px-3 py-2">Company</th><th class="px-3 py-2">Product</th><th class="px-3 py-2">Bob Status</th><th class="px-3 py-2">Checked By</th><th class="px-3 py-2">Checked At</th></tr></thead><tbody>`;
         axxessStatusChecks.forEach(c => {
             const bobCls = (c.bob_status || '').toLowerCase().includes('active') ? 'text-emerald-600 font-medium' : 'text-red-500 font-medium';
-            html += `<tr class="border-t hover:bg-gray-50"><td class="px-3 py-2 font-mono">${c.service_id || '-'}</td><td class="px-3 py-2">${c.company || '-'}</td><td class="px-3 py-2">${c.product || '-'}</td><td class="px-3 py-2 ${bobCls}">${c.bob_status || '-'}</td><td class="px-3 py-2">${c.checked_by || '-'}</td><td class="px-3 py-2 text-gray-500">${c.checked_at ? new Date(c.checked_at).toLocaleString() : '-'}</td></tr>`;
+            const ts = c.checked_at || c.created_at;
+            html += `<tr class="border-t hover:bg-gray-50"><td class="px-3 py-2 font-mono">${c.service_id || '-'}</td><td class="px-3 py-2">${c.company || '-'}</td><td class="px-3 py-2">${c.product || '-'}</td><td class="px-3 py-2 ${bobCls}">${c.bob_status || '-'}</td><td class="px-3 py-2">${c.checked_by || '-'}</td><td class="px-3 py-2 text-gray-500">${ts ? new Date(ts).toLocaleString() : '-'}</td></tr>`;
         });
         html += '</tbody></table></div></div>';
     }
@@ -1240,28 +1245,11 @@ window.axConfirmStatusCsvUpload = async function() {
     msg.innerHTML = '<p class="text-blue-600 text-sm font-medium">Processing... please wait</p>';
     preview.innerHTML = '';
 
-    const checkedBy = currentUser?.full_name || currentUser?.email || 'CSV Upload';
-    const now = new Date().toISOString();
-    let loggedCount = 0, updatedCount = 0, errorCount = 0;
+    let updatedCount = 0, errorCount = 0, matchedCount = 0, notFoundCount = 0;
     const results = [];
 
     for (const row of rows) {
         try {
-            // 1. Log to service_status_checks
-            const checkData = {
-                service_id: row.service_id,
-                company: row.company || null,
-                product: row.product || null,
-                bob_status: row.csv_status,
-                checked_by: checkedBy,
-                checked_at: now
-            };
-
-            const { error: checkErr } = await window.supabaseClient.from('service_status_checks').insert([checkData]);
-            if (checkErr) throw checkErr;
-            loggedCount++;
-
-            // 2. Auto-update matching sales_log if mapped
             if (row.mapped) {
                 const { data: matchingSales } = await window.supabaseClient
                     .from('sales_log')
@@ -1272,7 +1260,6 @@ window.axConfirmStatusCsvUpload = async function() {
 
                 if (matchingSales && matchingSales.length > 0) {
                     const sale = matchingSales[0];
-                    // Only update if status actually changed
                     if (sale.sale_status !== row.mapped.sale_status || sale.status_reason !== row.mapped.status_reason) {
                         const updateData = {
                             sale_status: row.mapped.sale_status,
@@ -1284,13 +1271,17 @@ window.axConfirmStatusCsvUpload = async function() {
                             .update(updateData)
                             .eq('id', sale.id);
 
-                        if (!updateErr) {
-                            updatedCount++;
-                        }
+                        if (!updateErr) updatedCount++;
+                    } else {
+                        updatedCount++; // Already correct status
                     }
+                    matchedCount++;
+                } else {
+                    notFoundCount++;
                 }
+            } else {
+                notFoundCount++;
             }
-
             results.push({ ...row, success: true });
         } catch (err) {
             errorCount++;
@@ -1301,8 +1292,9 @@ window.axConfirmStatusCsvUpload = async function() {
     // Show results
     let resultHtml = `<div class="bg-gray-50 rounded-xl p-4 space-y-1">
         <p class="text-sm font-medium text-gray-800">Upload Complete</p>
-        <p class="text-sm"><span class="text-emerald-600 font-bold">${loggedCount}</span> status checks logged</p>
+        <p class="text-sm"><span class="text-emerald-600 font-bold">${matchedCount}</span> service IDs matched in sales</p>
         <p class="text-sm"><span class="text-blue-600 font-bold">${updatedCount}</span> sales updated</p>
+        ${notFoundCount > 0 ? `<p class="text-sm"><span class="text-orange-600 font-bold">${notFoundCount}</span> not found in sales</p>` : ''}
         ${errorCount > 0 ? `<p class="text-sm"><span class="text-red-600 font-bold">${errorCount}</span> errors</p>` : ''}
     </div>`;
 
