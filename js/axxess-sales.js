@@ -1347,7 +1347,7 @@ async function loadAxLinkingTable() {
     const roleOptions = ['super_admin', 'admin', 'internal_agent', 'agent', 'external_agent', 'dealer', 'openserve'];
     const roleColors = { super_admin: 'bg-red-100 text-red-700', admin: 'bg-blue-100 text-blue-700', internal_agent: 'bg-purple-100 text-purple-700', agent: 'bg-green-100 text-green-700', external_agent: 'bg-teal-100 text-teal-700', dealer: 'bg-orange-100 text-orange-700', openserve: 'bg-yellow-100 text-yellow-700' };
 
-    let html = `<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Profile</th><th class="px-3 py-2">Role</th><th class="px-3 py-2">Linked Agent</th><th class="px-3 py-2">Status</th></tr></thead><tbody>`;
+    let html = `<table class="w-full text-sm"><thead class="bg-gray-50"><tr class="text-left text-gray-500"><th class="px-3 py-2">Profile</th><th class="px-3 py-2">Role</th><th class="px-3 py-2">Linked Agent</th><th class="px-3 py-2">Status</th><th class="px-3 py-2">Share</th></tr></thead><tbody>`;
     profiles.forEach(p => {
         const linked = axxessAgents.find(a => a.id === p.agent_table_id);
         const rc = roleColors[p.role] || 'bg-gray-100 text-gray-700';
@@ -1365,11 +1365,49 @@ async function loadAxLinkingTable() {
                 </select>
             </td>
             <td class="px-3 py-2">${linked ? '<span class="text-emerald-600 text-xs font-medium">Linked</span>' : '<span class="text-gray-400 text-xs">Unlinked</span>'}</td>
+            <td class="px-3 py-2"><button onclick="axShareLogin('${p.email.replace(/'/g, "\\'") }', '${(p.full_name || 'User').replace(/'/g, "\\'") }', '${p.role}')" class="text-emerald-600 hover:bg-emerald-50 px-2 py-1 rounded-lg text-xs font-medium border border-emerald-200">Share</button></td>
         </tr>`;
     });
     html += '</tbody></table>';
     el.innerHTML = html;
 }
+
+window.axShareLogin = function(email, name, role) {
+    const config = getSupabaseConfig();
+    const supaUrl = config ? config.url : 'https://xitiatikzlzcswakgevy.supabase.co';
+    const supaKey = config ? config.key : 'sb_publishable_o-2_PZ2xRLLPt7JfC2Stzw_knc5GHGE';
+
+    const roleLabels = { super_admin: 'Super Admin', admin: 'Admin', internal_agent: 'Internal Agent', agent: 'Agent', external_agent: 'External Agent', dealer: 'Dealer', openserve: 'Openserve' };
+    const roleLabel = roleLabels[role] || role;
+
+    let dashboardUrl;
+    if (role === 'super_admin' || role === 'admin') {
+        dashboardUrl = 'https://dylanayronrodgers-creator.github.io/dealerdashboard/admin-dashboard.html';
+    } else if (role === 'internal_agent') {
+        dashboardUrl = 'https://dylanayronrodgers-creator.github.io/dealerdashboard/internal-agent-dashboard.html';
+    } else if (role === 'dealer') {
+        dashboardUrl = 'https://dylanayronrodgers-creator.github.io/dealerdashboard/dealer-dashboard.html';
+    } else if (role === 'openserve') {
+        dashboardUrl = 'https://dylanayronrodgers-creator.github.io/dealerdashboard/openserve-dashboard.html';
+    } else {
+        dashboardUrl = 'https://dylanayronrodgers-creator.github.io/AxxessSalesDashboardNew/portal/index.html';
+    }
+
+    const loginUrl = (role === 'agent' || role === 'external_agent')
+        ? dashboardUrl
+        : 'https://dylanayronrodgers-creator.github.io/dealerdashboard/login.html';
+
+    const text = `🔐 Axxess ${roleLabel} Dashboard Login\n\n👤 Name: ${name}\n📧 Email: ${email}\n🔑 Password: (use the password set during account creation)\n\n🌐 Login URL:\n${loginUrl}\n\n📊 Dashboard:\n${dashboardUrl}\n\n⚙️ Supabase Setup (if prompted):\nURL: ${supaUrl}\nAPI Key: ${supaKey}`;
+
+    navigator.clipboard.writeText(text).then(() => {
+        const btn = event.target;
+        const orig = btn.textContent;
+        btn.textContent = 'Copied!';
+        btn.classList.add('bg-emerald-500', 'text-white');
+        btn.classList.remove('text-emerald-600');
+        setTimeout(() => { btn.textContent = orig; btn.classList.remove('bg-emerald-500', 'text-white'); btn.classList.add('text-emerald-600'); }, 2000);
+    }).catch(() => { prompt('Copy login details:', text); });
+};
 
 window.axChangeRole = async function(profileId, newRole) {
     try {
