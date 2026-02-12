@@ -76,7 +76,13 @@ const FREE_TRIAL_DAYS = 30;
 
 function axGetTrialDaysLeft(sale) {
     if (sale.sale_status !== 'Free Trial') return null;
-    const start = sale.trial_start_date ? new Date(sale.trial_start_date) : new Date(sale.created_at);
+    let start;
+    if (sale.trial_start_date) {
+        start = new Date(sale.trial_start_date);
+    } else {
+        const created = new Date(sale.created_at);
+        start = new Date(created.getFullYear(), created.getMonth(), 1);
+    }
     const now = new Date();
     const elapsed = Math.floor((now - start) / (1000 * 60 * 60 * 24));
     return Math.max(FREE_TRIAL_DAYS - elapsed, 0);
@@ -319,7 +325,7 @@ function axGetMyReminders() {
 // ─── Commission calculation (same logic as project 4) ───
 function axCalcCommission(sales, target) {
     const validSales = sales.filter(s => s.sale_status !== 'Failed');
-    const commissioned = sales.filter(s => s.sale_status === 'Paid-Active' && s.status_reason === 'Full Payment');
+    const commissioned = sales.filter(s => s.sale_status === 'Free Trial' || (s.sale_status === 'Paid-Active' && s.status_reason === 'Full Payment'));
     const totalValue = validSales.reduce((sum, s) => sum + (parseFloat(s.total_sale) || 0), 0);
     const commValue = commissioned.reduce((sum, s) => sum + (parseFloat(s.total_sale) || 0), 0);
     const totalProg = target > 0 ? (totalValue / target) * 100 : 0;
@@ -473,7 +479,7 @@ function renderAxAddSale(container) {
             </div>` : ''}
             <div id="axTrialDateField" class="hidden">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Trial Start Date</label>
-                <input type="date" id="axTrialStartDate" class="w-full border rounded-xl px-3 py-2" value="${new Date().toISOString().slice(0,10)}">
+                <input type="date" id="axTrialStartDate" class="w-full border rounded-xl px-3 py-2" value="${new Date(new Date().getFullYear(), new Date().getMonth(), 1).toISOString().slice(0,10)}">
             </div>
             <div class="md:col-span-2">
                 <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
@@ -530,7 +536,13 @@ window.axToggleCampaign = function() {
 window.axToggleTrialDate = function() {
     const status = document.getElementById('axStatus')?.value;
     const field = document.getElementById('axTrialDateField');
-    if (field) field.classList.toggle('hidden', status !== 'Free Trial');
+    if (field) {
+        field.classList.toggle('hidden', status !== 'Free Trial');
+        if (status === 'Free Trial') {
+            const now = new Date();
+            document.getElementById('axTrialStartDate').value = new Date(now.getFullYear(), now.getMonth(), 1).toISOString().slice(0, 10);
+        }
+    }
 };
 
 window.axAddSale = async function() {
