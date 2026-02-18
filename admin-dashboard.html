@@ -240,13 +240,7 @@
                 </svg>
                 Dealers
             </a>
-            <a href="#pending-agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('pending-agents')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Pending Agents
-                <span id="pendingAgentsBadge" class="hidden bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
-            </a>
+            <!-- Pending Agents removed - no longer used -->
             <a href="#axxess-sales" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('axxess-sales')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -641,11 +635,28 @@
                 <span id="leadFilterCount" class="text-sm text-gray-500 ml-auto"></span>
             </div>
 
+            <!-- Bulk Assign Bar -->
+            <div id="bulkAssignBar" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3 shadow-sm">
+                <div class="flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
+                    <span class="text-sm font-semibold text-indigo-700" id="bulkSelectedCount">0 selected</span>
+                </div>
+                <select id="bulkAssignAgent" class="border border-indigo-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
+                    <option value="">Select Internal Agent</option>
+                </select>
+                <button onclick="bulkAssignLeads()" class="bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-1">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    Assign Selected
+                </button>
+                <button onclick="clearBulkSelection()" class="text-gray-500 hover:text-gray-700 px-3 py-1.5 text-sm border rounded-lg hover:bg-gray-50">Clear Selection</button>
+            </div>
+
             <div class="card">
                 <div class="overflow-x-auto">
                     <table class="w-full">
                         <thead class="bg-gray-50">
                             <tr class="text-left text-gray-500 text-xs uppercase tracking-wider">
+                                <th class="py-3 px-4 font-medium w-8"><input type="checkbox" id="selectAllLeads" onchange="toggleSelectAllLeads(this)" class="rounded"></th>
                                 <th class="py-3 px-4 font-medium">Client Name</th>
                                 <th class="py-3 px-4 font-medium">Contact</th>
                                 <th class="py-3 px-4 font-medium">Address</th>

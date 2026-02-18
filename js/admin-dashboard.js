@@ -522,8 +522,13 @@ function previewDealerLogo(url) {
     }
 }
 
+function getInternalAgents() {
+    return agents.filter(a => !a.dealer_id);
+}
+
 function populateAgentSelects() {
     const selects = ['leadAgentSelect', 'leadAgentFilter', 'orderAgentFilter'];
+    const internalAgents = getInternalAgents();
     
     selects.forEach(selectId => {
         const select = document.getElementById(selectId);
@@ -533,13 +538,22 @@ function populateAgentSelects() {
             
             select.innerHTML = isFilter ? '<option value="">All Agents</option>' : '<option value="">Select Agent</option>';
             
-            agents.forEach(agent => {
+            internalAgents.forEach(agent => {
                 select.innerHTML += `<option value="${agent.id}">${agent.full_name}</option>`;
             });
             
             select.value = currentValue;
         }
     });
+    
+    // Also populate bulk assign dropdown
+    const bulkSelect = document.getElementById('bulkAssignAgent');
+    if (bulkSelect) {
+        bulkSelect.innerHTML = '<option value="">Select Internal Agent</option>';
+        internalAgents.forEach(agent => {
+            bulkSelect.innerHTML += `<option value="${agent.id}">${agent.full_name}</option>`;
+        });
+    }
 }
 
 // Load Packages
@@ -647,7 +661,7 @@ function renderLeadsTable(filteredLeads = null) {
     if (displayLeads.length === 0) {
         table.innerHTML = `
             <tr class="table-row border-b">
-                <td class="py-4" colspan="7">
+                <td class="py-4" colspan="9">
                     <p class="text-gray-500 text-center">No leads found</p>
                 </td>
             </tr>
@@ -666,6 +680,9 @@ function renderLeadsTable(filteredLeads = null) {
         
         return `
         <tr class="table-row border-b">
+            <td class="py-4 px-4 w-8">
+                <input type="checkbox" class="lead-checkbox rounded" value="${lead.id}" onchange="updateBulkSelection()">
+            </td>
             <td class="py-4">
                 <div class="flex items-center gap-2">
                     <div>
@@ -1958,7 +1975,7 @@ document.addEventListener('DOMContentLoaded', () => {
 // ============================================
 function buildAssignToOptions(currentAssignedTo) {
     let html = '<option value="">Unassigned</option>';
-    agents.forEach(a => {
+    getInternalAgents().forEach(a => {
         const sel = currentAssignedTo === a.id ? ' selected' : '';
         html += `<option value="${a.id}"${sel}>${a.full_name}</option>`;
     });
@@ -1979,6 +1996,82 @@ async function assignLeadTo(leadId, profileId) {
         console.error('Error assigning lead:', error);
         alert('Error assigning lead: ' + error.message);
     }
+}
+
+// ============================================
+// BULK LEAD ASSIGNMENT
+// ============================================
+let selectedLeadIds = new Set();
+
+function updateBulkSelection() {
+    const checkboxes = document.querySelectorAll('.lead-checkbox');
+    selectedLeadIds.clear();
+    checkboxes.forEach(cb => { if (cb.checked) selectedLeadIds.add(cb.value); });
+    
+    const bar = document.getElementById('bulkAssignBar');
+    const countEl = document.getElementById('bulkSelectedCount');
+    
+    if (selectedLeadIds.size > 0) {
+        bar.classList.remove('hidden');
+        countEl.textContent = `${selectedLeadIds.size} selected`;
+    } else {
+        bar.classList.add('hidden');
+    }
+    
+    // Update select-all checkbox state
+    const selectAll = document.getElementById('selectAllLeads');
+    if (selectAll) {
+        selectAll.checked = checkboxes.length > 0 && selectedLeadIds.size === checkboxes.length;
+        selectAll.indeterminate = selectedLeadIds.size > 0 && selectedLeadIds.size < checkboxes.length;
+    }
+}
+
+function toggleSelectAllLeads(masterCheckbox) {
+    const checkboxes = document.querySelectorAll('.lead-checkbox');
+    checkboxes.forEach(cb => { cb.checked = masterCheckbox.checked; });
+    updateBulkSelection();
+}
+
+async function bulkAssignLeads() {
+    const agentId = document.getElementById('bulkAssignAgent').value;
+    if (!agentId) { alert('Please select an internal agent to assign leads to.'); return; }
+    if (selectedLeadIds.size === 0) { alert('No leads selected.'); return; }
+    
+    const agent = agents.find(a => a.id === agentId);
+    const agentName = agent?.full_name || 'selected agent';
+    
+    if (!confirm(`Assign ${selectedLeadIds.size} lead(s) to ${agentName}?`)) return;
+    
+    let success = 0, failed = 0;
+    
+    for (const leadId of selectedLeadIds) {
+        try {
+            const { error } = await window.supabaseClient
+                .from('leads')
+                .update({ agent_id: agentId, assigned_to: agentId, updated_at: new Date().toISOString() })
+                .eq('id', leadId);
+            if (error) throw error;
+            
+            const lead = leads.find(l => l.id === leadId);
+            if (lead) { lead.agent_id = agentId; lead.assigned_to = agentId; }
+            success++;
+        } catch (err) {
+            console.error('Error assigning lead:', leadId, err);
+            failed++;
+        }
+    }
+    
+    clearBulkSelection();
+    await loadLeads();
+    alert(`Bulk assign complete: ${success} assigned${failed > 0 ? `, ${failed} failed` : ''} to ${agentName}`);
+}
+
+function clearBulkSelection() {
+    selectedLeadIds.clear();
+    document.querySelectorAll('.lead-checkbox').forEach(cb => { cb.checked = false; });
+    const selectAll = document.getElementById('selectAllLeads');
+    if (selectAll) { selectAll.checked = false; selectAll.indeterminate = false; }
+    document.getElementById('bulkAssignBar').classList.add('hidden');
 }
 
 // ============================================
