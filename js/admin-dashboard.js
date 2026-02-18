@@ -347,7 +347,7 @@ async function loadAgents() {
         const { data, error } = await window.supabaseClient
             .from('profiles')
             .select('*')
-            .eq('role', 'agent')
+            .in('role', ['agent', 'internal agent', 'external agent'])
             .order('created_at', { ascending: false });
         
         if (error) throw error;
@@ -525,32 +525,41 @@ function previewDealerLogo(url) {
 }
 
 function getInternalAgents() {
-    // All agents loaded from profiles with role='agent' are valid for assignment
-    // The dealer_id on an agent just means which dealer they belong to, not that they're a "dealer user"
-    return agents;
+    // Only return internal agents for lead assignment
+    // 'internal agent' = explicitly internal, 'agent' without dealer_id = also internal
+    return agents.filter(a => a.role === 'internal agent' || (a.role === 'agent' && !a.dealer_id));
 }
 
 function populateAgentSelects() {
-    const selects = ['leadAgentSelect', 'leadAgentFilter', 'orderAgentFilter'];
     const internalAgents = getInternalAgents();
     
-    selects.forEach(selectId => {
+    // Filter dropdowns: show ALL agents so you can filter by any
+    ['leadAgentFilter', 'orderAgentFilter'].forEach(selectId => {
         const select = document.getElementById(selectId);
         if (select) {
             const currentValue = select.value;
-            const isFilter = selectId.includes('Filter');
-            
-            select.innerHTML = isFilter ? '<option value="">All Agents</option>' : '<option value="">Select Agent</option>';
-            
-            internalAgents.forEach(agent => {
-                select.innerHTML += `<option value="${agent.id}">${agent.full_name}</option>`;
+            select.innerHTML = '<option value="">All Agents</option>';
+            agents.forEach(agent => {
+                select.innerHTML += `<option value="${agent.id}">${agent.full_name}${agent.role === 'internal agent' ? ' (Internal)' : ''}</option>`;
             });
-            
             select.value = currentValue;
         }
     });
     
-    // Also populate bulk assign dropdown
+    // Assignment dropdowns: only internal agents
+    ['leadAgentSelect'].forEach(selectId => {
+        const select = document.getElementById(selectId);
+        if (select) {
+            const currentValue = select.value;
+            select.innerHTML = '<option value="">Select Agent</option>';
+            internalAgents.forEach(agent => {
+                select.innerHTML += `<option value="${agent.id}">${agent.full_name}</option>`;
+            });
+            select.value = currentValue;
+        }
+    });
+    
+    // Bulk assign dropdown: only internal agents
     const bulkSelect = document.getElementById('bulkAssignAgent');
     if (bulkSelect) {
         bulkSelect.innerHTML = '<option value="">Select Internal Agent</option>';
