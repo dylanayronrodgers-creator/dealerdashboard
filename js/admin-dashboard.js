@@ -525,7 +525,9 @@ function previewDealerLogo(url) {
 }
 
 function getInternalAgents() {
-    return agents.filter(a => !a.dealer_id);
+    // All agents loaded from profiles with role='agent' are valid for assignment
+    // The dealer_id on an agent just means which dealer they belong to, not that they're a "dealer user"
+    return agents;
 }
 
 function populateAgentSelects() {
