@@ -352,12 +352,6 @@ async function loadAgents() {
         
         if (error) throw error;
         agents = data || [];
-        
-        console.log('=== AGENTS DEBUG ===');
-        console.log('Total agents loaded:', agents.length);
-        console.log('Agent roles:', agents.map(a => `${a.full_name}: role="${a.role}", dealer_id=${a.dealer_id}`));
-        console.log('Internal agents:', getInternalAgents().map(a => a.full_name));
-        
         renderAgentsGrid();
         populateAgentSelects();
         document.getElementById('totalAgents').textContent = agents.length;
@@ -644,17 +638,37 @@ function populatePackageSelects() {
 async function loadLeads() {
     try {
         // Load last 500 leads for performance - exclude converted leads
-        const { data, error } = await window.supabaseClient
+        // Try with internal_agent join first, fall back if column doesn't exist yet
+        let data, error;
+        
+        ({ data, error } = await window.supabaseClient
             .from('leads')
             .select(`
                 *,
                 agent:profiles!leads_agent_id_fkey(id, full_name),
+                internal_agent:profiles!leads_internal_agent_id_fkey(id, full_name),
                 package:packages(id, name, price),
                 dealer:dealers(id, name)
             `)
             .neq('status', 'converted')
             .order('created_at', { ascending: false })
-            .limit(500);
+            .limit(500));
+        
+        // Fallback if internal_agent_id column doesn't exist yet
+        if (error && error.message && error.message.includes('internal_agent')) {
+            console.warn('internal_agent_id column not found, using fallback query');
+            ({ data, error } = await window.supabaseClient
+                .from('leads')
+                .select(`
+                    *,
+                    agent:profiles!leads_agent_id_fkey(id, full_name),
+                    package:packages(id, name, price),
+                    dealer:dealers(id, name)
+                `)
+                .neq('status', 'converted')
+                .order('created_at', { ascending: false })
+                .limit(500));
+        }
         
         if (error) throw error;
         
@@ -698,6 +712,7 @@ function renderLeadsTable(filteredLeads = null) {
         const address = lead.address || '-';
         const packageName = lead.package?.name || lead.package_name || '-';
         const agentName = lead.agent?.full_name || lead.agent_name || '-';
+        const internalAgentName = lead.internal_agent?.full_name || '-';
         const dealerName = lead.dealer?.name || lead.dealer_name || '-';
         
         return `
@@ -723,7 +738,7 @@ function renderLeadsTable(filteredLeads = null) {
             <td class="py-4 text-sm text-gray-600">${packageName}</td>
             <td class="py-4 text-sm text-gray-600">${agentName}</td>
             <td class="py-4 text-sm text-gray-600">${dealerName}</td>
-            ${currentUser && currentUser.role === 'super_admin' ? `<td class="py-4"><select onchange="assignLeadTo('${lead.id}', this.value)" class="text-xs border rounded px-2 py-1" title="Assign to internal agent">${buildAssignToOptions(lead.assigned_to)}</select></td>` : ''}
+            ${currentUser && currentUser.role === 'super_admin' ? `<td class="py-4"><select onchange="assignLeadTo('${lead.id}', this.value)" class="text-xs border rounded px-2 py-1" title="Assign to internal agent">${buildAssignToOptions(lead.internal_agent_id || lead.assigned_to)}</select></td>` : ''}
             <td class="py-4">
                 <select onchange="updateLeadStatus('${lead.id}', this.value)" class="text-xs border rounded px-2 py-1 status-${lead.status}">
                     <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
@@ -2037,14 +2052,22 @@ function buildAssignToOptions(currentAssignedTo) {
 
 async function assignLeadTo(leadId, profileId) {
     try {
+        // Set internal_agent_id + assigned_to, preserve agent_id (dealer agent)
         const { error } = await window.supabaseClient
             .from('leads')
-            .update({ assigned_to: profileId || null, updated_at: new Date().toISOString() })
+            .update({ 
+                assigned_to: profileId || null, 
+                internal_agent_id: profileId || null,
+                updated_at: new Date().toISOString() 
+            })
             .eq('id', leadId);
         if (error) throw error;
         const lead = leads.find(l => l.id === leadId);
-        if (lead) lead.assigned_to = profileId || null;
-        console.log('Lead assigned:', leadId, '->', profileId || 'unassigned');
+        if (lead) {
+            lead.assigned_to = profileId || null;
+            lead.internal_agent_id = profileId || null;
+        }
+        console.log('Lead assigned to internal agent:', leadId, '->', profileId || 'unassigned');
     } catch (error) {
         console.error('Error assigning lead:', error);
         alert('Error assigning lead: ' + error.message);
@@ -2099,14 +2122,19 @@ async function bulkAssignLeads() {
     
     for (const leadId of selectedLeadIds) {
         try {
+            // Set internal_agent_id + assigned_to, preserve agent_id (dealer agent)
             const { error } = await window.supabaseClient
                 .from('leads')
-                .update({ agent_id: agentId, assigned_to: agentId, updated_at: new Date().toISOString() })
+                .update({ 
+                    assigned_to: agentId, 
+                    internal_agent_id: agentId, 
+                    updated_at: new Date().toISOString() 
+                })
                 .eq('id', leadId);
             if (error) throw error;
             
             const lead = leads.find(l => l.id === leadId);
-            if (lead) { lead.agent_id = agentId; lead.assigned_to = agentId; }
+            if (lead) { lead.assigned_to = agentId; lead.internal_agent_id = agentId; }
             success++;
         } catch (err) {
             console.error('Error assigning lead:', leadId, err);
@@ -2601,6 +2629,75 @@ async function convertToOrder() {
         
         console.log('Order created successfully:', newOrder);
         
+        // Create sales_log entry for agent dashboard
+        // Use internal_agent_id > assigned_to > agent_id priority
+        const saleAgentProfileId = lead.internal_agent_id || lead.assigned_to || lead.agent_id;
+        if (saleAgentProfileId) {
+            try {
+                // Look up agent_table_id from profiles
+                const { data: agentProfile } = await window.supabaseClient
+                    .from('profiles')
+                    .select('agent_table_id, full_name')
+                    .eq('id', saleAgentProfileId)
+                    .single();
+                
+                if (agentProfile?.agent_table_id) {
+                    // Check if sale already exists (trigger may have created it)
+                    const { data: existingSale } = await window.supabaseClient
+                        .from('sales_log')
+                        .select('id')
+                        .eq('lead_id', convertingLeadId)
+                        .limit(1);
+                    
+                    if (!existingSale || existingSale.length === 0) {
+                        // Get package info
+                        let pkgName = 'Fibre Package';
+                        let pkgPrice = 0;
+                        if (lead.package_id) {
+                            const { data: pkg } = await window.supabaseClient
+                                .from('packages')
+                                .select('name, price')
+                                .eq('id', lead.package_id)
+                                .single();
+                            if (pkg) { pkgName = pkg.name; pkgPrice = pkg.price; }
+                        }
+                        
+                        const { error: saleError } = await window.supabaseClient
+                            .from('sales_log')
+                            .insert({
+                                agent_id: agentProfile.agent_table_id,
+                                lead_id: convertingLeadId,
+                                account_number: orderNumber,
+                                service_id: lead.service_id || null,
+                                package_name: pkgName,
+                                category: 'Fibre',
+                                provider: 'Openserve',
+                                total_sale: pkgPrice,
+                                sale_status: 'Pending',
+                                status_reason: 'Lead Converted - Awaiting Activation',
+                                sale_origin: 'Incoming Sales Leads',
+                                notes: `Converted lead - ${lead.full_name || ''} - Order: ${orderNumber}`,
+                                commission_status: 'Does Not Count',
+                                import_source: 'AUTO_LEAD',
+                                created_at: new Date().toISOString()
+                            });
+                        
+                        if (saleError) {
+                            console.error('Error creating sales_log entry:', saleError);
+                        } else {
+                            console.log('Sales log entry created for agent:', agentProfile.full_name);
+                        }
+                    } else {
+                        console.log('Sales log entry already exists for this lead (trigger created it)');
+                    }
+                } else {
+                    console.warn('Agent profile has no agent_table_id, cannot create sales_log entry. Link the profile to the agents table.');
+                }
+            } catch (saleErr) {
+                console.error('Error in sales_log creation:', saleErr);
+            }
+        }
+        
         closeModal('convertToOrderModal');
         convertingLeadId = null;
         
@@ -2851,15 +2948,11 @@ async function deleteDealer(dealerId) {
 // ============================================
 async function loadPendingAgents() {
     try {
-        console.log('=== PENDING AGENTS DEBUG ===');
         const { data, error } = await window.supabaseClient
             .from('pending_agents')
             .select('*, dealer:dealers(name)')
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
-        
-        console.log('Pending agents data:', data);
-        console.log('Pending agents error:', error);
         
         if (error) {
             // Table might not exist yet — show helpful message
