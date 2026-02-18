@@ -347,11 +347,16 @@ async function loadAgents() {
         const { data, error } = await window.supabaseClient
             .from('profiles')
             .select('*')
-            .in('role', ['agent', 'internal agent', 'external agent'])
+            .in('role', ['agent', 'internal agent', 'external agent', 'internal_agent', 'external_agent'])
             .order('created_at', { ascending: false });
         
         if (error) throw error;
         agents = data || [];
+        
+        console.log('=== AGENTS DEBUG ===');
+        console.log('Total agents loaded:', agents.length);
+        console.log('Agent roles:', agents.map(a => `${a.full_name}: role="${a.role}", dealer_id=${a.dealer_id}`));
+        console.log('Internal agents:', getInternalAgents().map(a => a.full_name));
         
         renderAgentsGrid();
         populateAgentSelects();
@@ -526,8 +531,11 @@ function previewDealerLogo(url) {
 
 function getInternalAgents() {
     // Only return internal agents for lead assignment
-    // 'internal agent' = explicitly internal, 'agent' without dealer_id = also internal
-    return agents.filter(a => a.role === 'internal agent' || (a.role === 'agent' && !a.dealer_id));
+    return agents.filter(a => 
+        a.role === 'internal agent' || 
+        a.role === 'internal_agent' || 
+        (a.role === 'agent' && !a.dealer_id)
+    );
 }
 
 function populateAgentSelects() {
@@ -540,7 +548,8 @@ function populateAgentSelects() {
             const currentValue = select.value;
             select.innerHTML = '<option value="">All Agents</option>';
             agents.forEach(agent => {
-                select.innerHTML += `<option value="${agent.id}">${agent.full_name}${agent.role === 'internal agent' ? ' (Internal)' : ''}</option>`;
+                const isInternal = agent.role === 'internal agent' || agent.role === 'internal_agent';
+                select.innerHTML += `<option value="${agent.id}">${agent.full_name}${isInternal ? ' (Internal)' : ''}</option>`;
             });
             select.value = currentValue;
         }
@@ -2842,11 +2851,15 @@ async function deleteDealer(dealerId) {
 // ============================================
 async function loadPendingAgents() {
     try {
+        console.log('=== PENDING AGENTS DEBUG ===');
         const { data, error } = await window.supabaseClient
             .from('pending_agents')
             .select('*, dealer:dealers(name)')
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
+        
+        console.log('Pending agents data:', data);
+        console.log('Pending agents error:', error);
         
         if (error) {
             // Table might not exist yet — show helpful message
@@ -3645,18 +3658,26 @@ async function loadPrivilegesTable() {
     
     const roleColors = {
         'admin': 'bg-purple-100 text-purple-700',
+        'super_admin': 'bg-purple-100 text-purple-700',
         'agent': 'bg-blue-100 text-blue-700',
+        'internal agent': 'bg-indigo-100 text-indigo-700',
+        'internal_agent': 'bg-indigo-100 text-indigo-700',
+        'external agent': 'bg-orange-100 text-orange-700',
+        'external_agent': 'bg-orange-100 text-orange-700',
         'dealer': 'bg-emerald-100 text-emerald-700',
-        'openserve': 'bg-green-100 text-green-700',
-        'external_agent': 'bg-orange-100 text-orange-700'
+        'openserve': 'bg-green-100 text-green-700'
     };
     
     const rolePrivileges = {
         'admin': ['All Access', 'Manage Users', 'Edit Settings', 'View Reports', 'Export Data'],
+        'super_admin': ['All Access', 'Manage Users', 'Edit Settings', 'View Reports', 'Export Data'],
         'agent': ['View Leads', 'Edit Own Leads', 'Convert Clients'],
+        'internal agent': ['View Leads', 'Edit Own Leads', 'Convert Clients', 'Assign Leads'],
+        'internal_agent': ['View Leads', 'Edit Own Leads', 'Convert Clients', 'Assign Leads'],
+        'external agent': ['View Assigned', 'Update Status'],
+        'external_agent': ['View Assigned', 'Update Status'],
         'dealer': ['View Team Leads', 'View Reports'],
-        'openserve': ['View Orders', 'Update Status', 'Return Items'],
-        'external_agent': ['View Assigned', 'Update Status']
+        'openserve': ['View Orders', 'Update Status', 'Return Items']
     };
     
     table.innerHTML = allUsers.slice(0, 20).map(user => {
@@ -3707,9 +3728,9 @@ async function editUserPrivileges(userId) {
         return;
     }
     
-    const newRole = prompt(`Edit role for ${user.full_name}\n\nCurrent role: ${user.role}\n\nAvailable roles:\n- admin\n- agent\n- dealer\n- openserve\n- external_agent\n\nEnter new role:`, user.role);
+    const newRole = prompt(`Edit role for ${user.full_name}\n\nCurrent role: ${user.role}\n\nAvailable roles:\n- admin\n- super_admin\n- agent\n- internal_agent\n- external_agent\n- dealer\n- openserve\n\nEnter new role:`, user.role);
     
-    if (newRole && ['admin', 'agent', 'dealer', 'openserve', 'external_agent'].includes(newRole)) {
+    if (newRole && ['admin', 'super_admin', 'agent', 'internal_agent', 'external_agent', 'dealer', 'openserve'].includes(newRole)) {
         try {
             const { error } = await window.supabaseClient
                 .from('profiles')
@@ -3724,7 +3745,7 @@ async function editUserPrivileges(userId) {
             alert('Error updating role: ' + error.message);
         }
     } else if (newRole) {
-        alert('Invalid role. Please enter one of: admin, agent, dealer, openserve, external_agent');
+        alert('Invalid role. Please enter one of: admin, super_admin, agent, internal_agent, external_agent, dealer, openserve');
     }
 }
 
