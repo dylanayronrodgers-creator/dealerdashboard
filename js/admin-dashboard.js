@@ -325,6 +325,8 @@ function showSection(section) {
         loadShippingDeliveries();
     } else if (section === 'payments') {
         renderPaymentsSection();
+    } else if (section === 'pending-agents') {
+        loadPendingAgents();
     } else if (section === 'axxess-sales') {
         loadAxxessSalesData();
     }
@@ -1426,6 +1428,37 @@ function setupFormHandlers() {
                 alert('Rate limit reached. Please wait a few minutes before approving another agent.\n\nSupabase limits new user signups to prevent abuse.');
             } else {
                 alert('Error approving agent: ' + error.message);
+            }
+        }
+    });
+    
+    // Add Pending Agent Form
+    document.getElementById('addPendingAgentForm')?.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const formData = new FormData(e.target);
+        
+        try {
+            const { error } = await window.supabaseClient
+                .from('pending_agents')
+                .insert({
+                    full_name: formData.get('full_name'),
+                    email: formData.get('email'),
+                    dealer_id: formData.get('dealer_id') || null,
+                    status: 'pending'
+                });
+            
+            if (error) throw error;
+            
+            closeModal('addPendingAgentModal');
+            e.target.reset();
+            await loadPendingAgents();
+            alert('Pending agent added successfully! You can now approve them to create their account.');
+        } catch (error) {
+            console.error('Error adding pending agent:', error);
+            if (error.message && error.message.includes('duplicate')) {
+                alert('An agent with this email already exists in the pending list.');
+            } else {
+                alert('Error adding pending agent: ' + error.message);
             }
         }
     });
@@ -2744,12 +2777,14 @@ function renderDealersGrid() {
 }
 
 function populateDealerSelects() {
-    const selects = ['approveAgentDealer', 'agentDealerSelect'];
+    const selects = ['approveAgentDealer', 'agentDealerSelect', 'addPendingAgentDealer'];
     selects.forEach(selectId => {
         const select = document.getElementById(selectId);
         if (select) {
             const currentValue = select.value;
-            select.innerHTML = '<option value="">No dealer</option>';
+            select.innerHTML = selectId === 'addPendingAgentDealer' 
+                ? '<option value="">No dealer (internal agent)</option>' 
+                : '<option value="">No dealer</option>';
             dealers.filter(d => d.is_active).forEach(dealer => {
                 select.innerHTML += `<option value="${dealer.id}">${dealer.name}</option>`;
             });
@@ -2802,13 +2837,25 @@ async function loadPendingAgents() {
             .eq('status', 'pending')
             .order('created_at', { ascending: false });
         
-        if (error) throw error;
+        if (error) {
+            // Table might not exist yet — show helpful message
+            if (error.message && (error.message.includes('does not exist') || error.code === '42P01')) {
+                console.warn('pending_agents table does not exist. Run the SQL migration to create it.');
+                pendingAgents = [];
+                renderPendingAgentsTable();
+                updatePendingAgentsBadge();
+                return;
+            }
+            throw error;
+        }
         pendingAgents = data || [];
         renderPendingAgentsTable();
         updatePendingAgentsBadge();
     } catch (error) {
         console.error('Error loading pending agents:', error);
         pendingAgents = [];
+        renderPendingAgentsTable();
+        updatePendingAgentsBadge();
     }
 }
 

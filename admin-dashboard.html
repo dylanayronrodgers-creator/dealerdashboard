@@ -240,7 +240,13 @@
                 </svg>
                 Dealers
             </a>
-            <!-- Pending Agents removed - no longer used -->
+            <a href="#pending-agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('pending-agents')">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
+                </svg>
+                Pending Agents
+                <span id="pendingAgentsBadge" class="hidden bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+            </a>
             <a href="#axxess-sales" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('axxess-sales')">
                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
@@ -1275,9 +1281,17 @@
 
         <!-- Pending Agents Section -->
         <section id="section-pending-agents" class="p-4 md:p-8 hidden">
-            <div class="mb-6">
-                <h3 class="text-lg font-semibold text-gray-800">Pending Agent Approvals</h3>
-                <p class="text-gray-500 text-sm">Review and approve agents imported from CSV files</p>
+            <div class="flex items-center justify-between mb-6">
+                <div>
+                    <h3 class="text-lg font-semibold text-gray-800">Pending Agent Approvals</h3>
+                    <p class="text-gray-500 text-sm">Review, approve, or add new agents awaiting setup</p>
+                </div>
+                <button onclick="openModal('addPendingAgentModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                    </svg>
+                    Add Pending Agent
+                </button>
             </div>
             <div class="card overflow-hidden">
                 <div class="overflow-x-auto">
@@ -2223,6 +2237,40 @@ Primary contact number: 0788260588
                 <div class="flex justify-end gap-3 pt-4">
                     <button type="button" onclick="closeModal('approveAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
                     <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Approve & Create</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Add Pending Agent Modal -->
+    <div id="addPendingAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
+        <div class="bg-white rounded-2xl w-full max-w-md m-4">
+            <div class="p-6 border-b flex items-center justify-between">
+                <h3 class="text-xl font-semibold">Add Pending Agent</h3>
+                <button onclick="closeModal('addPendingAgentModal')" class="text-gray-400 hover:text-gray-600">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+            <form id="addPendingAgentForm" class="p-6 space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
+                    <input type="text" name="full_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Agent full name">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
+                    <input type="email" name="email" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="agent@example.com">
+                </div>
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Dealer</label>
+                    <select name="dealer_id" id="addPendingAgentDealer" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <option value="">No dealer (internal agent)</option>
+                    </select>
+                </div>
+                <div class="flex justify-end gap-3 pt-4">
+                    <button type="button" onclick="closeModal('addPendingAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add to Pending</button>
                 </div>
             </form>
         </div>
