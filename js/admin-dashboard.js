@@ -265,6 +265,12 @@ document.addEventListener('click', (e) => {
 });
 
 // Navigation
+function toggleNavGroup(toggleEl) {
+    toggleEl.classList.toggle('open');
+    const children = toggleEl.nextElementSibling;
+    if (children) children.classList.toggle('open');
+}
+
 function showSection(section) {
     // Hide all sections
     document.querySelectorAll('main > section').forEach(s => s.classList.add('hidden'));
@@ -280,6 +286,13 @@ function showSection(section) {
     const activeNav = document.querySelector(`[href="#${section}"]`);
     if (activeNav) {
         activeNav.classList.add('active');
+        // Auto-expand parent group if collapsed
+        const parentChildren = activeNav.closest('.nav-group-children');
+        if (parentChildren && !parentChildren.classList.contains('open')) {
+            parentChildren.classList.add('open');
+            const toggle = parentChildren.previousElementSibling;
+            if (toggle) toggle.classList.add('open');
+        }
     }
     
     // Update page title

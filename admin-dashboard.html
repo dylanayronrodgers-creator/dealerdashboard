@@ -131,6 +131,31 @@
         }
         .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
 
+        /* Collapsible nav groups */
+        .nav-group-toggle {
+            display: flex; align-items: center; gap: 0.625rem;
+            padding: 0.5rem 1.25rem; margin: 1px 0.5rem;
+            border-radius: 0.375rem; font-size: 0.8125rem; font-weight: 500;
+            color: var(--sidebar-text); cursor: pointer;
+            transition: all 0.15s ease; user-select: none;
+        }
+        .nav-group-toggle:hover { background: var(--sidebar-hover); color: var(--text-primary); }
+        .nav-group-toggle svg.nav-icon { width: 18px; height: 18px; flex-shrink: 0; }
+        .nav-group-toggle .chevron { 
+            width: 14px; height: 14px; margin-left: auto; 
+            transition: transform 0.2s ease; color: var(--sidebar-text-muted);
+        }
+        .nav-group-toggle.open .chevron { transform: rotate(90deg); }
+        .nav-group-children { 
+            display: none; padding-left: 0.5rem;
+        }
+        .nav-group-children.open { display: block; }
+        .nav-group-children .nav-item {
+            padding: 0.375rem 1.25rem 0.375rem 2.75rem;
+            font-size: 0.8rem;
+        }
+        .nav-group-children .nav-item svg { width: 15px; height: 15px; }
+
         /* Modern Select */
         select {
             appearance: none;
@@ -225,10 +250,10 @@
     <!-- Sidebar -->
     <aside class="sidebar sidebar-bg fixed left-0 top-0 z-50 flex flex-col min-h-screen" style="width: var(--sidebar-width)" id="sidebar">
         <!-- Logo -->
-        <div class="px-5 py-4 border-b" style="border-color: var(--sidebar-border)">
-            <div class="flex items-center gap-2.5">
-                <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: linear-gradient(135deg, #4f46e5, #6366f1)">
-                    <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-5">
+        <div class="px-4 py-3 border-b" style="border-color: var(--sidebar-border)">
+            <div class="flex items-center gap-3">
+                <div class="rounded-lg overflow-hidden flex items-center justify-center" style="background: linear-gradient(135deg, #1e293b, #334155); padding: 6px 10px;">
+                    <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-6">
                 </div>
                 <div>
                     <h1 class="font-semibold text-sm" style="color: var(--text-primary)">Axxess Africa</h1>
@@ -239,88 +264,170 @@
 
         <!-- Navigation -->
         <nav class="flex-1 overflow-y-auto py-2">
-            <!-- MAIN -->
-            <div class="nav-section-label">Main</div>
+            <!-- Dashboard (top-level, no group) -->
             <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
                 <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Dashboard
             </a>
 
-            <!-- CRM -->
-            <div class="nav-section-label">CRM</div>
-            <a href="#leads" class="nav-item" onclick="showSection('leads')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                Leads
-            </a>
-            <a href="#preorders" class="nav-item" onclick="showSection('preorders')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                Preorders
-                <span id="preordersBadge" class="hidden bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
-            </a>
-            <a href="#orders" class="nav-item" onclick="showSection('orders')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
-                Orders
-            </a>
+            <!-- CRM Dropdown -->
+            <div class="nav-group">
+                <div class="nav-group-toggle" onclick="toggleNavGroup(this)">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    CRM
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="nav-group-children">
+                    <a href="#leads" class="nav-item" onclick="showSection('leads')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Leads
+                    </a>
+                    <a href="#preorders" class="nav-item" onclick="showSection('preorders')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Preorders
+                        <span id="preordersBadge" class="hidden bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+                    </a>
+                    <a href="#orders" class="nav-item" onclick="showSection('orders')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Orders
+                    </a>
+                </div>
+            </div>
 
-            <!-- FINANCE -->
-            <div class="nav-section-label">Finance</div>
-            <a href="#payments" class="nav-item" onclick="showSection('payments')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
-                Payments
-                <span id="paymentsBadge" class="hidden bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
-            </a>
-            <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
-                Axxess Sales
-            </a>
+            <!-- Finance Dropdown -->
+            <div class="nav-group">
+                <div class="nav-group-toggle" onclick="toggleNavGroup(this)">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    Finance
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="nav-group-children">
+                    <a href="#payments" class="nav-item" onclick="showSection('payments')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                        Payments
+                        <span id="paymentsBadge" class="hidden bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+                    </a>
+                </div>
+            </div>
 
-            <!-- OPERATIONS -->
-            <div class="nav-section-label">Operations</div>
-            <a href="#shipping" class="nav-item" onclick="showSection('shipping')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
-                Shipping
-                <span id="shippingBadge" class="hidden bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
-            </a>
-            <a href="#returned" class="nav-item" onclick="showSection('returned')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
-                Returned Items
-                <span id="returnedItemsBadge" class="hidden bg-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
-            </a>
-            <a href="#packages" class="nav-item" onclick="showSection('packages')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
-                Packages
-            </a>
+            <!-- Axxess Sales Dropdown -->
+            <div class="nav-group">
+                <div class="nav-group-toggle" onclick="toggleNavGroup(this)">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    Axxess Sales
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="nav-group-children">
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-overview'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Overview
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-add-sale'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Add Sale
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-current-month'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                        Current Month
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-sales-history'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        History
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-commission'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Commission
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-mass-import'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Import
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-reminders'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                        Reminders
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-free-trials'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Free Trials
+                    </a>
+                    <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales'); setTimeout(()=>axSwitchTab('ax-status-checks'),50)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"/></svg>
+                        Status Checks
+                    </a>
+                </div>
+            </div>
 
-            <!-- COMPANY -->
-            <div class="nav-section-label">Company</div>
-            <a href="#agents" class="nav-item" onclick="showSection('agents')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
-                Agents
-            </a>
-            <a href="#pending-agents" class="nav-item" onclick="showSection('pending-agents')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
-                Pending Agents
-                <span id="pendingAgentsBadge" class="hidden bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
-            </a>
-            <a href="#dealers" class="nav-item" onclick="showSection('dealers')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
-                Dealers
-            </a>
+            <!-- Operations Dropdown -->
+            <div class="nav-group">
+                <div class="nav-group-toggle" onclick="toggleNavGroup(this)">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                    Operations
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="nav-group-children">
+                    <a href="#shipping" class="nav-item" onclick="showSection('shipping')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                        Shipping
+                        <span id="shippingBadge" class="hidden bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+                    </a>
+                    <a href="#returned" class="nav-item" onclick="showSection('returned')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                        Returned Items
+                        <span id="returnedItemsBadge" class="hidden bg-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+                    </a>
+                    <a href="#packages" class="nav-item" onclick="showSection('packages')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                        Packages
+                    </a>
+                </div>
+            </div>
 
-            <!-- SYSTEM -->
-            <div class="nav-section-label">System</div>
-            <a href="#reports" class="nav-item" onclick="showSection('reports')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
-                Reports
-            </a>
-            <a href="#import" class="nav-item" onclick="showSection('import')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
-                Import Leads
-            </a>
-            <a href="#settings" class="nav-item" onclick="showSection('settings')">
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                Settings
-            </a>
+            <!-- Company Dropdown -->
+            <div class="nav-group">
+                <div class="nav-group-toggle" onclick="toggleNavGroup(this)">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    Company
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="nav-group-children">
+                    <a href="#agents" class="nav-item" onclick="showSection('agents')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                        Agents
+                    </a>
+                    <a href="#pending-agents" class="nav-item" onclick="showSection('pending-agents')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                        Pending Agents
+                        <span id="pendingAgentsBadge" class="hidden bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+                    </a>
+                    <a href="#dealers" class="nav-item" onclick="showSection('dealers')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        Dealers
+                    </a>
+                </div>
+            </div>
+
+            <!-- System Dropdown -->
+            <div class="nav-group">
+                <div class="nav-group-toggle" onclick="toggleNavGroup(this)">
+                    <svg class="nav-icon" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                    System
+                    <svg class="chevron" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                </div>
+                <div class="nav-group-children">
+                    <a href="#reports" class="nav-item" onclick="showSection('reports')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                        Reports
+                    </a>
+                    <a href="#import" class="nav-item" onclick="showSection('import')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Import Leads
+                    </a>
+                    <a href="#settings" class="nav-item" onclick="showSection('settings')">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Settings
+                    </a>
+                </div>
+            </div>
         </nav>
 
         <!-- User Section -->
@@ -478,42 +585,8 @@
                 </span>
             </div>
 
-            <!-- Revenue & Commission Summary -->
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--success-light)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--success)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div class="stat-body">
-                        <div class="stat-label">Confirmed Revenue</div>
-                        <div class="stat-value text-xl" style="color: var(--success)" id="confirmedRevenue">R0</div>
-                        <div class="text-xs" style="color:var(--text-muted)"><span id="confirmedCount">0</span> confirmed</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--warning-light)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--warning)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div class="stat-body">
-                        <div class="stat-label">Pending Revenue</div>
-                        <div class="stat-value text-xl" style="color: var(--warning)" id="pendingRevenue">R0</div>
-                        <div class="text-xs" style="color:var(--text-muted)"><span id="pendingCount">0</span> pending</div>
-                    </div>
-                </div>
-                <div class="stat-card">
-                    <div class="stat-icon" style="background: var(--danger-light)">
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--danger)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                    </div>
-                    <div class="stat-body">
-                        <div class="stat-label">Rejected / Lost</div>
-                        <div class="stat-value text-xl" style="color: var(--danger)" id="rejectedRevenue">R0</div>
-                        <div class="text-xs" style="color:var(--text-muted)"><span id="rejectedCount">0</span> rejected</div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Status + Lead Pipeline in 2 columns -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+            <!-- Order Status + Lead Pipeline -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-5">
                 <!-- Order Status -->
                 <div class="card p-4">
                     <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Order Status</h3>
@@ -565,72 +638,46 @@
                 </div>
             </div>
 
-            <!-- Bottom Section - Lead Status, Top Agents, Recent Activity -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
-                <!-- Lead Status Breakdown -->
+            <!-- Revenue Summary + Recent Activity -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+                <!-- Revenue -->
                 <div class="card p-4">
-                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Lead Status Breakdown</h3>
-                    <div class="space-y-3" id="leadStatusBreakdown">
-                        <!-- Populated by JS -->
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Revenue Summary</h3>
+                    <div class="space-y-3">
+                        <div class="flex items-center justify-between p-2 rounded-md" style="background: var(--success-light)">
+                            <span class="text-sm font-medium" style="color: var(--success)">Confirmed</span>
+                            <span class="text-sm font-bold" style="color: var(--success)" id="confirmedRevenue">R0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded-md" style="background: var(--warning-light)">
+                            <span class="text-sm font-medium" style="color: var(--warning)">Pending</span>
+                            <span class="text-sm font-bold" style="color: var(--warning)" id="pendingRevenue">R0</span>
+                        </div>
+                        <div class="flex items-center justify-between p-2 rounded-md" style="background: var(--danger-light)">
+                            <span class="text-sm font-medium" style="color: var(--danger)">Rejected</span>
+                            <span class="text-sm font-bold" style="color: var(--danger)" id="rejectedRevenue">R0</span>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Top Performing Agents -->
-                <div class="card p-4">
-                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Top Performing Agents</h3>
-                    <div class="space-y-3" id="topAgents">
-                        <!-- Populated by JS -->
+                    <div class="mt-3 pt-3 border-t text-xs" style="color: var(--text-muted); border-color: var(--card-border)">
+                        <span id="confirmedCount">0</span> confirmed &middot; <span id="pendingCount">0</span> pending &middot; <span id="rejectedCount">0</span> rejected
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
-                <div class="card p-4">
+                <div class="card p-4 lg:col-span-2">
                     <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Recent Activity</h3>
-                    <div class="space-y-3 max-h-64 overflow-y-auto" id="recentActivity">
+                    <div class="space-y-2 max-h-48 overflow-y-auto" id="recentActivity">
                         <!-- Populated by JS -->
                     </div>
                 </div>
             </div>
 
-            <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
-                <div class="card p-4">
-                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Orders Overview</h3>
-                    <canvas id="ordersChart" height="200"></canvas>
-                </div>
-                <div class="card p-4">
-                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Lead Sources</h3>
-                    <canvas id="leadsChart" height="200"></canvas>
-                </div>
-            </div>
-
-            <!-- Recent Orders Table -->
-            <div class="card p-4">
-                <div class="flex items-center justify-between mb-3">
-                    <h3 class="text-xs font-semibold uppercase" style="color: var(--text-muted)">Recent Orders</h3>
-                    <a href="#orders" onclick="showSection('orders')" class="text-xs font-medium" style="color: var(--primary)">View All &rarr;</a>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full">
-                        <thead>
-                            <tr class="text-left text-gray-500 text-xs border-b">
-                                <th class="pb-2 font-medium">Client</th>
-                                <th class="pb-2 font-medium">Package</th>
-                                <th class="pb-2 font-medium">Agent</th>
-                                <th class="pb-2 font-medium">Status</th>
-                                <th class="pb-2 font-medium">Date</th>
-                                <th class="pb-2 font-medium">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="recentOrdersTable">
-                            <tr class="table-row border-b">
-                                <td class="py-2" colspan="6">
-                                    <p class="text-gray-500 text-center">Loading...</p>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
+            <!-- Hidden elements to preserve JS references -->
+            <div class="hidden">
+                <div id="leadStatusBreakdown"></div>
+                <div id="topAgents"></div>
+                <canvas id="ordersChart"></canvas>
+                <canvas id="leadsChart"></canvas>
+                <table><tbody id="recentOrdersTable"></tbody></table>
             </div>
         </section>
 
