@@ -2384,10 +2384,10 @@ function viewLeadDetails(leadId) {
     
     editingLeadId = leadId;
     const content = document.getElementById('viewLeadContent');
-    const inputClass = "w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition";
-    const labelClass = "text-xs font-medium text-gray-500 block mb-1";
-    const sectionClass = "border rounded-lg p-4";
-    const sectionTitleClass = "text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2";
+    const ic = "w-full border rounded px-2 py-1 text-xs focus:outline-none focus:ring-1 focus:ring-indigo-500/20 transition";
+    const lc = "text-[11px] font-medium text-gray-500 block mb-0.5";
+    const sc = "border rounded p-2.5";
+    const stc = "text-xs font-semibold text-gray-700 mb-2 flex items-center gap-1.5";
     
     // Build agent options
     const agentOptions = agents.map(a => 
@@ -2405,16 +2405,16 @@ function viewLeadDetails(leadId) {
     ).join('');
     
     content.innerHTML = `
-        <form id="editLeadForm" class="space-y-5">
-            <!-- Lead Overview -->
-            <div class="grid grid-cols-3 gap-3">
+        <form id="editLeadForm" class="space-y-2.5">
+            <!-- Row 1: Lead ID, Status, Service ID, Full Name, ID Number, Passport -->
+            <div class="grid grid-cols-6 gap-2">
                 <div>
-                    <label class="${labelClass}">Lead ID</label>
-                    <input type="text" name="lead_id" value="${lead.lead_id || ''}" class="${inputClass}">
+                    <label class="${lc}">Lead ID</label>
+                    <input type="text" name="lead_id" value="${lead.lead_id || ''}" class="${ic}">
                 </div>
                 <div>
-                    <label class="${labelClass}">Status</label>
-                    <select name="status" class="${inputClass}">
+                    <label class="${lc}">Status</label>
+                    <select name="status" class="${ic}">
                         <option value="new" ${lead.status === 'new' ? 'selected' : ''}>New</option>
                         <option value="contacted" ${lead.status === 'contacted' ? 'selected' : ''}>Contacted</option>
                         <option value="qualified" ${lead.status === 'qualified' ? 'selected' : ''}>Qualified</option>
@@ -2423,174 +2423,117 @@ function viewLeadDetails(leadId) {
                     </select>
                 </div>
                 <div>
-                    <label class="${labelClass}">Service ID</label>
-                    <input type="text" name="service_id" value="${lead.service_id || ''}" class="${inputClass}">
+                    <label class="${lc}">Service ID</label>
+                    <input type="text" name="service_id" value="${lead.service_id || ''}" class="${ic}">
+                </div>
+                <div>
+                    <label class="${lc}">Full Name</label>
+                    <input type="text" name="full_name" value="${lead.full_name || ''}" class="${ic}">
+                </div>
+                <div>
+                    <label class="${lc}">First Name</label>
+                    <input type="text" name="first_name" value="${lead.first_name || ''}" class="${ic}">
+                </div>
+                <div>
+                    <label class="${lc}">Last Name</label>
+                    <input type="text" name="last_name" value="${lead.last_name || ''}" class="${ic}">
+                </div>
+            </div>
+
+            <!-- Row 2: ID docs -->
+            <div class="grid grid-cols-6 gap-2">
+                <div>
+                    <label class="${lc}">ID Number</label>
+                    <input type="text" name="id_number" maxlength="13" value="${lead.id_number || ''}" class="${ic}" placeholder="13-digit SA ID">
+                </div>
+                <div>
+                    <label class="${lc}">Passport</label>
+                    <input type="text" name="passport_number" value="${lead.passport_number || ''}" class="${ic}">
+                </div>
+                <div>
+                    <label class="${lc}">Email</label>
+                    <input type="email" name="email" value="${lead.email || ''}" class="${ic}">
+                </div>
+                <div>
+                    <label class="${lc}">Phone</label>
+                    <input type="text" name="phone" value="${lead.phone || ''}" class="${ic}">
+                </div>
+                <div class="col-span-2">
+                    <label class="${lc}">Address/Region</label>
+                    <input type="text" name="address" value="${lead.address || ''}" class="${ic}">
                 </div>
             </div>
             
-            <!-- Client Details -->
-            <div class="${sectionClass}" style="border-color: var(--card-border)">
-                <h4 class="${sectionTitleClass}">
-                    <svg class="w-4 h-4" style="color: var(--info)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                    Client Details
-                </h4>
-                <div class="grid grid-cols-3 gap-3">
-                    <div>
-                        <label class="${labelClass}">Full Name</label>
-                        <input type="text" name="full_name" value="${lead.full_name || ''}" class="${inputClass}">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">First Name</label>
-                        <input type="text" name="first_name" value="${lead.first_name || ''}" class="${inputClass}">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">Last Name</label>
-                        <input type="text" name="last_name" value="${lead.last_name || ''}" class="${inputClass}">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">ID Number</label>
-                        <input type="text" name="id_number" maxlength="13" value="${lead.id_number || ''}" class="${inputClass}" placeholder="13-digit SA ID">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">Passport Number</label>
-                        <input type="text" name="passport_number" value="${lead.passport_number || ''}" class="${inputClass}" placeholder="Passport">
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Contact Information -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="${sectionClass}" style="border-color: var(--card-border)">
-                    <h4 class="${sectionTitleClass}">
-                        <svg class="w-4 h-4" style="color: var(--success)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                        Primary Contact
-                    </h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="${labelClass}">Email</label>
-                            <input type="email" name="email" value="${lead.email || ''}" class="${inputClass}">
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Phone</label>
-                            <input type="text" name="phone" value="${lead.phone || ''}" class="${inputClass}">
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Address/Region</label>
-                            <input type="text" name="address" value="${lead.address || ''}" class="${inputClass}">
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="${sectionClass}" style="border-color: var(--card-border)">
-                    <h4 class="${sectionTitleClass}">
-                        <svg class="w-4 h-4" style="color: var(--purple)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+            <!-- Row 3: 3 sections side by side -->
+            <div class="grid grid-cols-3 gap-2.5">
+                <!-- Secondary Contact -->
+                <div class="${sc}" style="border-color: var(--card-border)">
+                    <h4 class="${stc}">
+                        <svg class="w-3.5 h-3.5" style="color: var(--purple)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                         Secondary Contact
                     </h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="${labelClass}">Name</label>
-                            <input type="text" name="secondary_contact_name" value="${lead.secondary_contact_name || ''}" class="${inputClass}">
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Number</label>
-                            <input type="text" name="secondary_contact_number" value="${lead.secondary_contact_number || ''}" class="${inputClass}">
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Email</label>
-                            <input type="email" name="secondary_contact_email" value="${lead.secondary_contact_email || ''}" class="${inputClass}">
-                        </div>
+                    <div class="space-y-1.5">
+                        <div><label class="${lc}">Name</label><input type="text" name="secondary_contact_name" value="${lead.secondary_contact_name || ''}" class="${ic}"></div>
+                        <div><label class="${lc}">Number</label><input type="text" name="secondary_contact_number" value="${lead.secondary_contact_number || ''}" class="${ic}"></div>
+                        <div><label class="${lc}">Email</label><input type="email" name="secondary_contact_email" value="${lead.secondary_contact_email || ''}" class="${ic}"></div>
                     </div>
                 </div>
-            </div>
-            
-            <!-- Assignment & Order -->
-            <div class="grid grid-cols-2 gap-4">
-                <div class="${sectionClass}" style="border-color: var(--card-border)">
-                    <h4 class="${sectionTitleClass}">
-                        <svg class="w-4 h-4" style="color: var(--orange)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+
+                <!-- Assignment -->
+                <div class="${sc}" style="border-color: var(--card-border)">
+                    <h4 class="${stc}">
+                        <svg class="w-3.5 h-3.5" style="color: var(--orange)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
                         Assignment
                     </h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="${labelClass}">Agent</label>
-                            <select name="agent_id" class="${inputClass}">
-                                <option value="">Select Agent</option>
-                                ${agentOptions}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Dealer</label>
-                            <select name="dealer_id" class="${inputClass}">
-                                <option value="">Select Dealer</option>
-                                ${dealerOptions}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Package</label>
-                            <select name="package_id" class="${inputClass}">
-                                <option value="">Select Package</option>
-                                ${packageOptions}
-                            </select>
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Account Number</label>
-                            <input type="text" name="account_number" value="${lead.account_number || ''}" class="${inputClass}">
-                        </div>
+                    <div class="space-y-1.5">
+                        <div><label class="${lc}">Agent</label><select name="agent_id" class="${ic}"><option value="">Select</option>${agentOptions}</select></div>
+                        <div><label class="${lc}">Dealer</label><select name="dealer_id" class="${ic}"><option value="">Select</option>${dealerOptions}</select></div>
+                        <div><label class="${lc}">Package</label><select name="package_id" class="${ic}"><option value="">Select</option>${packageOptions}</select></div>
+                        <div><label class="${lc}">Account #</label><input type="text" name="account_number" value="${lead.account_number || ''}" class="${ic}"></div>
                     </div>
                 </div>
-                
-                <div class="${sectionClass}" style="border-color: var(--card-border)">
-                    <h4 class="${sectionTitleClass}">
-                        <svg class="w-4 h-4" style="color: var(--cyan)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+
+                <!-- Order Info -->
+                <div class="${sc}" style="border-color: var(--card-border)">
+                    <h4 class="${stc}">
+                        <svg class="w-3.5 h-3.5" style="color: var(--cyan)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                         Order Info
                     </h4>
-                    <div class="space-y-3">
-                        <div>
-                            <label class="${labelClass}">Order Number</label>
-                            <input type="text" name="order_number" value="${lead.order_number || ''}" class="${inputClass}">
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Order Status</label>
-                            <input type="text" name="order_status" value="${lead.order_status || ''}" class="${inputClass}">
-                        </div>
-                        <div>
-                            <label class="${labelClass}">Order Date</label>
-                            <input type="date" name="order_date" value="${lead.order_date ? lead.order_date.split('T')[0] : ''}" class="${inputClass}">
-                        </div>
+                    <div class="space-y-1.5">
+                        <div><label class="${lc}">Order Number</label><input type="text" name="order_number" value="${lead.order_number || ''}" class="${ic}"></div>
+                        <div><label class="${lc}">Order Status</label><input type="text" name="order_status" value="${lead.order_status || ''}" class="${ic}"></div>
+                        <div><label class="${lc}">Order Date</label><input type="date" name="order_date" value="${lead.order_date ? lead.order_date.split('T')[0] : ''}" class="${ic}"></div>
                     </div>
                 </div>
             </div>
             
-            <!-- Notes -->
-            <div class="${sectionClass}" style="border-color: var(--warning); border-left-width: 3px;">
-                <h4 class="${sectionTitleClass}">
-                    <svg class="w-4 h-4" style="color: var(--warning)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
-                    Notes
-                </h4>
-                <textarea name="notes" rows="3" class="${inputClass}">${lead.notes || ''}</textarea>
-            </div>
-            
-            <!-- Preorder Toggle -->
-            <div class="${sectionClass} flex items-center justify-between" style="border-color: var(--purple); border-left-width: 3px;">
-                <div>
-                    <label class="text-sm font-semibold text-gray-700">Preorder</label>
-                    <p class="text-xs text-gray-500">Mark this lead as a preorder for tracking</p>
+            <!-- Row 4: Notes + Preorder inline -->
+            <div class="grid grid-cols-3 gap-2.5">
+                <div class="col-span-2">
+                    <label class="${lc}">Notes</label>
+                    <textarea name="notes" rows="2" class="${ic}">${lead.notes || ''}</textarea>
                 </div>
-                <label class="relative inline-flex items-center cursor-pointer">
-                    <input type="checkbox" name="is_preorder" ${lead.is_preorder ? 'checked' : ''} class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
-                </label>
+                <div class="flex items-center justify-between ${sc}" style="border-color: var(--purple); border-left-width: 3px;">
+                    <div>
+                        <label class="text-xs font-semibold text-gray-700">Preorder</label>
+                        <p class="text-[10px] text-gray-500">Mark as preorder</p>
+                    </div>
+                    <label class="relative inline-flex items-center cursor-pointer">
+                        <input type="checkbox" name="is_preorder" ${lead.is_preorder ? 'checked' : ''} class="sr-only peer">
+                        <div class="w-9 h-5 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-indigo-600"></div>
+                    </label>
+                </div>
             </div>
             
             <!-- Actions -->
-            <div class="flex justify-between pt-4 border-t" style="border-color: var(--card-border)">
-                <button type="button" onclick="closeModal('viewLeadModal'); openConvertModal('${leadId}')" class="btn-success text-white px-5 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
-                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+            <div class="flex justify-between pt-2 border-t" style="border-color: var(--card-border)">
+                <button type="button" onclick="closeModal('viewLeadModal'); openConvertModal('${leadId}')" class="btn-success text-white px-4 py-1.5 rounded-lg font-medium text-xs flex items-center gap-1.5">
+                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     Convert to Order
                 </button>
-                <div class="flex gap-3">
-                    <button type="button" onclick="closeModal('viewLeadModal')" class="px-5 py-2 border rounded-lg hover:bg-gray-50 text-sm">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-5 py-2 rounded-lg font-medium text-sm">Save Changes</button>
+                <div class="flex gap-2">
+                    <button type="button" onclick="closeModal('viewLeadModal')" class="px-4 py-1.5 border rounded-lg hover:bg-gray-50 text-xs">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-4 py-1.5 rounded-lg font-medium text-xs">Save Changes</button>
                 </div>
             </div>
         </form>
