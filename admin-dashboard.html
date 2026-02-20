@@ -11,55 +11,127 @@
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <style>
         * { font-family: 'Poppins', sans-serif; }
-        /* Axxess Blue with subtle Openserve Green - lighter shade */
         :root {
-            --axxess-blue: #2c4a6e;
-            --axxess-blue-dark: #1a3a5c;
-            --axxess-blue-light: #3d5a7e;
-            --openserve-green: #10b981;
-            --openserve-green-light: #34d399;
-            --accent-50: #eff6ff;
-            --accent-100: #dbeafe;
-            --accent-500: #3b82f6;
-            --accent-600: #2563eb;
-            --accent-700: #1d4ed8;
+            --sidebar-width: 240px;
+            --sidebar-bg: #ffffff;
+            --sidebar-border: #e8ecf0;
+            --sidebar-text: #3d4f5f;
+            --sidebar-text-muted: #8a9bae;
+            --sidebar-hover: #f4f6f8;
+            --sidebar-active-bg: #eef2ff;
+            --sidebar-active-text: #4f46e5;
+            --sidebar-section-label: #8a9bae;
+            --topbar-bg: #ffffff;
+            --topbar-border: #e8ecf0;
+            --main-bg: #f4f6f8;
+            --card-bg: #ffffff;
+            --card-border: #e8ecf0;
+            --card-shadow: 0 1px 3px rgba(0,0,0,0.04);
+            --card-hover-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+            --text-muted: #94a3b8;
+            --primary: #4f46e5;
+            --primary-light: #eef2ff;
+            --success: #10b981;
+            --success-light: #d1fae5;
+            --warning: #f59e0b;
+            --warning-light: #fef3c7;
+            --danger: #ef4444;
+            --danger-light: #fee2e2;
+            --info: #3b82f6;
+            --info-light: #dbeafe;
+            --orange: #f97316;
+            --orange-light: #fff7ed;
+            --purple: #8b5cf6;
+            --purple-light: #f5f3ff;
+            --cyan: #06b6d4;
+            --cyan-light: #ecfeff;
+            --pink: #ec4899;
+            --pink-light: #fdf2f8;
         }
-        .sidebar-bg { 
-            background: linear-gradient(180deg, var(--axxess-blue) 0%, var(--axxess-blue-light) 100%);
-        }
-        .main-bg { background: #f1f5f9; }
+        .sidebar-bg { background: var(--sidebar-bg); border-right: 1px solid var(--sidebar-border); }
+        .main-bg { background: var(--main-bg); }
         .card { 
-            background: white; 
-            border-radius: 0.75rem; 
-            box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-            border: 1px solid #e2e8f0;
+            background: var(--card-bg); 
+            border-radius: 0.5rem; 
+            box-shadow: var(--card-shadow);
+            border: 1px solid var(--card-border);
+            transition: box-shadow 0.2s ease;
         }
+        .card:hover { box-shadow: var(--card-hover-shadow); }
         .btn-primary { 
-            background: linear-gradient(135deg, var(--axxess-blue) 0%, var(--axxess-blue-dark) 100%);
+            background: var(--primary);
+            color: white;
             transition: all 0.2s ease;
         }
         .btn-primary:hover { 
-            transform: translateY(-1px); 
-            box-shadow: 0 4px 14px rgba(30, 58, 95, 0.4);
-            background: linear-gradient(135deg, var(--axxess-blue-light) 0%, var(--axxess-blue) 100%);
+            background: #4338ca;
+            box-shadow: 0 2px 8px rgba(79, 70, 229, 0.3);
         }
-        .btn-success {
-            background: linear-gradient(135deg, var(--openserve-green) 0%, #059669 100%);
+        .btn-success { background: var(--success); }
+        .btn-success:hover { background: #059669; }
+
+        /* Status badges */
+        .status-new { background: var(--info-light); color: #1e40af; }
+        .status-lead { background: var(--warning-light); color: #92400e; }
+        .status-pending { background: var(--warning-light); color: #92400e; }
+        .status-contacted { background: var(--purple-light); color: #5b21b6; }
+        .status-qualified { background: var(--success-light); color: #065f46; }
+        .status-processing { background: var(--info-light); color: #1e40af; }
+        .status-scheduled { background: var(--purple-light); color: #5b21b6; }
+        .status-completed { background: var(--success-light); color: #065f46; }
+        .status-converted { background: #bbf7d0; color: #166534; }
+        .status-cancelled { background: var(--danger-light); color: #991b1b; }
+        .status-returned { background: var(--pink-light); color: #9d174d; }
+        .status-lost { background: #f3f4f6; color: #4b5563; }
+
+        /* Splynx-style stat cards */
+        .stat-card {
+            background: var(--card-bg);
+            border: 1px solid var(--card-border);
+            border-radius: 0.5rem;
+            padding: 1.25rem 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            transition: box-shadow 0.2s ease;
         }
-        .status-new { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; }
-        .status-lead { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
-        .status-pending { background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%); color: #92400e; }
-        .status-contacted { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #3730a3; }
-        .status-qualified { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
-        .status-processing { background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%); color: #1e40af; }
-        .status-scheduled { background: linear-gradient(135deg, #e0e7ff 0%, #c7d2fe 100%); color: #3730a3; }
-        .status-completed { background: linear-gradient(135deg, #d1fae5 0%, #a7f3d0 100%); color: #065f46; }
-        .status-converted { background: linear-gradient(135deg, #bbf7d0 0%, #86efac 100%); color: #166534; }
-        .status-cancelled { background: linear-gradient(135deg, #fee2e2 0%, #fecaca 100%); color: #991b1b; }
-        .status-returned { background: linear-gradient(135deg, #fce7f3 0%, #fbcfe8 100%); color: #9d174d; }
-        .status-lost { background: linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%); color: #4b5563; }
-        
-        /* Modern Select Dropdown */
+        .stat-card:hover { box-shadow: var(--card-hover-shadow); }
+        .stat-card .stat-icon {
+            width: 40px; height: 40px; border-radius: 50%;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+        }
+        .stat-card .stat-icon svg { width: 20px; height: 20px; }
+        .stat-card .stat-body { flex: 1; }
+        .stat-card .stat-label { font-size: 0.8125rem; font-weight: 500; color: var(--text-primary); }
+        .stat-card .stat-link { font-size: 0.75rem; color: var(--primary); cursor: pointer; }
+        .stat-card .stat-link:hover { text-decoration: underline; }
+        .stat-card .stat-value { font-size: 1.75rem; font-weight: 700; line-height: 1.2; }
+
+        /* Sidebar navigation */
+        .nav-section-label {
+            font-size: 0.6875rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.05em; color: var(--sidebar-section-label);
+            padding: 1.25rem 1.25rem 0.5rem; margin-top: 0.25rem;
+        }
+        .nav-item { 
+            display: flex; align-items: center; gap: 0.625rem;
+            padding: 0.5rem 1.25rem; margin: 1px 0.5rem;
+            border-radius: 0.375rem; font-size: 0.8125rem; font-weight: 400;
+            color: var(--sidebar-text); transition: all 0.15s ease;
+            text-decoration: none; cursor: pointer;
+        }
+        .nav-item:hover { background: var(--sidebar-hover); color: var(--text-primary); }
+        .nav-item.active { 
+            background: var(--sidebar-active-bg); 
+            color: var(--sidebar-active-text); 
+            font-weight: 500;
+        }
+        .nav-item svg { width: 18px; height: 18px; flex-shrink: 0; }
+
+        /* Modern Select */
         select {
             appearance: none;
             background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' fill='none' viewBox='0 0 24 24' stroke='%236b7280'%3E%3Cpath stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='M19 9l-7 7-7-7'%3E%3C/path%3E%3C/svg%3E");
@@ -68,38 +140,50 @@
             background-size: 1rem;
             padding-right: 2rem;
             cursor: pointer;
-            border-radius: 0.5rem;
-            transition: all 0.2s ease;
+            border-radius: 0.375rem;
+            transition: all 0.15s ease;
         }
-        select:hover {
-            border-color: var(--axxess-blue);
-        }
-        select:focus {
-            outline: none;
-            border-color: var(--openserve-green);
-            box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
-        }
-        .nav-item { transition: all 0.2s ease; border-radius: 0.5rem; }
-        .nav-item:hover { background: rgba(255,255,255,0.1); }
-        .nav-item.active { background: rgba(16, 185, 129, 0.2); border-left: 3px solid var(--openserve-green); }
+        select:hover { border-color: var(--primary); }
+        select:focus { outline: none; border-color: var(--primary); box-shadow: 0 0 0 3px rgba(79,70,229,0.1); }
+
         .table-row:hover { background: #f8fafc; }
         .modal { display: none; }
         .modal.active { display: flex; }
-        /* Modal overlay for Axxess modals */
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
-        .modal-container { background: white; border-radius: 1rem; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
-        .modal-container .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
+        .modal-container { background: white; border-radius: 0.75rem; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+        .modal-container .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--card-border); }
         .modal-container .modal-header button { font-size: 1.5rem; line-height: 1; }
+
         /* Axxess sub-tabs */
         .ax-tab-btn { color: #6b7280; background: transparent; }
         .ax-tab-btn:hover { background: rgba(0,0,0,0.05); }
-        .ax-tab-btn.active { background: white; color: var(--axxess-blue); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
-        /* Refined card hover */
-        .card:hover { box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-        /* Accent border */
-        .accent-border { border-left: 4px solid var(--primary-500); }
-        
+        .ax-tab-btn.active { background: white; color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+
+        /* Shortcuts bar */
+        .shortcut-link {
+            display: inline-flex; align-items: center; gap: 0.375rem;
+            font-size: 0.8125rem; color: var(--primary); padding: 0.25rem 0;
+            cursor: pointer; transition: color 0.15s;
+        }
+        .shortcut-link:hover { color: #4338ca; text-decoration: underline; }
+        .shortcut-link svg { width: 16px; height: 16px; }
+
+        /* Collapsible panel */
+        .panel-header {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 0.875rem 1rem; cursor: pointer; user-select: none;
+        }
+        .panel-title { font-size: 0.9375rem; font-weight: 600; color: var(--text-primary); }
+
+        /* Finance summary rows */
+        .finance-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 0.375rem 0; font-size: 0.8125rem;
+        }
+        .finance-row .label { color: var(--text-secondary); }
+        .finance-row .value { font-weight: 500; color: var(--text-primary); }
+
         /* Mobile Responsive */
         @media (max-width: 768px) {
             .sidebar { transform: translateX(-100%); transition: transform 0.3s ease; }
@@ -114,14 +198,10 @@
             .mobile-header { display: none !important; }
             .sidebar-overlay { display: none !important; }
         }
-        
-        /* Tablet responsive */
         @media (max-width: 1024px) {
             .card { padding: 1rem; }
             .stats-grid { grid-template-columns: repeat(2, 1fr); }
         }
-        
-        /* Small screens */
         @media (max-width: 640px) {
             .stats-grid { grid-template-columns: 1fr; }
             .card h3 { font-size: 1.5rem; }
@@ -129,20 +209,13 @@
             table { font-size: 0.75rem; }
             th, td { padding: 0.5rem 0.25rem; }
         }
-        
-        /* Large screens - use full width */
-        @media (min-width: 1536px) {
-            .main-content { max-width: none; }
-        }
-        
-        /* Scrollable tables */
+        @media (min-width: 1536px) { .main-content { max-width: none; } }
         .table-container { overflow-x: auto; -webkit-overflow-scrolling: touch; }
-        
-        /* Touch-friendly buttons */
         @media (hover: none) {
             .btn-primary:hover { transform: none; }
-            .nav-item { padding: 0.875rem 1rem; }
+            .nav-item { padding: 0.625rem 1.25rem; }
         }
+        .accent-border { border-left: 4px solid var(--primary); }
     </style>
 </head>
 <body class="min-h-screen flex">
@@ -150,361 +223,367 @@
     <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleSidebar()"></div>
     
     <!-- Sidebar -->
-    <aside class="sidebar sidebar-bg w-80 min-h-screen flex flex-col fixed left-0 top-0 z-50" id="sidebar">
+    <aside class="sidebar sidebar-bg fixed left-0 top-0 z-50 flex flex-col min-h-screen" style="width: var(--sidebar-width)" id="sidebar">
         <!-- Logo -->
-        <div class="p-6 border-b border-white/10">
-            <div class="flex items-center gap-3">
-                <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-12">
+        <div class="px-5 py-4 border-b" style="border-color: var(--sidebar-border)">
+            <div class="flex items-center gap-2.5">
+                <img src="https://i.ibb.co/fGy3TCJd/logo-axxess-1.png" alt="Axxess" class="h-8">
                 <div>
-                    <h1 class="text-white font-bold">Axxess</h1>
-                    <p class="text-white/50 text-xs">Admin Portal</p>
+                    <h1 class="font-semibold text-sm" style="color: var(--text-primary)">Axxess Africa</h1>
+                    <p class="text-xs" style="color: var(--text-muted)">Dealer Portal</p>
                 </div>
             </div>
         </div>
 
         <!-- Navigation -->
-        <nav class="flex-1 p-4 space-y-2">
-            <a href="#dashboard" class="nav-item active flex items-center gap-3 text-white px-4 py-3 rounded-xl" onclick="showSection('dashboard')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                </svg>
+        <nav class="flex-1 overflow-y-auto py-2">
+            <!-- MAIN -->
+            <div class="nav-section-label">Main</div>
+            <a href="#dashboard" class="nav-item active" onclick="showSection('dashboard')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"/></svg>
                 Dashboard
             </a>
-            <a href="#leads" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('leads')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+
+            <!-- CRM -->
+            <div class="nav-section-label">CRM</div>
+            <a href="#leads" class="nav-item" onclick="showSection('leads')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 Leads
             </a>
-            <a href="#orders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('orders')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+            <a href="#preorders" class="nav-item" onclick="showSection('preorders')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Preorders
+                <span id="preordersBadge" class="hidden bg-purple-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+            </a>
+            <a href="#orders" class="nav-item" onclick="showSection('orders')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                 Orders
             </a>
-            <a href="#payments" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('payments')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" />
-                </svg>
+
+            <!-- FINANCE -->
+            <div class="nav-section-label">Finance</div>
+            <a href="#payments" class="nav-item" onclick="showSection('payments')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
                 Payments
-                <span id="paymentsBadge" class="hidden bg-red-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
+                <span id="paymentsBadge" class="hidden bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
             </a>
-            <a href="#agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('agents')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
-                </svg>
-                Agents
-            </a>
-            <a href="#packages" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('packages')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
-                </svg>
-                Packages
-            </a>
-            <a href="#reports" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('reports')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
-                </svg>
-                Reports
-            </a>
-            <a href="#preorders" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('preorders')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-                Preorders
-                <span id="preordersBadge" class="hidden bg-purple-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
-            </a>
-            <a href="#shipping" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('shipping')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4" />
-                </svg>
-                Shipping
-                <span id="shippingBadge" class="hidden bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
-            </a>
-            <a href="#returned" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('returned')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6" />
-                </svg>
-                Returned Items
-                <span id="returnedItemsBadge" class="hidden bg-pink-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
-            </a>
-            <a href="#import" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('import')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
-                </svg>
-                Import Leads
-            </a>
-            <a href="#dealers" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('dealers')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                </svg>
-                Dealers
-            </a>
-            <a href="#pending-agents" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('pending-agents')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" />
-                </svg>
-                Pending Agents
-                <span id="pendingAgentsBadge" class="hidden bg-orange-500 text-white text-xs px-2 py-0.5 rounded-full ml-auto">0</span>
-            </a>
-            <a href="#axxess-sales" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('axxess-sales')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
-                </svg>
+            <a href="#axxess-sales" class="nav-item" onclick="showSection('axxess-sales')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
                 Axxess Sales
             </a>
-            <a href="#settings" class="nav-item flex items-center gap-3 text-white/70 px-4 py-3 rounded-xl" onclick="showSection('settings')">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                </svg>
+
+            <!-- OPERATIONS -->
+            <div class="nav-section-label">Operations</div>
+            <a href="#shipping" class="nav-item" onclick="showSection('shipping')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 8h14M5 8a2 2 0 110-4h14a2 2 0 110 4M5 8v10a2 2 0 002 2h10a2 2 0 002-2V8m-9 4h4"/></svg>
+                Shipping
+                <span id="shippingBadge" class="hidden bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+            </a>
+            <a href="#returned" class="nav-item" onclick="showSection('returned')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"/></svg>
+                Returned Items
+                <span id="returnedItemsBadge" class="hidden bg-pink-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+            </a>
+            <a href="#packages" class="nav-item" onclick="showSection('packages')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                Packages
+            </a>
+
+            <!-- COMPANY -->
+            <div class="nav-section-label">Company</div>
+            <a href="#agents" class="nav-item" onclick="showSection('agents')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                Agents
+            </a>
+            <a href="#pending-agents" class="nav-item" onclick="showSection('pending-agents')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z"/></svg>
+                Pending Agents
+                <span id="pendingAgentsBadge" class="hidden bg-orange-500 text-white text-xs px-1.5 py-0.5 rounded-full ml-auto" style="font-size:10px">0</span>
+            </a>
+            <a href="#dealers" class="nav-item" onclick="showSection('dealers')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                Dealers
+            </a>
+
+            <!-- SYSTEM -->
+            <div class="nav-section-label">System</div>
+            <a href="#reports" class="nav-item" onclick="showSection('reports')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                Reports
+            </a>
+            <a href="#import" class="nav-item" onclick="showSection('import')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                Import Leads
+            </a>
+            <a href="#settings" class="nav-item" onclick="showSection('settings')">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                 Settings
             </a>
         </nav>
 
         <!-- User Section -->
-        <div class="p-4 border-t border-white/10">
-            <div class="flex items-center gap-3 mb-4">
-                <div class="w-10 h-10 bg-green-500 rounded-full flex items-center justify-center text-white font-bold">
+        <div class="px-4 py-3 border-t" style="border-color: var(--sidebar-border)">
+            <div class="flex items-center gap-2.5">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-white font-semibold text-xs" style="background: var(--primary)">
                     <span id="userInitials">A</span>
                 </div>
-                <div>
-                    <p class="text-white font-medium text-sm" id="userName">Admin</p>
-                    <p class="text-white/50 text-xs">Administrator</p>
+                <div class="flex-1 min-w-0">
+                    <p class="text-sm font-medium truncate" style="color: var(--text-primary)" id="userName">Admin</p>
+                    <p class="text-xs" style="color: var(--text-muted)">Administrator</p>
                 </div>
+                <button onclick="logout()" class="p-1.5 rounded-md hover:bg-gray-100 transition" title="Logout">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"/></svg>
+                </button>
             </div>
-            <button onclick="logout()" class="w-full flex items-center justify-center gap-2 text-white/70 hover:text-white py-2 px-4 rounded-lg hover:bg-white/10 transition">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                </svg>
-                Logout
-            </button>
         </div>
     </aside>
 
     <!-- Main Content -->
-    <main class="main-content main-bg flex-1 ml-80 min-h-screen">
+    <main class="main-content main-bg flex-1 min-h-screen" style="margin-left: var(--sidebar-width)">
         <!-- Header -->
-        <header class="bg-white border-b px-4 md:px-8 py-4 flex items-center justify-between sticky top-0 z-40">
+        <header class="bg-white border-b px-4 md:px-6 py-3 flex items-center justify-between sticky top-0 z-40" style="border-color: var(--topbar-border)">
             <!-- Mobile menu button -->
-            <button class="mobile-header p-2 -ml-2 text-gray-700 hover:bg-gray-100 rounded-xl" onclick="toggleSidebar()">
-                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <button class="mobile-header p-2 -ml-2 text-gray-700 hover:bg-gray-100 rounded-lg" onclick="toggleSidebar()">
+                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
                 </svg>
             </button>
+            <!-- Breadcrumb + Title -->
             <div class="flex-1 md:flex-none">
-                <h2 class="text-lg md:text-2xl font-bold text-gray-800" id="pageTitle">Dashboard</h2>
-                <p class="text-gray-500 text-xs md:text-sm hidden md:block" id="pageSubtitle">Overview of your dealer network</p>
+                <div class="flex items-center gap-1.5 text-xs" style="color: var(--text-muted)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"/></svg>
+                    <span>Home</span>
+                    <span>/</span>
+                    <span id="pageSubtitle" style="color: var(--text-secondary)">Dashboard</span>
+                </div>
+                <h2 class="text-base md:text-lg font-semibold mt-0.5" style="color: var(--text-primary)" id="pageTitle">Dashboard</h2>
             </div>
-            <div class="flex items-center gap-2 md:gap-4">
+            <!-- Right side: search, notifications -->
+            <div class="flex items-center gap-2 md:gap-3">
                 <div class="relative desktop-search">
-                    <input type="text" id="globalSearch" placeholder="Search leads..." class="pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-green-500/20 focus:border-green-500 w-64" oninput="globalSearchHandler(this.value)">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <input type="text" id="globalSearch" placeholder="Search leads, orders..." class="pl-9 pr-4 py-1.5 border rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-400 w-56" style="border-color: var(--card-border)" oninput="globalSearchHandler(this.value)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 absolute left-3 top-1/2 -translate-y-1/2" style="color: var(--text-muted)" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
-                <button onclick="toggleNotifications()" class="relative p-2 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-xl" id="notificationBtn">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <button onclick="toggleNotifications()" class="relative p-2 rounded-lg hover:bg-gray-100 transition" id="notificationBtn" style="color: var(--text-secondary)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
                     </svg>
-                    <span id="notificationBadge" class="absolute top-1 right-1 w-2 h-2 bg-green-500 rounded-full hidden"></span>
+                    <span id="notificationBadge" class="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full hidden"></span>
                 </button>
                 <!-- Notifications Dropdown -->
-                <div id="notificationsDropdown" class="hidden absolute right-4 top-16 w-80 bg-white rounded-xl shadow-lg border z-50">
-                    <div class="p-4 border-b">
-                        <h4 class="font-semibold text-gray-800">Notifications</h4>
+                <div id="notificationsDropdown" class="hidden absolute right-4 top-14 w-80 bg-white rounded-lg shadow-lg border z-50" style="border-color: var(--card-border)">
+                    <div class="px-4 py-3 border-b" style="border-color: var(--card-border)">
+                        <h4 class="font-semibold text-sm" style="color: var(--text-primary)">Notifications</h4>
                     </div>
                     <div id="notificationsList" class="max-h-80 overflow-y-auto">
-                        <p class="p-4 text-gray-500 text-sm text-center">No new notifications</p>
+                        <p class="p-4 text-sm text-center" style="color: var(--text-muted)">No new notifications</p>
                     </div>
                 </div>
+                <span class="text-xs hidden md:inline" style="color: var(--text-muted)" id="dashboardTimestamp"></span>
             </div>
         </header>
 
-        <!-- Dashboard Section - Vuma-Style ISP Portal -->
-        <section id="section-dashboard" class="p-6 md:p-8">
-            <!-- Portal Banner -->
-            <div class="bg-gradient-to-r from-[var(--axxess-blue)] to-[var(--axxess-blue-light)] rounded-2xl p-6 mb-8 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center backdrop-blur-sm">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z" />
-                            </svg>
-                        </div>
-                        <div>
-                            <p class="text-white/60 text-xs uppercase tracking-wider">Dashboard</p>
-                            <h2 class="text-xl font-bold">ISP Portal Dashboard</h2>
-                            <p class="text-white/70 text-sm">Dashboard with Lead, Order and Commission Summary</p>
-                        </div>
+        <!-- Dashboard Section -->
+        <section id="section-dashboard" class="p-4 md:p-6">
+            <!-- Stat Cards Row 1: Main KPIs -->
+            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-3 mb-5">
+                <div class="stat-card cursor-pointer" onclick="showSection('leads')">
+                    <div class="stat-icon" style="background: var(--info-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--info)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     </div>
-                    <div class="flex items-center gap-3">
-                        <p class="text-white/50 text-xs" id="dashboardTimestamp"></p>
-                        <button onclick="location.reload()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition">Refresh</button>
+                    <div class="stat-body">
+                        <div class="stat-label">Total Leads</div>
+                        <div class="stat-value" style="color: var(--info)" id="totalLeads">0</div>
                     </div>
+                    <span class="stat-link" onclick="showSection('leads')">View</span>
+                </div>
+                <div class="stat-card cursor-pointer" onclick="showSection('orders')">
+                    <div class="stat-icon" style="background: var(--success-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--success)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Total Orders</div>
+                        <div class="stat-value" style="color: var(--success)" id="totalOrders">0</div>
+                    </div>
+                    <span class="stat-link" onclick="showSection('orders')">View</span>
+                </div>
+                <div class="stat-card cursor-pointer" onclick="showSection('agents')">
+                    <div class="stat-icon" style="background: var(--purple-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--purple)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Active Agents</div>
+                        <div class="stat-value" style="color: var(--purple)" id="totalAgents">0</div>
+                    </div>
+                    <span class="stat-link" onclick="showSection('agents')">View</span>
+                </div>
+                <div class="stat-card cursor-pointer" onclick="showSection('dealers')">
+                    <div class="stat-icon" style="background: var(--orange-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--orange)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Dealers</div>
+                        <div class="stat-value" style="color: var(--orange)" id="totalDealers">0</div>
+                    </div>
+                    <span class="stat-link" onclick="showSection('dealers')">View</span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--pink-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--pink)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Conversion Rate</div>
+                        <div class="stat-value" style="color: var(--pink)" id="conversionRate">0%</div>
+                    </div>
+                    <span class="text-xs" style="color:var(--text-muted)" id="dashTimestampSmall"></span>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--cyan-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--cyan)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Total Commission</div>
+                        <div class="stat-value" style="color: var(--cyan)" id="totalCommission">R0</div>
+                    </div>
+                    <span class="text-xs" style="color:var(--text-muted)" id="dashTimestampSmall2"></span>
                 </div>
             </div>
 
-            <!-- Lead & Order Summary (Vuma-style grouped cards) -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-blue-500 rounded-full"></div>
-                    Lead & Order Summary
-                </h3>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
-                <div class="card p-5 text-center hover:shadow-lg transition-all group cursor-pointer" onclick="showSection('leads')">
-                    <p class="text-xs text-gray-400 font-medium mb-2 group-hover:text-blue-500 transition">Total Leads</p>
-                    <p class="text-4xl font-bold text-blue-600 mb-1" id="totalLeads">0</p>
-                    <p class="text-xs text-blue-400 hover:underline">View Report</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all group cursor-pointer" onclick="showSection('orders')">
-                    <p class="text-xs text-gray-400 font-medium mb-2 group-hover:text-emerald-500 transition">Total Orders</p>
-                    <p class="text-4xl font-bold text-emerald-600 mb-1" id="totalOrders">0</p>
-                    <p class="text-xs text-emerald-400 hover:underline">View Report</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all group cursor-pointer" onclick="showSection('agents')">
-                    <p class="text-xs text-gray-400 font-medium mb-2 group-hover:text-purple-500 transition">Active Agents</p>
-                    <p class="text-4xl font-bold text-purple-600 mb-1" id="totalAgents">0</p>
-                    <p class="text-xs text-purple-400 hover:underline">View Report</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all group cursor-pointer" onclick="showSection('dealers')">
-                    <p class="text-xs text-gray-400 font-medium mb-2 group-hover:text-orange-500 transition">Dealers</p>
-                    <p class="text-4xl font-bold text-orange-600 mb-1" id="totalDealers">0</p>
-                    <p class="text-xs text-orange-400 hover:underline">View Report</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Conversion Rate</p>
-                    <p class="text-4xl font-bold text-pink-600 mb-1" id="conversionRate">0%</p>
-                    <p class="text-xs text-gray-400" id="dashTimestampSmall"></p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Total Commission</p>
-                    <p class="text-4xl font-bold text-cyan-600 mb-1" id="totalCommission">R0</p>
-                    <p class="text-xs text-gray-400" id="dashTimestampSmall2"></p>
-                </div>
+            <!-- Shortcuts Bar -->
+            <div class="card px-4 py-3 mb-5 flex flex-wrap items-center gap-4">
+                <span class="text-xs font-semibold uppercase" style="color: var(--text-muted)">Quick Actions</span>
+                <span class="shortcut-link" onclick="openModal('addLeadModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                    Add Lead
+                </span>
+                <span class="shortcut-link" onclick="openModal('openserveEmailModal')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                    Import Email
+                </span>
+                <span class="shortcut-link" onclick="showSection('orders')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                    View Orders
+                </span>
+                <span class="shortcut-link" onclick="showSection('payments')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    Payments
+                </span>
+                <span class="shortcut-link" onclick="showSection('reports')">
+                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/></svg>
+                    Reports
+                </span>
             </div>
 
             <!-- Revenue & Commission Summary -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                    Revenue & Commission Summary
-                </h3>
-            </div>
-            <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-                <div class="card p-5 text-center hover:shadow-lg transition-all">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Confirmed Revenue</p>
-                    <p class="text-3xl font-bold text-emerald-600 mb-1" id="confirmedRevenue">R0</p>
-                    <p class="text-xs text-emerald-400"><span id="confirmedCount">0</span> leads confirmed</p>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--success-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--success)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Confirmed Revenue</div>
+                        <div class="stat-value text-xl" style="color: var(--success)" id="confirmedRevenue">R0</div>
+                        <div class="text-xs" style="color:var(--text-muted)"><span id="confirmedCount">0</span> confirmed</div>
+                    </div>
                 </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Pending Revenue</p>
-                    <p class="text-3xl font-bold text-amber-600 mb-1" id="pendingRevenue">R0</p>
-                    <p class="text-xs text-amber-400"><span id="pendingCount">0</span> leads pending</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--warning-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--warning)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Pending Revenue</div>
+                        <div class="stat-value text-xl" style="color: var(--warning)" id="pendingRevenue">R0</div>
+                        <div class="text-xs" style="color:var(--text-muted)"><span id="pendingCount">0</span> pending</div>
+                    </div>
                 </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Rejected / Lost</p>
-                    <p class="text-3xl font-bold text-red-500 mb-1" id="rejectedRevenue">R0</p>
-                    <p class="text-xs text-red-400"><span id="rejectedCount">0</span> leads rejected</p>
-                </div>
-            </div>
-
-            <!-- Order Status Summary (Vuma-style) -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-purple-500 rounded-full"></div>
-                    Order Status Summary
-                </h3>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='pending'; filterOrders();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Pending Orders</p>
-                    <p class="text-4xl font-bold text-amber-500 mb-1" id="dashPendingOrders">0</p>
-                    <p class="text-xs text-amber-400 hover:underline">View Report (Pending)</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='processing'; filterOrders();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Processing Orders</p>
-                    <p class="text-4xl font-bold text-blue-500 mb-1" id="dashProcessingOrders">0</p>
-                    <p class="text-xs text-blue-400 hover:underline">View Report (Processing)</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='completed'; filterOrders();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Completed Orders</p>
-                    <p class="text-4xl font-bold text-emerald-500 mb-1" id="dashCompletedOrders">0</p>
-                    <p class="text-xs text-emerald-400 hover:underline">View Report (Completed)</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='cancelled'; filterOrders();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Cancelled Orders</p>
-                    <p class="text-4xl font-bold text-red-500 mb-1" id="dashCancelledOrders">0</p>
-                    <p class="text-xs text-red-400 hover:underline">View Report (Cancelled)</p>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: var(--danger-light)">
+                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="var(--danger)"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                    </div>
+                    <div class="stat-body">
+                        <div class="stat-label">Rejected / Lost</div>
+                        <div class="stat-value text-xl" style="color: var(--danger)" id="rejectedRevenue">R0</div>
+                        <div class="text-xs" style="color:var(--text-muted)"><span id="rejectedCount">0</span> rejected</div>
+                    </div>
                 </div>
             </div>
 
-            <!-- Lead Pipeline Summary (Vuma-style) -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-pink-500 rounded-full"></div>
-                    Lead Pipeline Summary
-                </h3>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='new'; filterLeads();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">New Leads</p>
-                    <p class="text-4xl font-bold text-blue-500 mb-1" id="dashNewLeads">0</p>
-                    <p class="text-xs text-blue-400 hover:underline">View Report (New)</p>
+            <!-- Order Status + Lead Pipeline in 2 columns -->
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+                <!-- Order Status -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Order Status</h3>
+                    <div class="grid grid-cols-2 gap-3">
+                        <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='pending'; filterOrders();}, 100)">
+                            <p class="text-2xl font-bold" style="color: var(--warning)" id="dashPendingOrders">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Pending</p>
+                        </div>
+                        <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='processing'; filterOrders();}, 100)">
+                            <p class="text-2xl font-bold" style="color: var(--info)" id="dashProcessingOrders">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Processing</p>
+                        </div>
+                        <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='completed'; filterOrders();}, 100)">
+                            <p class="text-2xl font-bold" style="color: var(--success)" id="dashCompletedOrders">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Completed</p>
+                        </div>
+                        <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='cancelled'; filterOrders();}, 100)">
+                            <p class="text-2xl font-bold" style="color: var(--danger)" id="dashCancelledOrders">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Cancelled</p>
+                        </div>
+                    </div>
                 </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='contacted'; filterLeads();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Contacted</p>
-                    <p class="text-4xl font-bold text-indigo-500 mb-1" id="dashContactedLeads">0</p>
-                    <p class="text-xs text-indigo-400 hover:underline">View Report (Contacted)</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='qualified'; filterLeads();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Qualified</p>
-                    <p class="text-4xl font-bold text-emerald-500 mb-1" id="dashQualifiedLeads">0</p>
-                    <p class="text-xs text-emerald-400 hover:underline">View Report (Qualified)</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='converted'; filterLeads();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Converted</p>
-                    <p class="text-4xl font-bold text-green-600 mb-1" id="dashConvertedLeads">0</p>
-                    <p class="text-xs text-green-400 hover:underline">View Report (Converted)</p>
-                </div>
-                <div class="card p-5 text-center hover:shadow-lg transition-all cursor-pointer" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='lost'; filterLeads();}, 100)">
-                    <p class="text-xs text-gray-400 font-medium mb-2">Lost</p>
-                    <p class="text-4xl font-bold text-gray-500 mb-1" id="dashLostLeads">0</p>
-                    <p class="text-xs text-gray-400 hover:underline">View Report (Lost)</p>
+
+                <!-- Lead Pipeline -->
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Lead Pipeline</h3>
+                    <div class="grid grid-cols-5 gap-2">
+                        <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='new'; filterLeads();}, 100)">
+                            <p class="text-xl font-bold" style="color: var(--info)" id="dashNewLeads">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">New</p>
+                        </div>
+                        <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='contacted'; filterLeads();}, 100)">
+                            <p class="text-xl font-bold" style="color: var(--purple)" id="dashContactedLeads">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Contacted</p>
+                        </div>
+                        <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='qualified'; filterLeads();}, 100)">
+                            <p class="text-xl font-bold" style="color: var(--success)" id="dashQualifiedLeads">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Qualified</p>
+                        </div>
+                        <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='converted'; filterLeads();}, 100)">
+                            <p class="text-xl font-bold text-green-600" id="dashConvertedLeads">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Converted</p>
+                        </div>
+                        <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='lost'; filterLeads();}, 100)">
+                            <p class="text-xl font-bold text-gray-500" id="dashLostLeads">0</p>
+                            <p class="text-xs" style="color: var(--text-muted)">Lost</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 
             <!-- Bottom Section - Lead Status, Top Agents, Recent Activity -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 mb-5">
                 <!-- Lead Status Breakdown -->
-                <div class="card p-6">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <div class="w-1 h-4 bg-blue-500 rounded-full"></div>
-                        Lead Status Breakdown
-                    </h3>
-                    <div class="space-y-4" id="leadStatusBreakdown">
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Lead Status Breakdown</h3>
+                    <div class="space-y-3" id="leadStatusBreakdown">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
                 <!-- Top Performing Agents -->
-                <div class="card p-6">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <div class="w-1 h-4 bg-purple-500 rounded-full"></div>
-                        Top Performing Agents
-                    </h3>
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Top Performing Agents</h3>
                     <div class="space-y-3" id="topAgents">
                         <!-- Populated by JS -->
                     </div>
                 </div>
 
                 <!-- Recent Activity -->
-                <div class="card p-6">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4 flex items-center gap-2">
-                        <div class="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                        Recent Activity
-                    </h3>
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Recent Activity</h3>
                     <div class="space-y-3 max-h-64 overflow-y-auto" id="recentActivity">
                         <!-- Populated by JS -->
                     </div>
@@ -512,22 +591,22 @@
             </div>
 
             <!-- Charts Row -->
-            <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-                <div class="card p-6">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Orders Overview</h3>
+            <div class="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-5">
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Orders Overview</h3>
                     <canvas id="ordersChart" height="200"></canvas>
                 </div>
-                <div class="card p-6">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-4">Lead Sources</h3>
+                <div class="card p-4">
+                    <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Lead Sources</h3>
                     <canvas id="leadsChart" height="200"></canvas>
                 </div>
             </div>
 
             <!-- Recent Orders Table -->
-            <div class="card p-6">
-                <div class="flex items-center justify-between mb-4">
-                    <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider">Recent Orders</h3>
-                    <a href="#orders" onclick="showSection('orders')" class="text-blue-500 hover:text-blue-600 text-sm font-medium">View All &rarr;</a>
+            <div class="card p-4">
+                <div class="flex items-center justify-between mb-3">
+                    <h3 class="text-xs font-semibold uppercase" style="color: var(--text-muted)">Recent Orders</h3>
+                    <a href="#orders" onclick="showSection('orders')" class="text-xs font-medium" style="color: var(--primary)">View All &rarr;</a>
                 </div>
                 <div class="overflow-x-auto">
                     <table class="w-full">
@@ -553,42 +632,27 @@
             </div>
         </section>
 
-        <!-- Leads Section - Vuma-Style -->
-        <section id="section-leads" class="p-8 hidden">
-            <!-- Leads Banner -->
-            <div class="bg-gradient-to-r from-blue-600 to-blue-700 rounded-2xl p-5 mb-6 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-white/60 text-xs uppercase tracking-wider">Leads</p>
-                            <h2 class="text-lg font-bold">Lead Management</h2>
-                            <p class="text-white/70 text-sm" id="leadsSubtitle">Manage and track all incoming leads</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="openModal('openserveEmailModal')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
-                            Import Email
-                        </button>
-                        <button onclick="openModal('addLeadModal')" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>
-                            Add Lead
-                        </button>
-                    </div>
+        <!-- Leads Section -->
+        <section id="section-leads" class="p-4 md:p-6 hidden">
+            <!-- Section Header -->
+            <div class="flex items-center justify-between mb-5">
+                <div>
+                    <p class="text-sm" style="color: var(--text-muted)" id="leadsSubtitle">Manage and track all incoming leads</p>
+                </div>
+                <div class="flex items-center gap-2">
+                    <button onclick="openModal('openserveEmailModal')" class="border px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center gap-1.5" style="border-color: var(--card-border); color: var(--text-secondary)">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+                        Import Email
+                    </button>
+                    <button onclick="openModal('addLeadModal')" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                        Add Lead
+                    </button>
                 </div>
             </div>
 
             <!-- Lead Pipeline Cards -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-blue-500 rounded-full"></div>
-                    Lead Pipeline
-                </h3>
-            </div>
-            <div class="grid grid-cols-2 lg:grid-cols-6 gap-4 mb-6">
+            <div class="grid grid-cols-2 lg:grid-cols-6 gap-3 mb-5">
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('leadStatusFilter').value=''; filterLeads();">
                     <p class="text-xs text-gray-400 font-medium mb-1">All Leads</p>
                     <p class="text-3xl font-bold text-gray-700" id="leadsAllCount">0</p>
@@ -685,28 +749,11 @@
             </div>
         </section>
 
-        <!-- Orders Section - Vuma-Style -->
-        <section id="section-orders" class="p-8 hidden">
-            <!-- Orders Banner -->
-            <div class="bg-gradient-to-r from-emerald-600 to-emerald-700 rounded-2xl p-5 mb-6 text-white shadow-lg">
-                <div class="flex items-center gap-4">
-                    <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
-                    </div>
-                    <div>
-                        <p class="text-white/60 text-xs uppercase tracking-wider">Orders</p>
-                        <h2 class="text-lg font-bold">Order Management</h2>
-                        <p class="text-white/70 text-sm">Track and manage all customer orders</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Order Status Summary Cards -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-emerald-500 rounded-full"></div>
-                    Order Status Overview
-                </h3>
+        <!-- Orders Section -->
+        <section id="section-orders" class="p-4 md:p-6 hidden">
+            <!-- Section Header -->
+            <div class="flex items-center justify-between mb-5">
+                <p class="text-sm" style="color: var(--text-muted)">Track and manage all customer orders</p>
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="document.getElementById('orderStatusFilter').value=''; filterOrders();">
@@ -777,36 +824,15 @@
             </div>
         </section>
 
-        <!-- Payments Section - Vuma-Style -->
-        <section id="section-payments" class="p-8 hidden">
-            <!-- Payments Banner -->
-            <div class="bg-gradient-to-r from-rose-600 to-pink-600 rounded-2xl p-5 mb-6 text-white shadow-lg">
-                <div class="flex items-center justify-between">
-                    <div class="flex items-center gap-4">
-                        <div class="w-12 h-12 bg-white/20 rounded-xl flex items-center justify-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
-                        </div>
-                        <div>
-                            <p class="text-white/60 text-xs uppercase tracking-wider">Payments</p>
-                            <h2 class="text-lg font-bold">Payment Tracking</h2>
-                            <p class="text-white/70 text-sm">Monitor client payments, flag overdue accounts, send reminders</p>
-                        </div>
-                    </div>
-                    <div class="flex items-center gap-2">
-                        <button onclick="exportPaymentReport()" class="bg-white/20 hover:bg-white/30 px-4 py-2 rounded-xl text-sm font-medium backdrop-blur-sm transition flex items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
-                            Export Report
-                        </button>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Payment Summary Cards -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-rose-500 rounded-full"></div>
-                    Payment Overview
-                </h3>
+        <!-- Payments Section -->
+        <section id="section-payments" class="p-4 md:p-6 hidden">
+            <!-- Section Header -->
+            <div class="flex items-center justify-between mb-5">
+                <p class="text-sm" style="color: var(--text-muted)">Monitor client payments, flag overdue accounts, send reminders</p>
+                <button onclick="exportPaymentReport()" class="border px-3 py-1.5 rounded-lg text-sm font-medium hover:bg-gray-50 transition flex items-center gap-1.5" style="border-color: var(--card-border); color: var(--text-secondary)">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                    Export Report
+                </button>
             </div>
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterPayments('')">
@@ -837,12 +863,7 @@
             </div>
 
             <!-- Aging Report -->
-            <div class="mb-2">
-                <h3 class="text-sm font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
-                    <div class="w-1 h-4 bg-amber-500 rounded-full"></div>
-                    Aging Report
-                </h3>
-            </div>
+            <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Aging Report</h3>
             <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                 <div class="card p-4 text-center">
                     <p class="text-xs text-gray-400 font-medium mb-1">0-7 Days</p>
@@ -879,9 +900,9 @@
                     <option value="overdue">Overdue</option>
                     <option value="partial">Partial</option>
                 </select>
-                <button onclick="sendBulkReminders()" class="bg-gradient-to-r from-rose-500 to-pink-500 text-white px-4 py-2 rounded-xl text-sm font-medium hover:shadow-md transition-all flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" /></svg>
-                    Send Reminders to Overdue
+                <button onclick="sendBulkReminders()" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                    Send Reminders
                 </button>
                 <span id="paymentFilterCount" class="text-sm text-gray-500 ml-auto"></span>
             </div>
@@ -961,7 +982,7 @@
                         <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
                         <textarea id="payModalNotes" class="w-full border rounded-xl px-4 py-2" rows="2" placeholder="Payment reference, notes..."></textarea>
                     </div>
-                    <button onclick="savePaymentStatus()" class="w-full bg-gradient-to-r from-rose-500 to-pink-500 text-white py-3 rounded-xl font-medium hover:shadow-lg transition-all">
+                    <button onclick="savePaymentStatus()" class="w-full btn-primary py-2.5 rounded-lg font-medium">
                         Save Payment Status
                     </button>
                 </div>
@@ -969,13 +990,11 @@
         </div>
 
         <!-- Agents Section -->
-        <section id="section-agents" class="p-8 hidden">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-800">Manage Agents</h3>
-                <button onclick="openModal('addAgentModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
+        <section id="section-agents" class="p-4 md:p-6 hidden">
+            <div class="flex items-center justify-between mb-5">
+                <p class="text-sm" style="color: var(--text-muted)">Manage your agent team</p>
+                <button onclick="openModal('addAgentModal')" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Agent
                 </button>
             </div>
@@ -988,13 +1007,11 @@
         </section>
 
         <!-- Packages Section -->
-        <section id="section-packages" class="p-8 hidden">
-            <div class="flex items-center justify-between mb-6">
-                <h3 class="text-lg font-semibold text-gray-800">Openserve Packages</h3>
-                <button onclick="openModal('addPackageModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
+        <section id="section-packages" class="p-4 md:p-6 hidden">
+            <div class="flex items-center justify-between mb-5">
+                <p class="text-sm" style="color: var(--text-muted)">Manage Openserve fibre packages</p>
+                <button onclick="openModal('addPackageModal')" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Package
                 </button>
             </div>
@@ -1007,7 +1024,7 @@
         </section>
 
         <!-- Shipping Section -->
-        <section id="section-shipping" class="p-8 hidden">
+        <section id="section-shipping" class="p-4 md:p-6 hidden">
             <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-800">Free Router Deliveries</h3>
                 <p class="text-gray-500 text-sm mt-1">Track and manage free router deliveries for non-WebConnect and non-prepaid packages</p>
@@ -1072,7 +1089,7 @@
         </section>
 
         <!-- Preorders Section -->
-        <section id="section-preorders" class="p-8 hidden">
+        <section id="section-preorders" class="p-4 md:p-6 hidden">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h2 class="text-xl font-bold text-gray-800">Preorders</h2>
@@ -1118,7 +1135,7 @@
         </section>
 
         <!-- Reports Section -->
-        <section id="section-reports" class="p-8 hidden">
+        <section id="section-reports" class="p-4 md:p-6 hidden">
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="card p-6">
                     <h3 class="text-lg font-semibold text-gray-800 mb-4">Agent Performance</h3>
@@ -1132,7 +1149,7 @@
         </section>
 
         <!-- Returned Items Section -->
-        <section id="section-returned" class="p-8 hidden">
+        <section id="section-returned" class="p-4 md:p-6 hidden">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h2 class="text-xl font-bold text-gray-800">Returned Items</h2>
@@ -1262,13 +1279,11 @@
         </section>
 
         <!-- Dealers Section -->
-        <section id="section-dealers" class="p-4 md:p-8 hidden">
-            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-                <h3 class="text-lg font-semibold text-gray-800">Dealer Management</h3>
-                <button onclick="openModal('addDealerModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
+        <section id="section-dealers" class="p-4 md:p-6 hidden">
+            <div class="flex flex-col md:flex-row items-start md:items-center justify-between mb-5 gap-4">
+                <p class="text-sm" style="color: var(--text-muted)">Manage dealer organizations</p>
+                <button onclick="openModal('addDealerModal')" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Dealer
                 </button>
             </div>
@@ -1280,16 +1295,11 @@
         </section>
 
         <!-- Pending Agents Section -->
-        <section id="section-pending-agents" class="p-4 md:p-8 hidden">
-            <div class="flex items-center justify-between mb-6">
-                <div>
-                    <h3 class="text-lg font-semibold text-gray-800">Pending Agent Approvals</h3>
-                    <p class="text-gray-500 text-sm">Review, approve, or add new agents awaiting setup</p>
-                </div>
-                <button onclick="openModal('addPendingAgentModal')" class="btn-primary text-white px-6 py-2 rounded-xl font-medium flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                    </svg>
+        <section id="section-pending-agents" class="p-4 md:p-6 hidden">
+            <div class="flex items-center justify-between mb-5">
+                <p class="text-sm" style="color: var(--text-muted)">Review, approve, or add new agents awaiting setup</p>
+                <button onclick="openModal('addPendingAgentModal')" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1.5">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
                     Add Pending Agent
                 </button>
             </div>
@@ -1318,7 +1328,7 @@
         </section>
 
         <!-- Axxess Sales Section (Full Integration from Project 4) -->
-        <section id="section-axxess-sales" class="p-4 md:p-8 hidden">
+        <section id="section-axxess-sales" class="p-4 md:p-6 hidden">
             <div class="flex items-center justify-between mb-6">
                 <div>
                     <h3 class="text-lg font-semibold text-gray-800">Axxess Sales Dashboard</h3>
@@ -1467,7 +1477,7 @@
         </div>
 
         <!-- Settings Section -->
-        <section id="section-settings" class="p-4 md:p-8 hidden">
+        <section id="section-settings" class="p-4 md:p-6 hidden">
             <div class="mb-6">
                 <h3 class="text-lg font-semibold text-gray-800">System Settings</h3>
                 <p class="text-gray-500 text-sm">Configure system-wide settings and integrations</p>
