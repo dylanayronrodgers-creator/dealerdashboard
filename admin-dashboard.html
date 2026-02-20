@@ -509,7 +509,7 @@
                     </div>
                     <div class="stat-body">
                         <div class="stat-label">Total Leads</div>
-                        <div class="stat-value" style="color: var(--info)" id="totalLeads">0</div>
+                        <div class="stat-value" style="color: var(--info)" id="totalLeads"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></div>
                     </div>
                     <span class="stat-link" onclick="showSection('leads')">View</span>
                 </div>
@@ -519,7 +519,7 @@
                     </div>
                     <div class="stat-body">
                         <div class="stat-label">Total Orders</div>
-                        <div class="stat-value" style="color: var(--success)" id="totalOrders">0</div>
+                        <div class="stat-value" style="color: var(--success)" id="totalOrders"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></div>
                     </div>
                     <span class="stat-link" onclick="showSection('orders')">View</span>
                 </div>
@@ -529,7 +529,7 @@
                     </div>
                     <div class="stat-body">
                         <div class="stat-label">Active Agents</div>
-                        <div class="stat-value" style="color: var(--purple)" id="totalAgents">0</div>
+                        <div class="stat-value" style="color: var(--purple)" id="totalAgents"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></div>
                     </div>
                     <span class="stat-link" onclick="showSection('agents')">View</span>
                 </div>
@@ -539,7 +539,7 @@
                     </div>
                     <div class="stat-body">
                         <div class="stat-label">Dealers</div>
-                        <div class="stat-value" style="color: var(--orange)" id="totalDealers">0</div>
+                        <div class="stat-value" style="color: var(--orange)" id="totalDealers"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></div>
                     </div>
                     <span class="stat-link" onclick="showSection('dealers')">View</span>
                 </div>
@@ -549,7 +549,7 @@
                     </div>
                     <div class="stat-body">
                         <div class="stat-label">Conversion Rate</div>
-                        <div class="stat-value" style="color: var(--pink)" id="conversionRate">0%</div>
+                        <div class="stat-value" style="color: var(--pink)" id="conversionRate"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></div>
                     </div>
                     <span class="text-xs" style="color:var(--text-muted)" id="dashTimestampSmall"></span>
                 </div>
@@ -559,7 +559,7 @@
                     </div>
                     <div class="stat-body">
                         <div class="stat-label">Total Commission</div>
-                        <div class="stat-value" style="color: var(--cyan)" id="totalCommission">R0</div>
+                        <div class="stat-value" style="color: var(--cyan)" id="totalCommission"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></div>
                     </div>
                     <span class="text-xs" style="color:var(--text-muted)" id="dashTimestampSmall2"></span>
                 </div>
@@ -597,19 +597,19 @@
                     <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Order Status</h3>
                     <div class="grid grid-cols-2 gap-3">
                         <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='pending'; filterOrders();}, 100)">
-                            <p class="text-2xl font-bold" style="color: var(--warning)" id="dashPendingOrders">0</p>
+                            <p class="text-2xl font-bold" style="color: var(--warning)" id="dashPendingOrders"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Pending</p>
                         </div>
                         <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='processing'; filterOrders();}, 100)">
-                            <p class="text-2xl font-bold" style="color: var(--info)" id="dashProcessingOrders">0</p>
+                            <p class="text-2xl font-bold" style="color: var(--info)" id="dashProcessingOrders"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Processing</p>
                         </div>
                         <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='completed'; filterOrders();}, 100)">
-                            <p class="text-2xl font-bold" style="color: var(--success)" id="dashCompletedOrders">0</p>
+                            <p class="text-2xl font-bold" style="color: var(--success)" id="dashCompletedOrders"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Completed</p>
                         </div>
                         <div class="p-3 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('orders'); setTimeout(()=>{document.getElementById('orderStatusFilter').value='cancelled'; filterOrders();}, 100)">
-                            <p class="text-2xl font-bold" style="color: var(--danger)" id="dashCancelledOrders">0</p>
+                            <p class="text-2xl font-bold" style="color: var(--danger)" id="dashCancelledOrders"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Cancelled</p>
                         </div>
                     </div>
@@ -620,23 +620,23 @@
                     <h3 class="text-xs font-semibold uppercase mb-3" style="color: var(--text-muted)">Lead Pipeline</h3>
                     <div class="grid grid-cols-5 gap-2">
                         <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='new'; filterLeads();}, 100)">
-                            <p class="text-xl font-bold" style="color: var(--info)" id="dashNewLeads">0</p>
+                            <p class="text-xl font-bold" style="color: var(--info)" id="dashNewLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">New</p>
                         </div>
                         <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='contacted'; filterLeads();}, 100)">
-                            <p class="text-xl font-bold" style="color: var(--purple)" id="dashContactedLeads">0</p>
+                            <p class="text-xl font-bold" style="color: var(--purple)" id="dashContactedLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Contacted</p>
                         </div>
                         <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='qualified'; filterLeads();}, 100)">
-                            <p class="text-xl font-bold" style="color: var(--success)" id="dashQualifiedLeads">0</p>
+                            <p class="text-xl font-bold" style="color: var(--success)" id="dashQualifiedLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Qualified</p>
                         </div>
                         <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='converted'; filterLeads();}, 100)">
-                            <p class="text-xl font-bold text-green-600" id="dashConvertedLeads">0</p>
+                            <p class="text-xl font-bold text-green-600" id="dashConvertedLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Converted</p>
                         </div>
                         <div class="p-2 rounded-md cursor-pointer hover:bg-gray-50 transition text-center" onclick="showSection('leads'); setTimeout(()=>{document.getElementById('leadStatusFilter').value='lost'; filterLeads();}, 100)">
-                            <p class="text-xl font-bold text-gray-500" id="dashLostLeads">0</p>
+                            <p class="text-xl font-bold text-gray-500" id="dashLostLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                             <p class="text-xs" style="color: var(--text-muted)">Lost</p>
                         </div>
                     </div>
@@ -651,15 +651,15 @@
                     <div class="space-y-3">
                         <div class="flex items-center justify-between p-2 rounded-md" style="background: var(--success-light)">
                             <span class="text-sm font-medium" style="color: var(--success)">Confirmed</span>
-                            <span class="text-sm font-bold" style="color: var(--success)" id="confirmedRevenue">R0</span>
+                            <span class="text-sm font-bold" style="color: var(--success)" id="confirmedRevenue"><span class="text-xs animate-pulse">Loading...</span></span>
                         </div>
                         <div class="flex items-center justify-between p-2 rounded-md" style="background: var(--warning-light)">
                             <span class="text-sm font-medium" style="color: var(--warning)">Pending</span>
-                            <span class="text-sm font-bold" style="color: var(--warning)" id="pendingRevenue">R0</span>
+                            <span class="text-sm font-bold" style="color: var(--warning)" id="pendingRevenue"><span class="text-xs animate-pulse">Loading...</span></span>
                         </div>
                         <div class="flex items-center justify-between p-2 rounded-md" style="background: var(--danger-light)">
                             <span class="text-sm font-medium" style="color: var(--danger)">Rejected</span>
-                            <span class="text-sm font-bold" style="color: var(--danger)" id="rejectedRevenue">R0</span>
+                            <span class="text-sm font-bold" style="color: var(--danger)" id="rejectedRevenue"><span class="text-xs animate-pulse">Loading...</span></span>
                         </div>
                     </div>
                     <div class="mt-3 pt-3 border-t text-xs" style="color: var(--text-muted); border-color: var(--card-border)">
@@ -891,28 +891,28 @@
             <div class="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-6">
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all" onclick="filterPayments('')">
                     <p class="text-xs text-gray-400 font-medium mb-1">Total Orders</p>
-                    <p class="text-3xl font-bold text-gray-700" id="payTotalOrders">0</p>
-                    <p class="text-xs text-gray-400 mt-1" id="payTotalAmount">R0</p>
+                    <p class="text-3xl font-bold text-gray-700" id="payTotalOrders"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
+                    <p class="text-xs text-gray-400 mt-1" id="payTotalAmount"><span class="animate-pulse">...</span></p>
                 </div>
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-emerald-500" onclick="filterPayments('paid')">
                     <p class="text-xs text-gray-400 font-medium mb-1">Paid</p>
-                    <p class="text-3xl font-bold text-emerald-600" id="payPaidCount">0</p>
-                    <p class="text-xs text-emerald-500 mt-1" id="payPaidAmount">R0</p>
+                    <p class="text-3xl font-bold text-emerald-600" id="payPaidCount"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
+                    <p class="text-xs text-emerald-500 mt-1" id="payPaidAmount"><span class="animate-pulse">...</span></p>
                 </div>
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-amber-500" onclick="filterPayments('unpaid')">
                     <p class="text-xs text-gray-400 font-medium mb-1">Unpaid</p>
-                    <p class="text-3xl font-bold text-amber-600" id="payUnpaidCount">0</p>
-                    <p class="text-xs text-amber-500 mt-1" id="payUnpaidAmount">R0</p>
+                    <p class="text-3xl font-bold text-amber-600" id="payUnpaidCount"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
+                    <p class="text-xs text-amber-500 mt-1" id="payUnpaidAmount"><span class="animate-pulse">...</span></p>
                 </div>
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-red-500" onclick="filterPayments('overdue')">
                     <p class="text-xs text-gray-400 font-medium mb-1">Overdue</p>
-                    <p class="text-3xl font-bold text-red-600" id="payOverdueCount">0</p>
-                    <p class="text-xs text-red-500 mt-1" id="payOverdueAmount">R0</p>
+                    <p class="text-3xl font-bold text-red-600" id="payOverdueCount"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
+                    <p class="text-xs text-red-500 mt-1" id="payOverdueAmount"><span class="animate-pulse">...</span></p>
                 </div>
                 <div class="card p-4 text-center cursor-pointer hover:shadow-lg transition-all border-l-4 border-l-blue-500" onclick="filterPayments('partial')">
                     <p class="text-xs text-gray-400 font-medium mb-1">Partial</p>
-                    <p class="text-3xl font-bold text-blue-600" id="payPartialCount">0</p>
-                    <p class="text-xs text-blue-500 mt-1" id="payPartialAmount">R0</p>
+                    <p class="text-3xl font-bold text-blue-600" id="payPartialCount"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
+                    <p class="text-xs text-blue-500 mt-1" id="payPartialAmount"><span class="animate-pulse">...</span></p>
                 </div>
             </div>
 

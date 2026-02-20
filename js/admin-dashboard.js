@@ -2642,6 +2642,34 @@ async function saveLeadChanges(e) {
                     alert('Lead updated but failed to create order: ' + orderError.message);
                 } else {
                     console.log('Order created successfully');
+                    
+                    // Create sales_log entry - use agent_id or fall back to currentUser (super_admin)
+                    const saleProfileId = updateData.agent_id || (originalLead && originalLead.internal_agent_id) || (originalLead && originalLead.assigned_to) || (currentUser ? currentUser.id : null);
+                    if (saleProfileId) {
+                        try {
+                            const { data: agentP } = await window.supabaseClient.from('profiles').select('agent_table_id, full_name').eq('id', saleProfileId).single();
+                            if (agentP?.agent_table_id) {
+                                const { data: existS } = await window.supabaseClient.from('sales_log').select('id').eq('lead_id', editingLeadId).limit(1);
+                                if (!existS || existS.length === 0) {
+                                    let pkgName = 'Fibre Package', pkgPrice = 0;
+                                    if (updateData.package_id) {
+                                        const { data: pkg } = await window.supabaseClient.from('packages').select('name, price').eq('id', updateData.package_id).single();
+                                        if (pkg) { pkgName = pkg.name; pkgPrice = pkg.price; }
+                                    }
+                                    await window.supabaseClient.from('sales_log').insert({
+                                        agent_id: agentP.agent_table_id, lead_id: editingLeadId,
+                                        account_number: updateData.order_number, service_id: updateData.service_id || null,
+                                        package_name: pkgName, category: 'Fibre', provider: 'Openserve', total_sale: pkgPrice,
+                                        sale_status: 'Pending', status_reason: 'Lead Converted - Awaiting Activation',
+                                        sale_origin: 'Incoming Sales Leads', notes: `Converted lead - ${updateData.full_name || ''} - Order: ${updateData.order_number}`,
+                                        commission_status: 'Does Not Count', import_source: 'AUTO_LEAD', created_at: new Date().toISOString()
+                                    });
+                                    console.log('Sales log entry created for agent:', agentP.full_name);
+                                }
+                            }
+                        } catch (slErr) { console.error('Error creating sales_log from edit:', slErr); }
+                    }
+                    
                     alert('Lead updated and order created successfully!');
                     await loadOrders(); // Reload orders to show the new one
                 }
@@ -2761,8 +2789,8 @@ async function convertToOrder() {
         console.log('Order created successfully:', newOrder);
         
         // Create sales_log entry for agent dashboard
-        // Use internal_agent_id > assigned_to > agent_id priority
-        const saleAgentProfileId = lead.internal_agent_id || lead.assigned_to || lead.agent_id;
+        // Use internal_agent_id > assigned_to > agent_id > currentUser (super_admin fallback)
+        const saleAgentProfileId = lead.internal_agent_id || lead.assigned_to || lead.agent_id || (currentUser ? currentUser.id : null);
         if (saleAgentProfileId) {
             try {
                 // Look up agent_table_id from profiles
