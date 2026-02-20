@@ -275,15 +275,11 @@ function showSection(section) {
     // Update nav
     document.querySelectorAll('.nav-item').forEach(item => {
         item.classList.remove('active');
-        item.classList.remove('text-white');
-        item.classList.add('text-white/70');
     });
     
     const activeNav = document.querySelector(`[href="#${section}"]`);
     if (activeNav) {
         activeNav.classList.add('active');
-        activeNav.classList.add('text-white');
-        activeNav.classList.remove('text-white/70');
     }
     
     // Update page title
