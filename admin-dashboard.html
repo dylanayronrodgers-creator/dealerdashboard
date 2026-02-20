@@ -683,11 +683,11 @@
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <div class="relative flex-1 min-w-[200px] max-w-sm">
                     <input type="text" id="leadSearchFilter" placeholder="Search name, email, phone, lead ID..." 
-                        class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20"
+                        class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500/20"
                         oninput="filterLeads()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <select id="leadStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
+                <select id="leadStatusFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
                     <option value="">All Status</option>
                     <option value="new">New</option>
                     <option value="contacted">Contacted</option>
@@ -695,18 +695,18 @@
                     <option value="converted">Converted</option>
                     <option value="lost">Lost</option>
                 </select>
-                <select id="leadAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
+                <select id="leadAgentFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
                     <option value="">All Agents</option>
                 </select>
-                <select id="leadDealerFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
+                <select id="leadDealerFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" onchange="filterLeads()">
                     <option value="">All Dealers</option>
                 </select>
-                <button onclick="clearLeadFilters()" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm border rounded-xl hover:bg-gray-50">Clear</button>
+                <button onclick="clearLeadFilters()" class="text-gray-500 hover:text-gray-700 px-3 py-2 text-sm border rounded-lg hover:bg-gray-50">Clear</button>
                 <span id="leadFilterCount" class="text-sm text-gray-500 ml-auto"></span>
             </div>
 
             <!-- Bulk Assign Bar -->
-            <div id="bulkAssignBar" class="hidden bg-gradient-to-r from-indigo-50 to-blue-50 border border-indigo-200 rounded-xl p-3 mb-4 flex flex-wrap items-center gap-3 shadow-sm">
+            <div id="bulkAssignBar" class="hidden bg-indigo-50 border border-indigo-200 rounded-lg p-3 mb-4 flex flex-wrap items-center gap-3">
                 <div class="flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-indigo-500" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" /></svg>
                     <span class="text-sm font-semibold text-indigo-700" id="bulkSelectedCount">0 selected</span>
@@ -714,7 +714,7 @@
                 <select id="bulkAssignAgent" class="border border-indigo-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20">
                     <option value="">Select Internal Agent</option>
                 </select>
-                <button onclick="bulkAssignLeads()" class="bg-gradient-to-r from-indigo-500 to-blue-600 text-white px-4 py-1.5 rounded-lg text-sm font-medium shadow-sm hover:shadow-md transition-all flex items-center gap-1">
+                <button onclick="bulkAssignLeads()" class="btn-primary px-3 py-1.5 rounded-lg text-sm font-medium flex items-center gap-1">
                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
                     Assign Selected
                 </button>
@@ -781,10 +781,10 @@
             <!-- Filters & Search -->
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <div class="relative flex-1 min-w-[200px] max-w-sm">
-                    <input type="text" id="orderSearchFilter" placeholder="Search orders..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-emerald-500/20" oninput="filterOrders()">
+                    <input type="text" id="orderSearchFilter" placeholder="Search orders..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-emerald-500/20" oninput="filterOrders()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <select id="orderStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="filterOrders()">
+                <select id="orderStatusFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="filterOrders()">
                     <option value="">All Status</option>
                     <option value="pending">Pending</option>
                     <option value="processing">Processing</option>
@@ -792,7 +792,7 @@
                     <option value="completed">Completed</option>
                     <option value="cancelled">Cancelled</option>
                 </select>
-                <select id="orderAgentFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="filterOrders()">
+                <select id="orderAgentFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" onchange="filterOrders()">
                     <option value="">All Agents</option>
                 </select>
                 <span id="orderFilterCount" class="text-sm text-gray-500 ml-auto"></span>
@@ -890,10 +890,10 @@
             <!-- Filters & Search -->
             <div class="flex flex-wrap items-center gap-3 mb-6">
                 <div class="relative flex-1 min-w-[200px] max-w-sm">
-                    <input type="text" id="paymentSearchFilter" placeholder="Search client, order #, account..." class="w-full pl-10 pr-4 py-2 border rounded-xl focus:outline-none focus:ring-2 focus:ring-rose-500/20" oninput="filterPayments()">
+                    <input type="text" id="paymentSearchFilter" placeholder="Search client, order #, account..." class="w-full pl-10 pr-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-rose-500/20" oninput="filterPayments()">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" /></svg>
                 </div>
-                <select id="paymentStatusFilter" class="border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20" onchange="filterPayments()">
+                <select id="paymentStatusFilter" class="border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-rose-500/20" onchange="filterPayments()">
                     <option value="">All Payment Status</option>
                     <option value="paid">Paid</option>
                     <option value="unpaid">Unpaid</option>
@@ -952,7 +952,7 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Payment Status</label>
-                        <select id="payModalStatus" class="w-full border rounded-xl px-4 py-2">
+                        <select id="payModalStatus" class="w-full border rounded-lg px-4 py-2">
                             <option value="unpaid">Unpaid</option>
                             <option value="paid">Paid</option>
                             <option value="partial">Partial Payment</option>
@@ -961,11 +961,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Payment Amount (R)</label>
-                        <input type="number" id="payModalAmount" class="w-full border rounded-xl px-4 py-2" placeholder="0.00">
+                        <input type="number" id="payModalAmount" class="w-full border rounded-lg px-4 py-2" placeholder="0.00">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Payment Method</label>
-                        <select id="payModalMethod" class="w-full border rounded-xl px-4 py-2">
+                        <select id="payModalMethod" class="w-full border rounded-lg px-4 py-2">
                             <option value="">Select method</option>
                             <option value="eft">EFT / Bank Transfer</option>
                             <option value="debit_order">Debit Order</option>
@@ -976,11 +976,11 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Payment Date</label>
-                        <input type="date" id="payModalDate" class="w-full border rounded-xl px-4 py-2">
+                        <input type="date" id="payModalDate" class="w-full border rounded-lg px-4 py-2">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                        <textarea id="payModalNotes" class="w-full border rounded-xl px-4 py-2" rows="2" placeholder="Payment reference, notes..."></textarea>
+                        <textarea id="payModalNotes" class="w-full border rounded-lg px-4 py-2" rows="2" placeholder="Payment reference, notes..."></textarea>
                     </div>
                     <button onclick="savePaymentStatus()" class="w-full btn-primary py-2.5 rounded-lg font-medium">
                         Save Payment Status
@@ -1096,14 +1096,14 @@
                     <p class="text-gray-500 text-sm">Manage and track preorder leads</p>
                 </div>
                 <div class="flex gap-2">
-                    <select id="preorderStatusFilter" onchange="filterPreorders()" class="border rounded-xl px-4 py-2 focus:outline-none">
+                    <select id="preorderStatusFilter" onchange="filterPreorders()" class="border rounded-lg px-4 py-2 focus:outline-none">
                         <option value="">All Statuses</option>
                         <option value="new">New</option>
                         <option value="contacted">Contacted</option>
                         <option value="qualified">Qualified</option>
                         <option value="converted">Converted</option>
                     </select>
-                    <button onclick="exportPreorders()" class="bg-blue-600 text-white px-4 py-2 rounded-xl hover:bg-blue-700">
+                    <button onclick="exportPreorders()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
                         Export Preorders
                     </button>
                 </div>
@@ -1156,14 +1156,14 @@
                     <p class="text-gray-500 text-sm">Orders returned for follow-up or correction</p>
                 </div>
                 <div class="flex gap-2">
-                    <select id="returnedStatusFilter" onchange="filterReturnedItems()" class="border rounded-xl px-4 py-2 focus:outline-none">
+                    <select id="returnedStatusFilter" onchange="filterReturnedItems()" class="border rounded-lg px-4 py-2 focus:outline-none">
                         <option value="">All Status</option>
                         <option value="pending">Pending Review</option>
                         <option value="acknowledged">Acknowledged</option>
                         <option value="resolved">Resolved</option>
                         <option value="rejected">Rejected</option>
                     </select>
-                    <button onclick="exportReturnedItems()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Export</button>
+                    <button onclick="exportReturnedItems()" class="btn-primary text-white px-3 py-1.5 rounded-lg text-sm">Export</button>
                 </div>
             </div>
 
@@ -1208,14 +1208,14 @@
         </section>
 
         <!-- Import Section -->
-        <section id="section-import" class="p-4 md:p-8 hidden">
+        <section id="section-import" class="p-4 md:p-6 hidden">
             <div class="card p-6">
                 <h3 class="text-lg font-semibold text-gray-800 mb-2">Mass Import Leads</h3>
                 <p class="text-gray-500 text-sm mb-6">Upload a CSV file to import multiple leads at once. Leads will be assigned to dealers and agents as specified.</p>
 
                 <div class="mb-6">
                     <h4 class="font-medium text-gray-700 mb-2">CSV Format Requirements:</h4>
-                    <div class="bg-gray-50 rounded-xl p-4 text-sm text-gray-600 overflow-x-auto">
+                    <div class="bg-gray-50 rounded-lg p-4 text-sm text-gray-600 overflow-x-auto">
                         <p class="mb-2">Your CSV file should have the following columns:</p>
                         <code class="bg-gray-200 px-2 py-1 rounded text-xs whitespace-nowrap">LEAD ID, AGENT, DEALER, DEAL, SERVICE ID, ACCOUNT NUMBER, STATUS, REGION, PRIMARY CONTACT NAME, PRIMARY CONTACT NUMBER, PRIMARY CONTACT EMAIL, SECONDARY CONTACT NAME, SECONDARY CONTACT NUMBER, SECONDARY CONTACT SECONDARY, SECONDARY CONTACT EMAIL, ORDER NUMBER, ORDER STATUS, ORDER DATE, DATE CAPTURED, LAST UPDATED, CAPTURED BY, SECONDARY CONTACT</code>
                         <ul class="mt-3 space-y-1 text-gray-500 text-xs">
@@ -1241,12 +1241,12 @@
                     </a>
                 </div>
 
-                <div class="border-2 border-dashed border-gray-300 rounded-xl p-8 text-center" id="dropZone">
+                <div class="border-2 border-dashed border-gray-300 rounded-lg p-8 text-center" id="dropZone">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-12 w-12 text-gray-400 mx-auto mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
                     </svg>
                     <p class="text-gray-600 mb-2">Drag and drop your CSV file here, or</p>
-                    <label class="btn-primary text-white px-6 py-2 rounded-xl font-medium cursor-pointer inline-block">
+                    <label class="btn-primary text-white px-6 py-2 rounded-lg font-medium cursor-pointer inline-block">
                         Browse Files
                         <input type="file" accept=".csv" class="hidden" id="csvFileInput" onchange="handleFileSelect(event)">
                     </label>
@@ -1258,10 +1258,10 @@
                         <table class="w-full text-sm" id="previewTable"></table>
                     </div>
                     <div class="mt-4 flex gap-4">
-                        <button onclick="confirmImport()" class="btn-primary text-white px-6 py-2 rounded-xl font-medium">
+                        <button onclick="confirmImport()" class="btn-primary text-white px-6 py-2 rounded-lg font-medium">
                             Import <span id="importCount">0</span> Leads
                         </button>
-                        <button onclick="cancelImport()" class="border px-6 py-2 rounded-xl hover:bg-gray-50">
+                        <button onclick="cancelImport()" class="border px-6 py-2 rounded-lg hover:bg-gray-50">
                             Cancel
                         </button>
                     </div>
@@ -1334,7 +1334,7 @@
                     <h3 class="text-lg font-semibold text-gray-800">Axxess Sales Dashboard</h3>
                     <p class="text-gray-500 text-sm">Full sales management — add, track, import, export, commissions & reminders</p>
                 </div>
-                <button onclick="loadAxxessSalesData()" class="border px-4 py-2 rounded-xl text-sm hover:bg-gray-50 flex items-center gap-2">
+                <button onclick="loadAxxessSalesData()" class="border px-4 py-2 rounded-lg text-sm hover:bg-gray-50 flex items-center gap-2">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                     </svg>
@@ -1366,7 +1366,7 @@
             </div>
 
             <!-- Sub-Tabs -->
-            <div class="flex flex-wrap gap-1 mb-6 bg-gray-100 rounded-xl p-1">
+            <div class="flex flex-wrap gap-1 mb-6 bg-gray-100 rounded-lg p-1">
                 <button data-ax-tab="ax-overview" class="ax-tab-btn active px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-overview')">Overview</button>
                 <button data-ax-tab="ax-add-sale" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-add-sale')">Add Sale</button>
                 <button data-ax-tab="ax-current-month" class="ax-tab-btn px-3 py-2 rounded-lg text-sm font-medium transition" onclick="axSwitchTab('ax-current-month')">Current Month</button>
@@ -1397,7 +1397,7 @@
                     <p class="text-sm text-gray-500" id="axModalSaleInfo">-</p>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">New Status</label>
-                        <select id="axModalStatus" onchange="axModalUpdateReasons()" class="w-full border rounded-xl px-3 py-2">
+                        <select id="axModalStatus" onchange="axModalUpdateReasons()" class="w-full border rounded-lg px-3 py-2">
                             <option value="Paid-Active">Paid-Active</option>
                             <option value="Pending">Pending</option>
                             <option value="Partial">Partial</option>
@@ -1407,18 +1407,18 @@
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status Details</label>
-                        <select id="axModalReason" class="w-full border rounded-xl px-3 py-2">
+                        <select id="axModalReason" class="w-full border rounded-lg px-3 py-2">
                             <option value="">Select Details...</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                        <textarea id="axModalNotes" class="w-full border rounded-xl px-3 py-2" rows="3"></textarea>
+                        <textarea id="axModalNotes" class="w-full border rounded-lg px-3 py-2" rows="3"></textarea>
                     </div>
                 </div>
                 <div class="modal-footer flex justify-end gap-3 p-4 border-t">
-                    <button onclick="closeModal('axStatusModal')" class="border px-4 py-2 rounded-xl text-sm">Cancel</button>
-                    <button onclick="axUpdateSaleStatus()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Update Status</button>
+                    <button onclick="closeModal('axStatusModal')" class="border px-4 py-2 rounded-lg text-sm">Cancel</button>
+                    <button onclick="axUpdateSaleStatus()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">Update Status</button>
                 </div>
             </div>
         </div>
@@ -1433,20 +1433,20 @@
                 <div class="modal-body p-6 space-y-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Title *</label>
-                        <input type="text" id="axRemTitle" class="w-full border rounded-xl px-3 py-2" placeholder="Follow up with client...">
+                        <input type="text" id="axRemTitle" class="w-full border rounded-lg px-3 py-2" placeholder="Follow up with client...">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                        <textarea id="axRemDesc" class="w-full border rounded-xl px-3 py-2" rows="2"></textarea>
+                        <textarea id="axRemDesc" class="w-full border rounded-lg px-3 py-2" rows="2"></textarea>
                     </div>
                     <div class="grid grid-cols-2 gap-3">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Date & Time *</label>
-                            <input type="datetime-local" id="axRemDatetime" class="w-full border rounded-xl px-3 py-2">
+                            <input type="datetime-local" id="axRemDatetime" class="w-full border rounded-lg px-3 py-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Priority</label>
-                            <select id="axRemPriority" class="w-full border rounded-xl px-3 py-2">
+                            <select id="axRemPriority" class="w-full border rounded-lg px-3 py-2">
                                 <option value="low">Low</option>
                                 <option value="normal" selected>Normal</option>
                                 <option value="high">High</option>
@@ -1457,21 +1457,21 @@
                     <div class="grid grid-cols-3 gap-3">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Client Name</label>
-                            <input type="text" id="axRemClient" class="w-full border rounded-xl px-3 py-2">
+                            <input type="text" id="axRemClient" class="w-full border rounded-lg px-3 py-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Account #</label>
-                            <input type="text" id="axRemAccount" class="w-full border rounded-xl px-3 py-2">
+                            <input type="text" id="axRemAccount" class="w-full border rounded-lg px-3 py-2">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Service ID</label>
-                            <input type="text" id="axRemService" class="w-full border rounded-xl px-3 py-2">
+                            <input type="text" id="axRemService" class="w-full border rounded-lg px-3 py-2">
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer flex justify-end gap-3 p-4 border-t">
-                    <button onclick="closeModal('axReminderModal')" class="border px-4 py-2 rounded-xl text-sm">Cancel</button>
-                    <button onclick="axSaveReminder()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Create Reminder</button>
+                    <button onclick="closeModal('axReminderModal')" class="border px-4 py-2 rounded-lg text-sm">Cancel</button>
+                    <button onclick="axSaveReminder()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">Create Reminder</button>
                 </div>
             </div>
         </div>
@@ -1487,7 +1487,7 @@
                 <!-- Supabase Configuration -->
                 <div class="card p-6">
                     <div class="flex items-start gap-3 mb-4">
-                        <div class="w-10 h-10 bg-emerald-100 rounded-xl flex items-center justify-center">
+                        <div class="w-10 h-10 bg-emerald-100 rounded-lg flex items-center justify-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4" />
                             </svg>
@@ -1500,17 +1500,17 @@
                     <div class="space-y-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Supabase Project URL</label>
-                            <input type="url" id="supabaseUrlSetting" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://your-project.supabase.co">
+                            <input type="url" id="supabaseUrlSetting" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://your-project.supabase.co">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Supabase API Key (anon public)</label>
-                            <textarea id="supabaseKeySetting" rows="2" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs" placeholder="Enter your anon key"></textarea>
+                            <textarea id="supabaseKeySetting" rows="2" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20 text-xs" placeholder="Enter your anon key"></textarea>
                         </div>
                         <div class="flex gap-2">
-                            <button onclick="saveSupabaseConfig()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Save Configuration</button>
-                            <button onclick="testSupabaseConnection()" class="border px-4 py-2 rounded-xl text-sm hover:bg-gray-50">Test Connection</button>
+                            <button onclick="saveSupabaseConfig()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">Save Configuration</button>
+                            <button onclick="testSupabaseConnection()" class="border px-4 py-2 rounded-lg text-sm hover:bg-gray-50">Test Connection</button>
                         </div>
-                        <div id="supabaseConfigStatus" class="p-3 bg-gray-50 rounded-xl text-sm text-gray-600">
+                        <div id="supabaseConfigStatus" class="p-3 bg-gray-50 rounded-lg text-sm text-gray-600">
                             <strong>Status:</strong> <span id="supabaseStatusText">Checking...</span>
                         </div>
                     </div>
@@ -1536,15 +1536,15 @@
                     <div id="openserveApiConfig" class="hidden space-y-4 pt-4 border-t">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">API URL</label>
-                            <input type="url" id="openserveApiUrl" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://api.openserve.co.za">
+                            <input type="url" id="openserveApiUrl" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="https://api.openserve.co.za">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">API Key</label>
-                            <input type="password" id="openserveApiKey" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Enter your API key">
+                            <input type="password" id="openserveApiKey" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Enter your API key">
                         </div>
-                        <button onclick="saveOpenserveConfig()" class="btn-primary text-white px-4 py-2 rounded-xl text-sm">Save Configuration</button>
+                        <button onclick="saveOpenserveConfig()" class="btn-primary text-white px-4 py-2 rounded-lg text-sm">Save Configuration</button>
                     </div>
-                    <div class="mt-4 p-3 bg-amber-50 rounded-xl text-sm text-amber-700" id="openserveApiStatus">
+                    <div class="mt-4 p-3 bg-amber-50 rounded-lg text-sm text-amber-700" id="openserveApiStatus">
                         <strong>Status:</strong> Inactive - Enable to connect to live Openserve data
                     </div>
                 </div>
@@ -1595,7 +1595,7 @@
                             <h4 class="font-semibold text-gray-800">User Privileges Management</h4>
                             <p class="text-sm text-gray-500">Assign roles and permissions to users</p>
                         </div>
-                        <button onclick="openModal('addPrivilegeModal')" class="btn-primary text-white px-4 py-2 rounded-xl text-sm flex items-center gap-2">
+                        <button onclick="openModal('addPrivilegeModal')" class="btn-primary text-white px-4 py-2 rounded-lg text-sm flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
@@ -1626,25 +1626,25 @@
                     <h4 class="font-semibold text-gray-800 mb-4">Data Export</h4>
                     <p class="text-sm text-gray-500 mb-4">Export your data for backup or analysis</p>
                     <div class="space-y-3">
-                        <button onclick="exportData('leads')" class="w-full flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50">
+                        <button onclick="exportData('leads')" class="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                             <span class="font-medium text-gray-700">Export All Leads</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </button>
-                        <button onclick="exportData('agents')" class="w-full flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50">
+                        <button onclick="exportData('agents')" class="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                             <span class="font-medium text-gray-700">Export All Agents</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </button>
-                        <button onclick="exportData('dealers')" class="w-full flex items-center justify-between p-3 border rounded-xl hover:bg-gray-50">
+                        <button onclick="exportData('dealers')" class="w-full flex items-center justify-between p-3 border rounded-lg hover:bg-gray-50">
                             <span class="font-medium text-gray-700">Export All Dealers</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                             </svg>
                         </button>
-                        <button onclick="exportData('all')" class="w-full flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-xl hover:bg-emerald-100">
+                        <button onclick="exportData('all')" class="w-full flex items-center justify-between p-3 bg-emerald-50 border border-emerald-200 rounded-lg hover:bg-emerald-100">
                             <span class="font-medium text-emerald-700">Export Complete Backup</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
@@ -1657,13 +1657,13 @@
                     <h4 class="font-semibold text-gray-800 mb-4">Danger Zone</h4>
                     <p class="text-sm text-gray-500 mb-4">Irreversible and destructive actions</p>
                     <div class="space-y-3">
-                        <button onclick="confirmResetStats()" class="w-full flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-xl hover:bg-orange-100">
+                        <button onclick="confirmResetStats()" class="w-full flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-lg hover:bg-orange-100">
                             <span class="font-medium text-orange-700">Reset Dashboard Statistics</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
                             </svg>
                         </button>
-                        <button onclick="confirmClearNotifications()" class="w-full flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-xl hover:bg-orange-100">
+                        <button onclick="confirmClearNotifications()" class="w-full flex items-center justify-between p-3 border border-orange-200 bg-orange-50 rounded-lg hover:bg-orange-100">
                             <span class="font-medium text-orange-700">Clear All Notifications</span>
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-orange-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9" />
@@ -1690,59 +1690,59 @@
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">First Name *</label>
-                        <input type="text" name="first_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <input type="text" name="first_name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Last Name *</label>
-                        <input type="text" name="last_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <input type="text" name="last_name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                        <input type="email" name="email" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <input type="email" name="email" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Phone *</label>
-                        <input type="tel" name="phone" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                        <input type="tel" name="phone" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                     </div>
                 </div>
                 <div class="grid grid-cols-3 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">ID Number</label>
-                        <input type="text" name="id_number" id="newLeadIdNumber" maxlength="13" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="13-digit SA ID">
+                        <input type="text" name="id_number" id="newLeadIdNumber" maxlength="13" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="13-digit SA ID">
                         <p id="newLeadIdError" class="text-red-500 text-xs mt-1 hidden"></p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Passport Number</label>
-                        <input type="text" name="passport_number" id="newLeadPassport" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Passport Number">
+                        <input type="text" name="passport_number" id="newLeadPassport" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Passport Number">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Address *</label>
-                        <input type="text" name="address" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                        <input type="text" name="address" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Package Interest</label>
-                        <select name="package_id" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="leadPackageSelect">
+                        <select name="package_id" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="leadPackageSelect">
                             <option value="">Select Package</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Agent</label>
-                        <select name="agent_id" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="leadAgentSelect">
+                        <select name="agent_id" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" id="leadAgentSelect">
                             <option value="">Select Agent</option>
                         </select>
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                    <textarea name="notes" rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
+                    <textarea name="notes" rows="3" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('addLeadModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add Lead</button>
+                    <button type="button" onclick="closeModal('addLeadModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Add Lead</button>
                 </div>
             </form>
         </div>
@@ -1753,7 +1753,7 @@
         <div class="bg-white rounded-2xl w-full max-w-3xl max-h-[90vh] overflow-y-auto m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center">
+                    <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--success)">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
                         </svg>
@@ -1773,7 +1773,7 @@
                 <!-- Step 1: Paste Email -->
                 <div id="osEmailStep1">
                     <label class="block text-sm font-medium text-gray-700 mb-2">Paste the Openserve email content below:</label>
-                    <textarea id="openserveEmailText" rows="10" class="w-full border rounded-xl px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/20 text-sm font-mono" placeholder="Heads up, AXXESS AFRICA!
+                    <textarea id="openserveEmailText" rows="10" class="w-full border rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-green-500/20 text-sm font-mono" placeholder="Heads up, AXXESS AFRICA!
 
 Dear valued partner
 
@@ -1789,13 +1789,13 @@ Email address: example@gmail.com
 Primary contact number: 0788260588
 ..."></textarea>
                     <div class="flex items-center gap-3 mt-4">
-                        <button onclick="parseOpenserveEmail()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 flex items-center gap-2">
+                        <button onclick="parseOpenserveEmail()" class="btn-success text-white px-5 py-2 rounded-lg font-medium transition flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
                             Parse Email
                         </button>
-                        <button onclick="pasteFromClipboard()" class="border border-gray-300 text-gray-700 px-5 py-2 rounded-xl font-medium hover:bg-gray-50 transition-all duration-200 flex items-center gap-2">
+                        <button onclick="pasteFromClipboard()" class="border border-gray-300 text-gray-700 px-5 py-2 rounded-lg font-medium hover:bg-gray-50 transition-all duration-200 flex items-center gap-2">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
                             </svg>
@@ -1806,7 +1806,7 @@ Primary contact number: 0788260588
 
                 <!-- Step 2: Review Parsed Data -->
                 <div id="osEmailStep2" class="hidden">
-                    <div class="bg-green-50 border border-green-200 rounded-xl p-4 mb-4">
+                    <div class="bg-green-50 border border-green-200 rounded-lg p-4 mb-4">
                         <div class="flex items-center gap-2 text-green-700 font-medium mb-1">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -1819,65 +1819,65 @@ Primary contact number: 0788260588
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Lead ID</label>
-                            <input type="text" id="osLeadId" readonly class="w-full border rounded-xl px-4 py-2 bg-gray-50 text-gray-600">
+                            <input type="text" id="osLeadId" readonly class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Code</label>
-                            <input type="text" id="osDealerCode" readonly class="w-full border rounded-xl px-4 py-2 bg-gray-50 text-gray-600">
+                            <input type="text" id="osDealerCode" readonly class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600">
                         </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input type="text" id="osFullName" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                        <input type="text" id="osFullName" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                            <input type="email" id="osEmail" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <input type="email" id="osEmail" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Primary Contact</label>
-                            <input type="tel" id="osPrimaryPhone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <input type="tel" id="osPrimaryPhone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Alternative Contact</label>
-                            <input type="tel" id="osAltPhone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <input type="tel" id="osAltPhone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Preferred Contact Time</label>
-                            <input type="text" id="osContactTime" readonly class="w-full border rounded-xl px-4 py-2 bg-gray-50 text-gray-600">
+                            <input type="text" id="osContactTime" readonly class="w-full border rounded-lg px-4 py-2 bg-gray-50 text-gray-600">
                         </div>
                     </div>
                     <div class="mt-4">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Physical Address</label>
-                        <input type="text" id="osAddress" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                        <input type="text" id="osAddress" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                     </div>
                     <div class="grid grid-cols-3 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Building</label>
-                            <input type="text" id="osBuilding" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <input type="text" id="osBuilding" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Floor</label>
-                            <input type="text" id="osFloor" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <input type="text" id="osFloor" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Unit</label>
-                            <input type="text" id="osUnit" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <input type="text" id="osUnit" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                         </div>
                     </div>
                     <div class="grid grid-cols-2 gap-4 mt-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Dealer</label>
-                            <select id="osDealerSelect" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <select id="osDealerSelect" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                                 <option value="">Auto-match by dealer code</option>
                             </select>
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Agent</label>
-                            <select id="osAgentSelect" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
+                            <select id="osAgentSelect" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-green-500/20">
                                 <option value="">Select Agent (optional)</option>
                             </select>
                         </div>
@@ -1886,12 +1886,12 @@ Primary contact number: 0788260588
                     <div id="osDealerMatch" class="mt-3 hidden"></div>
 
                     <div class="flex items-center justify-between mt-6 pt-4 border-t">
-                        <button onclick="resetOpenserveEmail()" class="px-5 py-2 border rounded-xl hover:bg-gray-50 text-gray-600 font-medium">
+                        <button onclick="resetOpenserveEmail()" class="px-5 py-2 border rounded-lg hover:bg-gray-50 text-gray-600 font-medium">
                             Back
                         </button>
                         <div class="flex items-center gap-3">
-                            <button type="button" onclick="closeModal('openserveEmailModal')" class="px-5 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                            <button onclick="saveOpenserveLead()" class="bg-gradient-to-r from-green-500 to-emerald-600 text-white px-6 py-2 rounded-xl font-medium hover:from-green-600 hover:to-emerald-700 transition-all duration-200 flex items-center gap-2">
+                            <button type="button" onclick="closeModal('openserveEmailModal')" class="px-5 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                            <button onclick="saveOpenserveLead()" class="btn-success text-white px-5 py-2 rounded-lg font-medium transition flex items-center gap-2">
                                 <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                                 </svg>
@@ -1918,23 +1918,23 @@ Primary contact number: 0788260588
             <form id="addAgentForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                    <input type="text" name="full_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="text" name="full_name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                    <input type="email" name="email" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="email" name="email" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                    <input type="password" name="password" required minlength="6" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="password" name="password" required minlength="6" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="tel" name="phone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="tel" name="phone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('addAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Create Agent</button>
+                    <button type="button" onclick="closeModal('addAgentModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Create Agent</button>
                 </div>
             </form>
         </div>
@@ -1955,32 +1955,32 @@ Primary contact number: 0788260588
                 <input type="hidden" name="agent_id" id="editAgentId">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                    <input type="text" name="full_name" id="editAgentName" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <input type="text" name="full_name" id="editAgentName" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                    <input type="email" name="email" id="editAgentEmail" readonly class="w-full border rounded-xl px-4 py-2 bg-gray-50">
+                    <input type="email" name="email" id="editAgentEmail" readonly class="w-full border rounded-lg px-4 py-2 bg-gray-50">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="tel" name="phone" id="editAgentPhone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <input type="tel" name="phone" id="editAgentPhone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Dealer</label>
-                    <select name="dealer_id" id="editAgentDealer" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <select name="dealer_id" id="editAgentDealer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                         <option value="">No dealer assigned</option>
                     </select>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                    <select name="is_approved" id="editAgentApproved" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <select name="is_approved" id="editAgentApproved" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                         <option value="true">Approved</option>
                         <option value="false">Pending</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('editAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl">Save Changes</button>
+                    <button type="button" onclick="closeModal('editAgentModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -2000,28 +2000,28 @@ Primary contact number: 0788260588
             <form id="editDealerForm" class="p-6 space-y-4">
                 <input type="hidden" name="dealer_id" id="editDealerId">
                 <div class="flex items-center gap-4 mb-4">
-                    <div id="dealerLogoPreview" class="w-20 h-20 bg-gray-100 rounded-xl flex items-center justify-center text-gray-400 overflow-hidden">
+                    <div id="dealerLogoPreview" class="w-20 h-20 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 overflow-hidden">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-10 w-10" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
                         </svg>
                     </div>
                     <div class="flex-1">
                         <label class="block text-sm font-medium text-gray-700 mb-1">Logo URL</label>
-                        <input type="url" name="logo_url" id="editDealerLogo" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="https://example.com/logo.png" oninput="previewDealerLogo(this.value)">
+                        <input type="url" name="logo_url" id="editDealerLogo" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="https://example.com/logo.png" oninput="previewDealerLogo(this.value)">
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Name *</label>
-                    <input type="text" name="name" id="editDealerName" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                    <input type="text" name="name" id="editDealerName" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Code</label>
-                        <input type="text" name="code" id="editDealerCode" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <input type="text" name="code" id="editDealerCode" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Status</label>
-                        <select name="is_active" id="editDealerActive" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <select name="is_active" id="editDealerActive" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                             <option value="true">Active</option>
                             <option value="false">Inactive</option>
                         </select>
@@ -2030,16 +2030,16 @@ Primary contact number: 0788260588
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                        <input type="email" name="contact_email" id="editDealerEmail" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <input type="email" name="contact_email" id="editDealerEmail" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                        <input type="tel" name="contact_phone" id="editDealerPhone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <input type="tel" name="contact_phone" id="editDealerPhone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                     </div>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2">Assigned Agents</label>
-                    <div id="dealerAgentsList" class="bg-gray-50 rounded-xl p-3 max-h-32 overflow-y-auto text-sm text-gray-600">
+                    <div id="dealerAgentsList" class="bg-gray-50 rounded-lg p-3 max-h-32 overflow-y-auto text-sm text-gray-600">
                         Loading agents...
                     </div>
                 </div>
@@ -2050,17 +2050,17 @@ Primary contact number: 0788260588
                     <div class="grid grid-cols-2 gap-4">
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Login Email *</label>
-                            <input type="email" name="login_email" id="editDealerLoginEmail" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="dealer@example.com">
+                            <input type="email" name="login_email" id="editDealerLoginEmail" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="dealer@example.com">
                         </div>
                         <div>
                             <label class="block text-sm font-medium text-gray-700 mb-1">Password</label>
-                            <input type="password" name="login_password" id="editDealerLoginPassword" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Leave blank to keep existing">
+                            <input type="password" name="login_password" id="editDealerLoginPassword" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20" placeholder="Leave blank to keep existing">
                         </div>
                     </div>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('editDealerModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl">Save Changes</button>
+                    <button type="button" onclick="closeModal('editDealerModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -2080,23 +2080,23 @@ Primary contact number: 0788260588
             <form id="addPackageForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Package Name *</label>
-                    <input type="text" name="name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="e.g., Fibre 50Mbps">
+                    <input type="text" name="name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="e.g., Fibre 50Mbps">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Speed (Mbps) *</label>
-                    <input type="number" name="speed" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="50">
+                    <input type="number" name="speed" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="50">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Price (R) *</label>
-                    <input type="number" name="price" required step="0.01" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="699.00">
+                    <input type="number" name="price" required step="0.01" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="699.00">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea name="description" rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
+                    <textarea name="description" rows="3" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('addPackageModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add Package</button>
+                    <button type="button" onclick="closeModal('addPackageModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Add Package</button>
                 </div>
             </form>
         </div>
@@ -2117,31 +2117,31 @@ Primary contact number: 0788260588
                 <input type="hidden" id="editPackageId">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Package Name *</label>
-                    <input type="text" id="editPackageName" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="text" id="editPackageName" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Speed (Mbps) *</label>
-                    <input type="number" id="editPackageSpeed" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="number" id="editPackageSpeed" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Monthly Price (R) *</label>
-                    <input type="number" id="editPackagePrice" required step="0.01" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
+                    <input type="number" id="editPackagePrice" required step="0.01" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Data Cap</label>
-                    <input type="text" id="editPackageDataCap" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="Uncapped">
+                    <input type="text" id="editPackageDataCap" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="Uncapped">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Commission (R)</label>
-                    <input type="number" id="editPackageCommission" step="0.01" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="200">
+                    <input type="number" id="editPackageCommission" step="0.01" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="200">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Description</label>
-                    <textarea id="editPackageDescription" rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
+                    <textarea id="editPackageDescription" rows="3" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20"></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('editPackageModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Save Changes</button>
+                    <button type="button" onclick="closeModal('editPackageModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Save Changes</button>
                 </div>
             </form>
         </div>
@@ -2163,11 +2163,11 @@ Primary contact number: 0788260588
                 <input type="hidden" name="item_type" id="returnItemType">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Reason for Return *</label>
-                    <textarea name="return_reason" required rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="Please provide a reason..."></textarea>
+                    <textarea name="return_reason" required rows="3" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-red-500/20" placeholder="Please provide a reason..."></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('returnToAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Return</button>
+                    <button type="button" onclick="closeModal('returnToAgentModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Return</button>
                 </div>
             </form>
         </div>
@@ -2187,23 +2187,23 @@ Primary contact number: 0788260588
             <form id="addDealerForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Name *</label>
-                    <input type="text" name="name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <input type="text" name="name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Dealer Code</label>
-                    <input type="text" name="code" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="e.g., MTL">
+                    <input type="text" name="code" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="e.g., MTL">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Contact Email</label>
-                    <input type="email" name="contact_email" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <input type="email" name="contact_email" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Contact Phone</label>
-                    <input type="tel" name="contact_phone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <input type="tel" name="contact_phone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('addDealerModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add Dealer</button>
+                    <button type="button" onclick="closeModal('addDealerModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Add Dealer</button>
                 </div>
             </form>
         </div>
@@ -2224,29 +2224,29 @@ Primary contact number: 0788260588
                 <input type="hidden" name="pending_agent_id" id="pendingAgentId">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                    <input type="text" name="full_name" id="approveAgentName" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <input type="text" name="full_name" id="approveAgentName" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                    <input type="email" name="email" id="approveAgentEmail" required readonly class="w-full border rounded-xl px-4 py-2 bg-gray-50">
+                    <input type="email" name="email" id="approveAgentEmail" required readonly class="w-full border rounded-lg px-4 py-2 bg-gray-50">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Password *</label>
-                    <input type="password" name="password" required minlength="6" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Set password for agent">
+                    <input type="password" name="password" required minlength="6" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Set password for agent">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Phone</label>
-                    <input type="tel" name="phone" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <input type="tel" name="phone" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Dealer</label>
-                    <select name="dealer_id" id="approveAgentDealer" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <select name="dealer_id" id="approveAgentDealer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">No dealer</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('approveAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Approve & Create</button>
+                    <button type="button" onclick="closeModal('approveAgentModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Approve & Create</button>
                 </div>
             </form>
         </div>
@@ -2266,21 +2266,21 @@ Primary contact number: 0788260588
             <form id="addPendingAgentForm" class="p-6 space-y-4">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Full Name *</label>
-                    <input type="text" name="full_name" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Agent full name">
+                    <input type="text" name="full_name" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="Agent full name">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Email *</label>
-                    <input type="email" name="email" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="agent@example.com">
+                    <input type="email" name="email" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="agent@example.com">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Assign to Dealer</label>
-                    <select name="dealer_id" id="addPendingAgentDealer" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <select name="dealer_id" id="addPendingAgentDealer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="">No dealer (internal agent)</option>
                     </select>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('addPendingAgentModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-xl">Add to Pending</button>
+                    <button type="button" onclick="closeModal('addPendingAgentModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-6 py-2 rounded-lg">Add to Pending</button>
                 </div>
             </form>
         </div>
@@ -2315,21 +2315,21 @@ Primary contact number: 0788260588
                 </button>
             </div>
             <div class="p-6 space-y-4">
-                <div class="bg-blue-50 border border-blue-200 rounded-xl p-4">
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
                     <p class="text-sm text-blue-800">Converting: <strong id="convertLeadName">-</strong></p>
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Order Number *</label>
-                    <input type="text" id="convertOrderNumber" required class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="e.g. ORD-12345">
+                    <input type="text" id="convertOrderNumber" required class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20" placeholder="e.g. ORD-12345">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Product Type *</label>
-                    <select id="convertProductType" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
+                    <select id="convertProductType" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-emerald-500/20">
                         <option value="postpaid">Postpaid (R200 commission)</option>
                         <option value="prepaid">Prepaid (R100 commission)</option>
                     </select>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-4">
+                <div class="bg-gray-50 rounded-lg p-4">
                     <p class="text-sm text-gray-600">Commission will be calculated based on product type:</p>
                     <ul class="text-sm text-gray-500 mt-2 space-y-1">
                         <li>• <strong>Postpaid:</strong> R200 per active service</li>
@@ -2337,8 +2337,8 @@ Primary contact number: 0788260588
                     </ul>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('convertToOrderModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button onclick="convertToOrder()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-medium">Convert to Order</button>
+                    <button type="button" onclick="closeModal('convertToOrderModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button onclick="convertToOrder()" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-lg font-medium">Convert to Order</button>
                 </div>
             </div>
         </div>
@@ -2360,11 +2360,11 @@ Primary contact number: 0788260588
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Order Number</label>
-                        <input type="text" id="editOrderNumber" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <input type="text" id="editOrderNumber" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Order Status</label>
-                        <select id="editOrderStatus" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <select id="editOrderStatus" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                             <option value="pending">Pending</option>
                             <option value="processing">Processing</option>
                             <option value="scheduled">Scheduled</option>
@@ -2373,7 +2373,7 @@ Primary contact number: 0788260588
                         </select>
                     </div>
                 </div>
-                <div class="bg-blue-50 rounded-xl p-4">
+                <div class="bg-blue-50 rounded-lg p-4">
                     <h4 class="font-semibold text-gray-700 mb-3">Order Details</h4>
                     <div class="grid grid-cols-3 gap-3">
                         <div>
@@ -2390,7 +2390,7 @@ Primary contact number: 0788260588
                         </div>
                     </div>
                 </div>
-                <div class="bg-gray-50 rounded-xl p-4">
+                <div class="bg-gray-50 rounded-lg p-4">
                     <h4 class="font-semibold text-gray-700 mb-3">Client Information</h4>
                     <div class="grid grid-cols-3 gap-3">
                         <div>
@@ -2423,23 +2423,23 @@ Primary contact number: 0788260588
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Agent</label>
-                        <select id="editOrderAgent" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <select id="editOrderAgent" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                         </select>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Dealer</label>
-                        <select id="editOrderDealer" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <select id="editOrderDealer" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                         </select>
                     </div>
                 </div>
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Commission Amount</label>
-                        <input type="number" id="editOrderCommission" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <input type="number" id="editOrderCommission" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 mb-1">Commission Status</label>
-                        <select id="editOrderCommissionStatus" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
+                        <select id="editOrderCommissionStatus" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20">
                             <option value="pending">Pending</option>
                             <option value="paid">Paid</option>
                         </select>
@@ -2447,11 +2447,11 @@ Primary contact number: 0788260588
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-1">Notes</label>
-                    <textarea id="editOrderNotes" rows="3" class="w-full border rounded-xl px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
+                    <textarea id="editOrderNotes" rows="3" class="w-full border rounded-lg px-4 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500/20"></textarea>
                 </div>
                 <div class="flex justify-end gap-3 pt-4">
-                    <button type="button" onclick="closeModal('viewOrderModal')" class="px-6 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl">Save Changes</button>
+                    <button type="button" onclick="closeModal('viewOrderModal')" class="px-6 py-2 border rounded-lg hover:bg-gray-50">Cancel</button>
+                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-lg">Save Changes</button>
                 </div>
             </form>
         </div>
