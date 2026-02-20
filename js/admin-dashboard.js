@@ -151,42 +151,193 @@ function hashCode(str) {
 }
 
 // Global Search
+let globalSearchTimeout = null;
+let globalSearchSelectedIdx = -1;
+
 function globalSearchHandler(query) {
+    clearTimeout(globalSearchTimeout);
+    const resultsEl = document.getElementById('globalSearchResults');
+    const contentEl = document.getElementById('globalSearchResultsContent');
     const searchTerm = query.toLowerCase().trim();
     
-    if (!searchTerm) {
-        renderLeadsTable();
+    if (!searchTerm || searchTerm.length < 2) {
+        resultsEl.classList.add('hidden');
+        globalSearchSelectedIdx = -1;
         return;
     }
     
-    // Switch to leads section
-    showSection('leads');
-    
-    // Filter leads based on search
-    const filtered = leads.filter(lead => {
-        const searchFields = [
-            lead.full_name,
-            lead.first_name,
-            lead.last_name,
-            lead.email,
-            lead.phone,
-            lead.address,
-            lead.lead_id,
-            lead.agent?.full_name,
-            lead.agent_name,
-            lead.dealer?.name,
-            lead.dealer_name,
-            lead.package?.name,
-            lead.package_name
-        ];
+    globalSearchTimeout = setTimeout(() => {
+        const results = [];
+        const maxPerCategory = 5;
         
-        return searchFields.some(field => 
-            field && field.toLowerCase().includes(searchTerm)
-        );
-    });
-    
-    renderLeadsTable(filtered);
+        // Search Leads
+        const matchedLeads = (leads || []).filter(l => {
+            return [l.full_name, l.first_name, l.last_name, l.email, l.phone, l.address, l.lead_id, l.id_number]
+                .some(f => f && String(f).toLowerCase().includes(searchTerm));
+        }).slice(0, maxPerCategory);
+        matchedLeads.forEach(l => results.push({
+            type: 'Lead', icon: '👤', color: 'var(--info)',
+            title: l.full_name || `${l.first_name || ''} ${l.last_name || ''}`.trim() || 'Unknown',
+            subtitle: [l.email, l.phone, l.status].filter(Boolean).join(' · '),
+            action: () => { showSection('leads'); setTimeout(() => { document.getElementById('leadSearchFilter').value = l.full_name || l.email || ''; filterLeads(); }, 100); }
+        }));
+        
+        // Search Orders
+        const matchedOrders = (orders || []).filter(o => {
+            return [o.order_number, o.client_name, o.lead_name, o.email, o.phone, o.account_number, o.service_id, o.status]
+                .some(f => f && String(f).toLowerCase().includes(searchTerm));
+        }).slice(0, maxPerCategory);
+        matchedOrders.forEach(o => results.push({
+            type: 'Order', icon: '📋', color: 'var(--success)',
+            title: o.order_number || `Order #${o.id}`,
+            subtitle: [o.client_name || o.lead_name, o.status].filter(Boolean).join(' · '),
+            action: () => { showSection('orders'); setTimeout(() => { if (typeof viewOrder === 'function') viewOrder(o.id); }, 100); }
+        }));
+        
+        // Search Agents
+        const matchedAgents = (agents || []).filter(a => {
+            return [a.full_name, a.email, a.phone, a.agent_code]
+                .some(f => f && String(f).toLowerCase().includes(searchTerm));
+        }).slice(0, maxPerCategory);
+        matchedAgents.forEach(a => results.push({
+            type: 'Agent', icon: '🧑‍💼', color: 'var(--purple)',
+            title: a.full_name || a.email || 'Unknown',
+            subtitle: [a.email, a.agent_code, a.status].filter(Boolean).join(' · '),
+            action: () => { showSection('agents'); }
+        }));
+        
+        // Search Dealers
+        const matchedDealers = (dealers || []).filter(d => {
+            return [d.name, d.email, d.phone, d.contact_person]
+                .some(f => f && String(f).toLowerCase().includes(searchTerm));
+        }).slice(0, maxPerCategory);
+        matchedDealers.forEach(d => results.push({
+            type: 'Dealer', icon: '🏢', color: 'var(--orange)',
+            title: d.name || 'Unknown',
+            subtitle: [d.contact_person, d.email].filter(Boolean).join(' · '),
+            action: () => { showSection('dealers'); }
+        }));
+        
+        // Search Pending Agents
+        const matchedPending = (pendingAgents || []).filter(p => {
+            return [p.full_name, p.email, p.phone]
+                .some(f => f && String(f).toLowerCase().includes(searchTerm));
+        }).slice(0, maxPerCategory);
+        matchedPending.forEach(p => results.push({
+            type: 'Pending Agent', icon: '⏳', color: 'var(--warning)',
+            title: p.full_name || p.email || 'Unknown',
+            subtitle: [p.email, p.phone].filter(Boolean).join(' · '),
+            action: () => { showSection('pending-agents'); }
+        }));
+        
+        // Search Navigation sections
+        const navSections = [
+            { name: 'Dashboard', section: 'dashboard', keywords: 'dashboard home overview' },
+            { name: 'Leads', section: 'leads', keywords: 'leads crm contacts' },
+            { name: 'Orders', section: 'orders', keywords: 'orders sales' },
+            { name: 'Preorders', section: 'preorders', keywords: 'preorders pre-orders' },
+            { name: 'Payments', section: 'payments', keywords: 'payments finance billing' },
+            { name: 'Axxess Sales', section: 'axxess-sales', keywords: 'axxess sales commission' },
+            { name: 'Shipping', section: 'shipping', keywords: 'shipping delivery router' },
+            { name: 'Returned Items', section: 'returned', keywords: 'returned items returns' },
+            { name: 'Packages', section: 'packages', keywords: 'packages fibre plans pricing' },
+            { name: 'Agents', section: 'agents', keywords: 'agents team members' },
+            { name: 'Pending Agents', section: 'pending-agents', keywords: 'pending agents approval' },
+            { name: 'Dealers', section: 'dealers', keywords: 'dealers organizations' },
+            { name: 'Reports', section: 'reports', keywords: 'reports analytics charts' },
+            { name: 'Import Leads', section: 'import', keywords: 'import csv upload leads' },
+            { name: 'Settings', section: 'settings', keywords: 'settings configuration privileges' },
+        ];
+        const matchedNav = navSections.filter(n => n.name.toLowerCase().includes(searchTerm) || n.keywords.includes(searchTerm));
+        matchedNav.forEach(n => results.push({
+            type: 'Page', icon: '📄', color: 'var(--primary)',
+            title: n.name,
+            subtitle: 'Go to section',
+            action: () => { showSection(n.section); }
+        }));
+        
+        // Render results
+        globalSearchSelectedIdx = -1;
+        if (results.length === 0) {
+            contentEl.innerHTML = '<div class="p-4 text-center text-sm" style="color:var(--text-muted)">No results found for "<strong>' + query.replace(/</g,'&lt;') + '</strong>"</div>';
+        } else {
+            contentEl.innerHTML = results.map((r, i) => `
+                <div class="global-search-item flex items-center gap-3 px-4 py-2.5 cursor-pointer hover:bg-gray-50 transition" data-idx="${i}" onclick="globalSearchSelect(${i})">
+                    <span class="text-base flex-shrink-0">${r.icon}</span>
+                    <div class="flex-1 min-w-0">
+                        <div class="text-sm font-medium truncate" style="color:var(--text-primary)">${r.title}</div>
+                        <div class="text-xs truncate" style="color:var(--text-muted)">${r.subtitle}</div>
+                    </div>
+                    <span class="text-xs px-2 py-0.5 rounded-full font-medium flex-shrink-0" style="background:${r.color}15; color:${r.color}">${r.type}</span>
+                </div>
+            `).join('');
+        }
+        resultsEl.classList.remove('hidden');
+        window._globalSearchResults = results;
+    }, 200);
 }
+
+function globalSearchSelect(idx) {
+    const results = window._globalSearchResults || [];
+    if (results[idx] && results[idx].action) {
+        results[idx].action();
+    }
+    document.getElementById('globalSearch').value = '';
+    document.getElementById('globalSearchResults').classList.add('hidden');
+    globalSearchSelectedIdx = -1;
+}
+
+function globalSearchKeydown(e) {
+    const resultsEl = document.getElementById('globalSearchResults');
+    const items = resultsEl.querySelectorAll('.global-search-item');
+    if (!items.length || resultsEl.classList.contains('hidden')) {
+        if (e.key === 'Escape') {
+            resultsEl.classList.add('hidden');
+            document.getElementById('globalSearch').blur();
+        }
+        return;
+    }
+    
+    if (e.key === 'ArrowDown') {
+        e.preventDefault();
+        globalSearchSelectedIdx = Math.min(globalSearchSelectedIdx + 1, items.length - 1);
+    } else if (e.key === 'ArrowUp') {
+        e.preventDefault();
+        globalSearchSelectedIdx = Math.max(globalSearchSelectedIdx - 1, 0);
+    } else if (e.key === 'Enter' && globalSearchSelectedIdx >= 0) {
+        e.preventDefault();
+        globalSearchSelect(globalSearchSelectedIdx);
+        return;
+    } else if (e.key === 'Escape') {
+        resultsEl.classList.add('hidden');
+        document.getElementById('globalSearch').blur();
+        return;
+    } else {
+        return;
+    }
+    
+    items.forEach((item, i) => {
+        item.style.background = i === globalSearchSelectedIdx ? '#f3f4f6' : '';
+    });
+    if (items[globalSearchSelectedIdx]) items[globalSearchSelectedIdx].scrollIntoView({ block: 'nearest' });
+}
+
+// Ctrl+K shortcut to focus search
+document.addEventListener('keydown', (e) => {
+    if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+        e.preventDefault();
+        const input = document.getElementById('globalSearch');
+        if (input) { input.focus(); input.select(); }
+    }
+});
+
+// Close search results when clicking outside
+document.addEventListener('click', (e) => {
+    const wrapper = document.getElementById('globalSearchWrapper');
+    if (wrapper && !wrapper.contains(e.target)) {
+        document.getElementById('globalSearchResults').classList.add('hidden');
+    }
+});
 
 // Notifications
 let notifications = [];
