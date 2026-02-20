@@ -176,7 +176,7 @@
         .modal.active { display: flex; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
-        .modal-container { background: white; border-radius: 0.75rem; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+        .modal-container { background: white; border-radius: 0.75rem; width: 90%; max-width: 1024px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
         .modal-container .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid var(--card-border); }
         .modal-container .modal-header button { font-size: 1.5rem; line-height: 1; }
 
@@ -1731,7 +1731,7 @@
 
     <!-- Add Lead Modal -->
     <div id="addLeadModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-2xl max-h-[90vh] overflow-y-auto m-4">
+        <div class="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Add New Lead</h3>
                 <button onclick="closeModal('addLeadModal')" class="text-gray-400 hover:text-gray-600">
@@ -1804,7 +1804,7 @@
 
     <!-- Openserve Email Import Modal -->
     <div id="openserveEmailModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-y-auto m-4">
+        <div class="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-y-auto m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <div class="flex items-center gap-3">
                     <div class="w-10 h-10 rounded-lg flex items-center justify-center" style="background: var(--success)">
@@ -1960,7 +1960,7 @@ Primary contact number: 0788260588
 
     <!-- Add Agent Modal -->
     <div id="addAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Add New Agent</h3>
                 <button onclick="closeModal('addAgentModal')" class="text-gray-400 hover:text-gray-600">
@@ -1996,7 +1996,7 @@ Primary contact number: 0788260588
 
     <!-- Edit Agent Modal -->
     <div id="editAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Edit Agent</h3>
                 <button onclick="closeModal('editAgentModal')" class="text-gray-400 hover:text-gray-600">
@@ -2042,7 +2042,7 @@ Primary contact number: 0788260588
 
     <!-- Edit Dealer Modal -->
     <div id="editDealerModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-lg m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Edit Dealer</h3>
                 <button onclick="closeModal('editDealerModal')" class="text-gray-400 hover:text-gray-600">
@@ -2122,7 +2122,7 @@ Primary contact number: 0788260588
 
     <!-- Add Package Modal -->
     <div id="addPackageModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Add New Package</h3>
                 <button onclick="closeModal('addPackageModal')" class="text-gray-400 hover:text-gray-600">
@@ -2158,7 +2158,7 @@ Primary contact number: 0788260588
 
     <!-- Edit Package Modal -->
     <div id="editPackageModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Edit Package</h3>
                 <button onclick="closeModal('editPackageModal')" class="text-gray-400 hover:text-gray-600">
@@ -2229,7 +2229,7 @@ Primary contact number: 0788260588
 
     <!-- Add Dealer Modal -->
     <div id="addDealerModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Add New Dealer</h3>
                 <button onclick="closeModal('addDealerModal')" class="text-gray-400 hover:text-gray-600">
@@ -2265,7 +2265,7 @@ Primary contact number: 0788260588
 
     <!-- Approve Agent Modal -->
     <div id="approveAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Approve Agent</h3>
                 <button onclick="closeModal('approveAgentModal')" class="text-gray-400 hover:text-gray-600">
@@ -2308,7 +2308,7 @@ Primary contact number: 0788260588
 
     <!-- Add Pending Agent Modal -->
     <div id="addPendingAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Add Pending Agent</h3>
                 <button onclick="closeModal('addPendingAgentModal')" class="text-gray-400 hover:text-gray-600">
@@ -2342,7 +2342,7 @@ Primary contact number: 0788260588
 
     <!-- View Lead Details Modal -->
     <div id="viewLeadModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-lg w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-lg w-full max-w-5xl m-4 max-h-[90vh] overflow-y-auto">
             <div class="p-5 border-b flex items-center justify-between sticky top-0 bg-white z-10" style="border-color: var(--card-border)">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-lg flex items-center justify-center" style="background: var(--purple-light)">

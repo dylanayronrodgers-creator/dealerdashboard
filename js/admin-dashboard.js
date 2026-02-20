@@ -2434,18 +2434,10 @@ function viewLeadDetails(leadId) {
                     <svg class="w-4 h-4" style="color: var(--info)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
                     Client Details
                 </h4>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-3 gap-3">
                     <div>
                         <label class="${labelClass}">Full Name</label>
                         <input type="text" name="full_name" value="${lead.full_name || ''}" class="${inputClass}">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">ID Number</label>
-                        <input type="text" name="id_number" maxlength="13" value="${lead.id_number || ''}" class="${inputClass}" placeholder="13-digit SA ID">
-                    </div>
-                    <div>
-                        <label class="${labelClass}">Passport Number</label>
-                        <input type="text" name="passport_number" value="${lead.passport_number || ''}" class="${inputClass}" placeholder="Passport">
                     </div>
                     <div>
                         <label class="${labelClass}">First Name</label>
@@ -2454,6 +2446,14 @@ function viewLeadDetails(leadId) {
                     <div>
                         <label class="${labelClass}">Last Name</label>
                         <input type="text" name="last_name" value="${lead.last_name || ''}" class="${inputClass}">
+                    </div>
+                    <div>
+                        <label class="${labelClass}">ID Number</label>
+                        <input type="text" name="id_number" maxlength="13" value="${lead.id_number || ''}" class="${inputClass}" placeholder="13-digit SA ID">
+                    </div>
+                    <div>
+                        <label class="${labelClass}">Passport Number</label>
+                        <input type="text" name="passport_number" value="${lead.passport_number || ''}" class="${inputClass}" placeholder="Passport">
                     </div>
                 </div>
             </div>
