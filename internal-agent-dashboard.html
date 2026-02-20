@@ -51,7 +51,7 @@
         .modal.active { display: flex; }
         .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 50; justify-content: center; align-items: center; }
         .modal-overlay.active { display: flex; }
-        .modal-container { background: white; border-radius: 1rem; width: 90%; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
+        .modal-container { background: white; border-radius: 0.75rem; width: 90%; max-width: 1024px; box-shadow: 0 20px 60px rgba(0,0,0,0.2); overflow: hidden; }
         .modal-container .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-bottom: 1px solid #e2e8f0; }
         .modal-container .modal-header button { font-size: 1.5rem; line-height: 1; }
         .ax-tab-btn { color: #6b7280; background: transparent; }
@@ -194,19 +194,19 @@
             <!-- Stats Cards -->
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
                 <div class="card p-5 border-l-4 border-blue-500">
-                    <p class="text-3xl font-bold text-gray-800" id="axxessAgentCount">0</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessAgentCount"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></p>
                     <p class="text-gray-500 text-sm">Total Sales (All Valid)</p>
                 </div>
                 <div class="card p-5 border-l-4 border-emerald-500">
-                    <p class="text-3xl font-bold text-gray-800" id="axxessTotalSales">0</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessTotalSales"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></p>
                     <p class="text-gray-500 text-sm">Commissioned Sales</p>
                 </div>
                 <div class="card p-5 border-l-4 border-purple-500">
-                    <p class="text-3xl font-bold text-gray-800" id="axxessMonthSales">0</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessMonthSales"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></p>
                     <p class="text-gray-500 text-sm">Progress to Target</p>
                 </div>
                 <div class="card p-5 border-l-4 border-orange-500">
-                    <p class="text-3xl font-bold text-gray-800" id="axxessTotalValue">R0</p>
+                    <p class="text-3xl font-bold text-gray-800" id="axxessTotalValue"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></p>
                     <p class="text-gray-500 text-sm">Net Commission</p>
                 </div>
             </div>
@@ -317,19 +317,19 @@
                 <h3 class="font-semibold text-gray-800 mb-4">Performance Summary</h3>
                 <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="reportStats">
                     <div class="bg-gray-50 rounded-lg p-4 text-center">
-                        <p class="text-2xl font-bold text-gray-800" id="rptTotalLeads">0</p>
+                        <p class="text-2xl font-bold text-gray-800" id="rptTotalLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                         <p class="text-xs text-gray-500">Total Leads</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-4 text-center">
-                        <p class="text-2xl font-bold text-emerald-600" id="rptConverted">0</p>
+                        <p class="text-2xl font-bold text-emerald-600" id="rptConverted"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                         <p class="text-xs text-gray-500">Converted</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-4 text-center">
-                        <p class="text-2xl font-bold text-blue-600" id="rptQualified">0</p>
+                        <p class="text-2xl font-bold text-blue-600" id="rptQualified"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                         <p class="text-xs text-gray-500">Qualified</p>
                     </div>
                     <div class="bg-gray-50 rounded-lg p-4 text-center">
-                        <p class="text-2xl font-bold text-red-500" id="rptLost">0</p>
+                        <p class="text-2xl font-bold text-red-500" id="rptLost"><span class="text-xs text-gray-400 animate-pulse">...</span></p>
                         <p class="text-xs text-gray-500">Lost</p>
                     </div>
                 </div>
@@ -454,7 +454,7 @@
 
         <!-- ═══ LEAD EDIT MODAL (Full Edit) ═══ -->
         <div class="modal fixed inset-0 bg-black/50 z-50 items-center justify-center" id="leadDetailModal">
-            <div class="bg-white rounded-xl w-full max-w-3xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="bg-white rounded-xl w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between p-5 border-b">
                     <h3 class="font-semibold text-lg">Lead Details</h3>
                     <button onclick="closeModal('leadDetailModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
@@ -465,7 +465,7 @@
 
         <!-- ═══ CONVERT TO ORDER MODAL ═══ -->
         <div class="modal fixed inset-0 bg-black/50 z-50 items-center justify-center" id="convertToOrderModal">
-            <div class="bg-white rounded-xl w-full max-w-md mx-4">
+            <div class="bg-white rounded-xl w-full max-w-2xl mx-4">
                 <div class="flex items-center justify-between p-5 border-b">
                     <h3 class="font-semibold text-lg">Convert Lead to Order</h3>
                     <button onclick="closeModal('convertToOrderModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>
@@ -497,7 +497,7 @@
 
         <!-- ═══ ORDER DETAIL MODAL ═══ -->
         <div class="modal fixed inset-0 bg-black/50 z-50 items-center justify-center" id="orderDetailModal">
-            <div class="bg-white rounded-xl w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <div class="bg-white rounded-xl w-full max-w-5xl mx-4 max-h-[90vh] overflow-y-auto">
                 <div class="flex items-center justify-between p-5 border-b">
                     <h3 class="font-semibold text-lg">Order Details</h3>
                     <button onclick="closeModal('orderDetailModal')" class="text-gray-400 hover:text-gray-600 text-2xl">&times;</button>

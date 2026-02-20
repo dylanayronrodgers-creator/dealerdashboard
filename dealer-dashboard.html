@@ -152,7 +152,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Total Agents</p>
-                            <h3 class="text-2xl font-bold text-gray-800" id="totalAgents">0</h3>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalAgents"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                         </div>
                     </div>
                 </div>
@@ -165,7 +165,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Total Leads</p>
-                            <h3 class="text-2xl font-bold text-gray-800" id="totalLeads">0</h3>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalLeads"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                         </div>
                     </div>
                 </div>
@@ -178,7 +178,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Total Orders</p>
-                            <h3 class="text-2xl font-bold text-gray-800" id="totalOrders">0</h3>
+                            <h3 class="text-2xl font-bold text-gray-800" id="totalOrders"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                         </div>
                     </div>
                 </div>
@@ -191,7 +191,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Commission Due</p>
-                            <h3 class="text-2xl font-bold text-emerald-600" id="totalCommission">R0</h3>
+                            <h3 class="text-2xl font-bold text-emerald-600" id="totalCommission"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                         </div>
                     </div>
                 </div>
@@ -364,7 +364,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Total Commission Due</p>
-                            <h3 class="text-2xl font-bold text-emerald-600" id="dealerTotalCommission">R0</h3>
+                            <h3 class="text-2xl font-bold text-emerald-600" id="dealerTotalCommission"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                             <p class="text-xs text-gray-400">From Openserve</p>
                         </div>
                     </div>
@@ -378,7 +378,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Pending Payment</p>
-                            <h3 class="text-2xl font-bold text-yellow-600" id="dealerPendingCommission">R0</h3>
+                            <h3 class="text-2xl font-bold text-yellow-600" id="dealerPendingCommission"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                         </div>
                     </div>
                 </div>
@@ -391,7 +391,7 @@
                         </div>
                         <div>
                             <p class="text-gray-500 text-sm">Paid Out</p>
-                            <h3 class="text-2xl font-bold text-blue-600" id="dealerPaidCommission">R0</h3>
+                            <h3 class="text-2xl font-bold text-blue-600" id="dealerPaidCommission"><span class="text-xs text-gray-400 animate-pulse">Loading...</span></h3>
                         </div>
                     </div>
                 </div>
@@ -442,23 +442,23 @@
                     <div class="space-y-4">
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Active Agents</span>
-                            <span class="font-bold text-gray-800" id="reportActiveAgents">0</span>
+                            <span class="font-bold text-gray-800" id="reportActiveAgents"><span class="text-xs text-gray-400 animate-pulse">...</span></span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Total Leads This Month</span>
-                            <span class="font-bold text-gray-800" id="reportMonthlyLeads">0</span>
+                            <span class="font-bold text-gray-800" id="reportMonthlyLeads"><span class="text-xs text-gray-400 animate-pulse">...</span></span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Conversions This Month</span>
-                            <span class="font-bold text-emerald-600" id="reportMonthlyConversions">0</span>
+                            <span class="font-bold text-emerald-600" id="reportMonthlyConversions"><span class="text-xs text-gray-400 animate-pulse">...</span></span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Avg Conversion Rate</span>
-                            <span class="font-bold text-blue-600" id="reportAvgConversion">0%</span>
+                            <span class="font-bold text-blue-600" id="reportAvgConversion"><span class="text-xs text-gray-400 animate-pulse">...</span></span>
                         </div>
                         <div class="flex justify-between items-center">
                             <span class="text-gray-600">Commission This Month</span>
-                            <span class="font-bold text-emerald-600" id="reportMonthlyCommission">R0</span>
+                            <span class="font-bold text-emerald-600" id="reportMonthlyCommission"><span class="text-xs text-gray-400 animate-pulse">...</span></span>
                         </div>
                     </div>
                 </div>
@@ -472,7 +472,7 @@
 
     <!-- Edit Agent Modal -->
     <div id="editAgentModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-full max-w-md m-4">
+        <div class="bg-white rounded-lg w-full max-w-2xl m-4">
             <div class="p-6 border-b flex items-center justify-between">
                 <h3 class="text-xl font-semibold">Edit Agent</h3>
                 <button onclick="closeModal('editAgentModal')" class="text-gray-400 hover:text-gray-600">
@@ -522,7 +522,7 @@
 
     <!-- View Order Modal (Read-only) -->
     <div id="viewOrderModal" class="modal fixed inset-0 bg-black/50 items-center justify-center z-50">
-        <div class="bg-white rounded-2xl w-full max-w-2xl m-4 max-h-[90vh] overflow-y-auto">
+        <div class="bg-white rounded-lg w-full max-w-5xl m-4 max-h-[90vh] overflow-y-auto">
             <div class="p-6 border-b flex items-center justify-between sticky top-0 bg-white">
                 <h3 class="text-xl font-semibold">Order Details</h3>
                 <button onclick="closeModal('viewOrderModal')" class="text-gray-400 hover:text-gray-600">
