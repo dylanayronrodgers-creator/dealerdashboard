@@ -605,7 +605,7 @@ function renderPackagesGrid() {
     grid.innerHTML = packages.map(pkg => `
         <div class="card p-6">
             <div class="flex items-center justify-between mb-4">
-                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-xl flex items-center justify-center text-white font-bold">
+                <div class="w-12 h-12 bg-gradient-to-br from-red-500 to-red-600 rounded-lg flex items-center justify-center text-white font-bold">
                     ${pkg.speed}
                 </div>
                 <span class="text-2xl font-bold text-gray-800">R${pkg.price}</span>
@@ -2224,8 +2224,10 @@ function viewLeadDetails(leadId) {
     
     editingLeadId = leadId;
     const content = document.getElementById('viewLeadContent');
-    const inputClass = "w-full border rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-500";
-    const labelClass = "text-xs text-gray-500 block mb-1";
+    const inputClass = "w-full border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-indigo-500/20 transition";
+    const labelClass = "text-xs font-medium text-gray-500 block mb-1";
+    const sectionClass = "border rounded-lg p-4";
+    const sectionTitleClass = "text-sm font-semibold text-gray-700 mb-3 flex items-center gap-2";
     
     // Build agent options
     const agentOptions = agents.map(a => 
@@ -2243,7 +2245,8 @@ function viewLeadDetails(leadId) {
     ).join('');
     
     content.innerHTML = `
-        <form id="editLeadForm" class="space-y-4">
+        <form id="editLeadForm" class="space-y-5">
+            <!-- Lead Overview -->
             <div class="grid grid-cols-3 gap-3">
                 <div>
                     <label class="${labelClass}">Lead ID</label>
@@ -2265,8 +2268,12 @@ function viewLeadDetails(leadId) {
                 </div>
             </div>
             
-            <div class="bg-gray-50 rounded-xl p-4">
-                <h4 class="font-semibold text-gray-700 mb-3">Client Details</h4>
+            <!-- Client Details -->
+            <div class="${sectionClass}" style="border-color: var(--card-border)">
+                <h4 class="${sectionTitleClass}">
+                    <svg class="w-4 h-4" style="color: var(--info)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                    Client Details
+                </h4>
                 <div class="grid grid-cols-2 gap-3">
                     <div>
                         <label class="${labelClass}">Full Name</label>
@@ -2291,10 +2298,14 @@ function viewLeadDetails(leadId) {
                 </div>
             </div>
             
+            <!-- Contact Information -->
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-gray-700 mb-3">Primary Contact</h4>
-                    <div class="space-y-2">
+                <div class="${sectionClass}" style="border-color: var(--card-border)">
+                    <h4 class="${sectionTitleClass}">
+                        <svg class="w-4 h-4" style="color: var(--success)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
+                        Primary Contact
+                    </h4>
+                    <div class="space-y-3">
                         <div>
                             <label class="${labelClass}">Email</label>
                             <input type="email" name="email" value="${lead.email || ''}" class="${inputClass}">
@@ -2310,9 +2321,12 @@ function viewLeadDetails(leadId) {
                     </div>
                 </div>
                 
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-gray-700 mb-3">Secondary Contact</h4>
-                    <div class="space-y-2">
+                <div class="${sectionClass}" style="border-color: var(--card-border)">
+                    <h4 class="${sectionTitleClass}">
+                        <svg class="w-4 h-4" style="color: var(--purple)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
+                        Secondary Contact
+                    </h4>
+                    <div class="space-y-3">
                         <div>
                             <label class="${labelClass}">Name</label>
                             <input type="text" name="secondary_contact_name" value="${lead.secondary_contact_name || ''}" class="${inputClass}">
@@ -2329,10 +2343,14 @@ function viewLeadDetails(leadId) {
                 </div>
             </div>
             
+            <!-- Assignment & Order -->
             <div class="grid grid-cols-2 gap-4">
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-gray-700 mb-3">Assignment</h4>
-                    <div class="space-y-2">
+                <div class="${sectionClass}" style="border-color: var(--card-border)">
+                    <h4 class="${sectionTitleClass}">
+                        <svg class="w-4 h-4" style="color: var(--orange)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/></svg>
+                        Assignment
+                    </h4>
+                    <div class="space-y-3">
                         <div>
                             <label class="${labelClass}">Agent</label>
                             <select name="agent_id" class="${inputClass}">
@@ -2361,9 +2379,12 @@ function viewLeadDetails(leadId) {
                     </div>
                 </div>
                 
-                <div class="bg-gray-50 rounded-xl p-4">
-                    <h4 class="font-semibold text-gray-700 mb-3">Order Info</h4>
-                    <div class="space-y-2">
+                <div class="${sectionClass}" style="border-color: var(--card-border)">
+                    <h4 class="${sectionTitleClass}">
+                        <svg class="w-4 h-4" style="color: var(--cyan)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
+                        Order Info
+                    </h4>
+                    <div class="space-y-3">
                         <div>
                             <label class="${labelClass}">Order Number</label>
                             <input type="text" name="order_number" value="${lead.order_number || ''}" class="${inputClass}">
@@ -2380,29 +2401,36 @@ function viewLeadDetails(leadId) {
                 </div>
             </div>
             
-            <div class="bg-yellow-50 rounded-xl p-4">
-                <label class="${labelClass}">Notes</label>
+            <!-- Notes -->
+            <div class="${sectionClass}" style="border-color: var(--warning); border-left-width: 3px;">
+                <h4 class="${sectionTitleClass}">
+                    <svg class="w-4 h-4" style="color: var(--warning)" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                    Notes
+                </h4>
                 <textarea name="notes" rows="3" class="${inputClass}">${lead.notes || ''}</textarea>
             </div>
             
-            <div class="bg-purple-50 rounded-xl p-4 flex items-center justify-between">
+            <!-- Preorder Toggle -->
+            <div class="${sectionClass} flex items-center justify-between" style="border-color: var(--purple); border-left-width: 3px;">
                 <div>
-                    <label class="font-semibold text-gray-700">Preorder</label>
+                    <label class="text-sm font-semibold text-gray-700">Preorder</label>
                     <p class="text-xs text-gray-500">Mark this lead as a preorder for tracking</p>
                 </div>
                 <label class="relative inline-flex items-center cursor-pointer">
                     <input type="checkbox" name="is_preorder" ${lead.is_preorder ? 'checked' : ''} class="sr-only peer">
-                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                    <div class="w-11 h-6 bg-gray-200 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-indigo-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-indigo-600"></div>
                 </label>
             </div>
             
-            <div class="flex justify-between pt-2 border-t">
-                <button type="button" onclick="closeModal('viewLeadModal'); openConvertModal('${leadId}')" class="bg-emerald-600 hover:bg-emerald-700 text-white px-6 py-2 rounded-xl font-medium">
+            <!-- Actions -->
+            <div class="flex justify-between pt-4 border-t" style="border-color: var(--card-border)">
+                <button type="button" onclick="closeModal('viewLeadModal'); openConvertModal('${leadId}')" class="btn-success text-white px-5 py-2 rounded-lg font-medium text-sm flex items-center gap-2">
+                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/></svg>
                     Convert to Order
                 </button>
                 <div class="flex gap-3">
-                    <button type="button" onclick="closeModal('viewLeadModal')" class="px-4 py-2 border rounded-xl hover:bg-gray-50">Cancel</button>
-                    <button type="submit" class="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded-xl font-medium">Save Changes</button>
+                    <button type="button" onclick="closeModal('viewLeadModal')" class="px-5 py-2 border rounded-lg hover:bg-gray-50 text-sm">Cancel</button>
+                    <button type="submit" class="btn-primary text-white px-5 py-2 rounded-lg font-medium text-sm">Save Changes</button>
                 </div>
             </div>
         </form>
@@ -2862,7 +2890,7 @@ function renderDealersGrid() {
         return `
         <div class="card p-6">
             <div class="flex items-start justify-between mb-4">
-                <div class="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center overflow-hidden">
+                <div class="w-12 h-12 bg-emerald-100 rounded-lg flex items-center justify-center overflow-hidden">
                     ${dealer.logo_url 
                         ? `<img src="${dealer.logo_url}" alt="${dealer.name}" class="w-full h-full object-contain">`
                         : `<svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-emerald-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -3087,10 +3115,10 @@ function applySystemSettings() {
     if (configDiv) configDiv.classList.toggle('hidden', !apiEnabled);
     if (statusDiv) {
         if (apiEnabled) {
-            statusDiv.className = 'mt-4 p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+            statusDiv.className = 'mt-4 p-3 bg-emerald-50 rounded-lg text-sm text-emerald-700';
             statusDiv.innerHTML = '<strong>Status:</strong> Active - Connected to Openserve API';
         } else {
-            statusDiv.className = 'mt-4 p-3 bg-amber-50 rounded-xl text-sm text-amber-700';
+            statusDiv.className = 'mt-4 p-3 bg-amber-50 rounded-lg text-sm text-amber-700';
             statusDiv.innerHTML = '<strong>Status:</strong> Inactive - Enable to connect to live Openserve data';
         }
     }
@@ -3167,17 +3195,17 @@ function loadSupabaseSettings() {
     if (url && key && window.supabaseClient) {
         if (statusText) {
             statusText.textContent = 'Connected';
-            statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+            statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-lg text-sm text-emerald-700';
         }
     } else if (url && key) {
         if (statusText) {
             statusText.textContent = 'Configured (reload to connect)';
-            statusText.parentElement.className = 'p-3 bg-amber-50 rounded-xl text-sm text-amber-700';
+            statusText.parentElement.className = 'p-3 bg-amber-50 rounded-lg text-sm text-amber-700';
         }
     } else {
         if (statusText) {
             statusText.textContent = 'Not configured';
-            statusText.parentElement.className = 'p-3 bg-gray-50 rounded-xl text-sm text-gray-600';
+            statusText.parentElement.className = 'p-3 bg-gray-50 rounded-lg text-sm text-gray-600';
         }
     }
 }
@@ -3202,7 +3230,7 @@ function saveSupabaseConfig() {
     const statusText = document.getElementById('supabaseStatusText');
     if (statusText) {
         statusText.textContent = 'Saved! Reloading...';
-        statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+        statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-lg text-sm text-emerald-700';
     }
     
     setTimeout(() => {
@@ -3228,10 +3256,10 @@ async function testSupabaseConnection() {
         if (error) throw error;
         
         statusText.textContent = 'Connection successful!';
-        statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-xl text-sm text-emerald-700';
+        statusText.parentElement.className = 'p-3 bg-emerald-50 rounded-lg text-sm text-emerald-700';
     } catch (error) {
         statusText.textContent = 'Connection failed: ' + error.message;
-        statusText.parentElement.className = 'p-3 bg-red-50 rounded-xl text-sm text-red-700';
+        statusText.parentElement.className = 'p-3 bg-red-50 rounded-lg text-sm text-red-700';
     }
 }
 
